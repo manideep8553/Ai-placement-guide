@@ -1,0 +1,189 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String   @id @default(uuid())
+  email           String   @unique
+  passwordHash    String
+  name            String
+  college         String?
+  branch          String?
+  graduationYear  Int?
+  avatarUrl       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  profile            Profile?
+  placementScores    PlacementScore[]
+  interviewSessions  InterviewSession[]
+  codingSubmissions  CodingSubmission[]
+  roadmaps           Roadmap[]
+  gapAnalyses        GapAnalysis[]
+  resumes            Resume[]
+}
+
+model Profile {
+  id              String  @id @default(uuid())
+  userId          String  @unique
+  currentLevel    String?
+  targetCompany   String?
+  leetcodeUsername String?
+  githubUsername  String?
+  linkedinUrl     String?
+  bio             String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PlacementScore {
+  id            String   @id @default(uuid())
+  userId        String
+  aptitude      Float
+  dsa           Float
+  coreSubjects  Float
+  communication Float
+  resumeScore   Float
+  overall       Float
+  calculatedAt  DateTime @default(now())
+
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyChances CompanyChance[]
+}
+
+model CompanyChance {
+  id            String @id @default(uuid())
+  scoreId       String
+  companyName   String
+  chancePercent Float
+
+  placementScore PlacementScore @relation(fields: [scoreId], references: [id], onDelete: Cascade)
+}
+
+model InterviewSession {
+  id           String   @id @default(uuid())
+  userId       String
+  type         String   // HR | TECHNICAL | MANAGER
+  company      String?
+  duration     Int      // seconds
+  overallScore Float?
+  fillerCount  Int      @default(0)
+  fillerDetail Json?    // { umm: 0, ah: 0, like: 0 }
+  wpm          Float?
+  transcript   String?
+  feedback     Json?
+  createdAt    DateTime @default(now())
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interviewMessages InterviewMessage[]
+}
+
+model InterviewMessage {
+  id        String   @id @default(uuid())
+  sessionId String
+  role      String   // AI | USER
+  content   String
+  timestamp DateTime @default(now())
+
+  session InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+model Problem {
+  id                String   @id @default(uuid())
+  title             String
+  description       String
+  difficulty        String   // Easy | Medium | Hard
+  topic             String
+  companyTags       String[] @default([])
+  solutionApproach  String?
+  optimalComplexity Json?    // { time: "O(n)", space: "O(n)" }
+  starterCode       Json?    // { python: "...", java: "...", ... }
+  examples          Json?    // [{ input, output, explanation }]
+  constraints       String[] @default([])
+  testCases         Json?    // [{ input, expectedOutput }]
+  createdAt         DateTime @default(now())
+
+  codingSubmissions CodingSubmission[]
+}
+
+model CodingSubmission {
+  id              String   @id @default(uuid())
+  userId          String
+  problemId       String
+  code            String
+  language        String
+  timeComplexity  String?
+  spaceComplexity String?
+  qualityScore    Float?
+  passedCases     Int      @default(0)
+  totalCases      Int      @default(0)
+  aiFeedback      Json?
+  submittedAt     DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+}
+
+model Roadmap {
+  id              String   @id @default(uuid())
+  userId          String
+  targetCompany   String
+  currentLevel    String
+  dailyHours      Int
+  startDate       DateTime
+  endDate         DateTime
+  overallProgress Float    @default(0)
+  createdAt       DateTime @default(now())
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weeks RoadmapWeek[]
+}
+
+model RoadmapWeek {
+  id             String  @id @default(uuid())
+  roadmapId      String
+  weekNumber     Int
+  phase          String  // Foundation | Core DSA | Advanced | Mock
+  topic          String
+  resourceCount  Int     @default(0)
+  estimatedHours Float
+  completed      Boolean @default(false)
+  resources      Json?   // [{ title, url, type }]
+
+  roadmap Roadmap @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+}
+
+model GapAnalysis {
+  id           String   @id @default(uuid())
+  userId       String
+  resumeSkills String[] @default([])
+  leetcodeStats Json?    // { solved, rating, weakTopics }
+  githubStats   Json?    // { repos, languages, contributions }
+  missingSkills String[] @default([])
+  weakAreas     String[] @default([])
+  strengths     String[] @default([])
+  overallMatch  Float?
+  targetRole    String?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Resume {
+  id             String   @id @default(uuid())
+  userId         String
+  fileUrl        String?
+  fileName       String?
+  atsScore       Float?
+  sectionScores  Json?    // { summary, skills, experience, projects, education }
+  keywordsMissing String[] @default([])
+  suggestions    Json?    // [{ section, bullet, suggestion }]
+  actionVerbScore Float?
+  uploadedAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

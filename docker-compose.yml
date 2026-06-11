@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: prepcoach
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6381:6379"
+
+  backend:
+    image: node:22-alpine
+    working_dir: /app
+    ports:
+      - "5000:5000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/prepcoach?schema=public"
+      REDIS_URL: "redis://redis:6379"
+      JWT_SECRET: "your-jwt-secret-change-in-production"
+      JWT_REFRESH_SECRET: "your-refresh-secret-change-in-production"
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-sk-placeholder}"
+      CORS_ORIGIN: "http://localhost:5173"
+      NODE_ENV: "development"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: sh -c "npx prisma generate --no-hints 2>/dev/null; npx prisma db push --accept-data-loss 2>/dev/null; npx tsx prisma/seed.ts 2>/dev/null; npx tsx watch src/index.ts"
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+    depends_on:
+      - backend
+    command: sh -c "npx vite --host 0.0.0.0"
+
+volumes:
+  pgdata:
