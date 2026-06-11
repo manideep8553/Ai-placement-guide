@@ -1,46 +1,58 @@
-import { useState, useMemo } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
-import { mockCompanies, type Company } from '@/data/mockData'
+import { mockCompanies } from '@/data/mockData'
 import { cn } from '@/lib/utils'
-import { X, Building2, Clock, ChevronDown, ChevronRight, CheckCircle, Circle, BarChart3 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { X, Building2, Clock, ChevronDown, ChevronRight, CheckCircle, Circle, BarChart3, ExternalLink } from 'lucide-react'
+import { motion } from 'framer-motion'
 
-interface RoadmapWeek {
-  week: number
-  topic: string
-  resources: number
-  hours: number
-}
+const companyColors = [
+  'bg-blue-500/20 text-blue-400',
+  'bg-orange-500/20 text-orange-400',
+  'bg-sky-500/20 text-sky-400',
+  'bg-indigo-500/20 text-indigo-400',
+  'bg-red-500/20 text-red-400',
+  'bg-purple-500/20 text-purple-400',
+  'bg-emerald-500/20 text-emerald-400',
+  'bg-cyan-500/20 text-cyan-400',
+  'bg-teal-500/20 text-teal-400',
+]
 
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline" | "success" | "warning" | "info"
+const tabItems = ['Process', 'Questions', 'Topics', 'Roadmap'] as const
+type Tab = typeof tabItems[number]
 
-function getDifficultyVariant(difficulty: string): BadgeVariant {
+function getDifficultyBadge(difficulty: string) {
   switch (difficulty) {
-    case "Easy": return "success"
-    case "Medium": return "warning"
-    case "Hard": return "destructive"
-    default: return "default"
+    case 'Easy': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+    case 'Medium': return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+    case 'Hard': return 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+    default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20'
   }
 }
 
-function getCategoryVariant(category: string): BadgeVariant {
+function getCategoryBadge(category: string) {
   switch (category) {
-    case "DSA": return "info"
-    case "System Design": return "default"
-    case "HR": return "success"
-    case "Core Subject": return "warning"
-    default: return "default"
+    case 'DSA': return 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+    case 'System Design': return 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+    case 'HR': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+    case 'Core Subject': return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+    default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20'
   }
 }
 
-function generateRoadmap(topics: Company['topics']): RoadmapWeek[] {
+function getDifficultyColor(difficulty: string) {
+  switch (difficulty) {
+    case 'Easy': return 'bg-emerald-500'
+    case 'Medium': return 'bg-amber-500'
+    case 'Hard': return 'bg-rose-500'
+    default: return 'bg-primary'
+  }
+}
+
+function generateRoadmap(topics: { name: string }[]) {
   const weekSize = Math.max(2, Math.ceil(topics.length / 4))
-  const weeks: RoadmapWeek[] = []
+  const weeks: { week: number; topic: string; resources: number; hours: number }[] = []
   for (let i = 0; i < topics.length; i += weekSize) {
     const chunk = topics.slice(i, i + weekSize)
     weeks.push({
@@ -53,47 +65,26 @@ function generateRoadmap(topics: Company['topics']): RoadmapWeek[] {
   return weeks
 }
 
-function getDifficultyColor(difficulty: string) {
-  switch (difficulty) {
-    case "Easy": return "bg-emerald-500"
-    case "Medium": return "bg-amber-500"
-    case "Hard": return "bg-rose-500"
-    default: return "bg-primary"
-  }
-}
-
 export default function CompanyPrep() {
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
+  const [selectedCompany, setSelectedCompany] = useState<typeof mockCompanies[number] | null>(null)
+  const [activeTab, setActiveTab] = useState<Tab>('Process')
   const [topicCheckState, setTopicCheckState] = useState<Record<string, boolean>>({})
   const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set([1]))
 
-  const difficultyDistribution = useMemo(() => {
-    const counts = { Easy: 0, Medium: 0, Hard: 0 }
-    mockCompanies.forEach(c => counts[c.difficulty]++)
-    const total = mockCompanies.length
-    return Object.entries(counts).map(([label, count]) => ({
-      label,
-      count,
-      percentage: total > 0 ? (count / total) * 100 : 0,
-    }))
-  }, [])
-
-  const roadmap = useMemo(
-    () => selectedCompany ? generateRoadmap(selectedCompany.topics) : [],
-    [selectedCompany]
-  )
+  const roadmap = selectedCompany ? generateRoadmap(selectedCompany.topics) : []
 
   const completedTopics = selectedCompany
     ? selectedCompany.topics.filter(t => topicCheckState[t.name] ?? t.completed).length
     : 0
   const totalTopics = selectedCompany?.topics.length ?? 0
 
-  function handleCompanySelect(company: Company) {
+  function handleCompanySelect(company: typeof mockCompanies[number]) {
     setSelectedCompany(company)
     const initial: Record<string, boolean> = {}
     company.topics.forEach(t => { initial[t.name] = t.completed })
     setTopicCheckState(initial)
     setExpandedWeeks(new Set([1]))
+    setActiveTab('Process')
   }
 
   function toggleWeek(week: number) {
@@ -110,307 +101,291 @@ export default function CompanyPrep() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Company Preparation</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Research and prepare for your target companies
-          </p>
-        </div>
-      </div>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
+        <h1 className="text-2xl font-bold text-white">Company Preparation</h1>
+        <p className="text-sm text-gray-400 mt-1">Research and prepare for your target companies</p>
+      </motion.div>
 
+      {/* Company Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockCompanies.map((company) => (
+        {mockCompanies.map((company, idx) => (
           <motion.div
             key={company.slug}
-            whileHover={{ scale: 1.02, y: -2 }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.04 }}
           >
-            <Card
+            <div
               className={cn(
-                "cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-primary/30",
-                selectedCompany?.slug === company.slug && "ring-2 ring-primary shadow-lg"
+                'rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-5 backdrop-blur-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg',
+                selectedCompany?.slug === company.slug && 'ring-2 ring-indigo-500/50 border-indigo-500/30'
               )}
               onClick={() => handleCompanySelect(company)}
             >
-              <CardContent className="p-5">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center text-xl shrink-0 ring-1 ring-primary/10">
-                    {company.logo}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold truncate">{company.name}</h3>
-                    <p className="text-sm text-muted-foreground font-medium">{company.avgPackage}</p>
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <Badge variant={getDifficultyVariant(company.difficulty)} className="capitalize">
-                        {company.difficulty}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Building2 className="w-3 h-3" />
-                        {company.interviewRounds} round{company.interviewRounds > 1 ? 's' : ''}
-                      </span>
-                    </div>
+              <div className="flex items-start gap-4">
+                <div className={cn(
+                  'w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-bold shrink-0',
+                  companyColors[idx % companyColors.length]
+                )}>
+                  {company.name[0]}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-white truncate">{company.name}</h3>
+                  <p className="text-sm text-gray-300 font-medium">{company.avgPackage}</p>
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    <Badge className={cn('capitalize border text-xs px-2 py-0.5', getDifficultyBadge(company.difficulty))}>
+                      {company.difficulty}
+                    </Badge>
+                    <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <Building2 className="w-3 h-3" />
+                      {company.interviewRounds} round{company.interviewRounds > 1 ? 's' : ''}
+                    </span>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </motion.div>
         ))}
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <BarChart3 className="w-4 h-4 text-primary" />
-            Difficulty Distribution
-          </CardTitle>
-          <CardDescription>Breakdown of companies by difficulty level</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            {difficultyDistribution.map(({ label, count, percentage }) => (
-              <div key={label} className="flex flex-col items-center gap-2">
-                <span className="text-2xl font-bold tracking-tight">{count}</span>
-                <div className="w-full h-3 rounded-full bg-muted overflow-hidden">
-                  <motion.div
-                    className={cn("h-full rounded-full", getDifficultyColor(label))}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percentage}%` }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                  />
-                </div>
-                <span className="text-xs font-medium text-muted-foreground">{label}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <AnimatePresence>
-        {selectedCompany && (
+      {/* Company Detail Overlay */}
+      {selectedCompany && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setSelectedCompany(null) }}
+        >
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 24 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl bg-[#0F172A] border border-[#334155] shadow-2xl"
           >
-            <Card className="overflow-hidden border-primary/10">
-              <CardHeader className="flex flex-row items-start justify-between pb-4 border-b bg-muted/30">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center text-2xl shrink-0 ring-1 ring-primary/10">
-                    {selectedCompany.logo}
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl">{selectedCompany.name}</CardTitle>
-                    <CardDescription className="flex items-center gap-2 mt-1">
-                      <span className="font-semibold text-foreground">{selectedCompany.avgPackage}</span>
-                      <span className="text-muted-foreground/40">·</span>
-                      <Badge variant={getDifficultyVariant(selectedCompany.difficulty)}>
-                        {selectedCompany.difficulty}
-                      </Badge>
-                    </CardDescription>
+            {/* Detail Header */}
+            <div className="flex items-start justify-between p-6 pb-4 border-b border-[#334155]/50">
+              <div className="flex items-center gap-4">
+                <div className={cn(
+                  'w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold shrink-0',
+                  companyColors[mockCompanies.indexOf(selectedCompany) % companyColors.length]
+                )}>
+                  {selectedCompany.name[0]}
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">{selectedCompany.name}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-sm font-semibold text-gray-300">{selectedCompany.avgPackage}</span>
+                    <span className="text-gray-600">·</span>
+                    <Badge className={cn('capitalize border text-xs px-2 py-0.5', getDifficultyBadge(selectedCompany.difficulty))}>
+                      {selectedCompany.difficulty}
+                    </Badge>
+                    <span className="text-xs text-gray-400 flex items-center gap-1">
+                      <Building2 className="w-3 h-3" />
+                      {selectedCompany.interviewRounds} rounds
+                    </span>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSelectedCompany(null)}
-                  className="shrink-0 rounded-xl"
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Tabs defaultValue="process" className="w-full">
-                  <div className="px-6 pt-4 pb-2 border-b bg-muted/20">
-                    <TabsList className="w-full h-auto grid grid-cols-4 gap-1.5 bg-transparent p-0">
-                      {["Process", "Questions", "Topics", "Roadmap"].map((tab) => (
-                        <TabsTrigger
-                          key={tab}
-                          value={tab.toLowerCase()}
-                          className="data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg py-2 text-xs sm:text-sm"
-                        >
-                          {tab}
-                        </TabsTrigger>
-                      ))}
-                    </TabsList>
-                  </div>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSelectedCompany(null)}
+                className="shrink-0 rounded-xl text-gray-400 hover:text-white hover:bg-[#1E293B]"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
 
-                  <TabsContent value="process" className="p-6 pt-4">
-                    <ScrollArea className="h-[420px] pr-4">
-                      <div className="relative">
-                        {selectedCompany.rounds.map((round, idx) => (
-                          <div key={idx} className="flex gap-4 pb-8 relative last:pb-0">
-                            {idx < selectedCompany.rounds.length - 1 && (
-                              <div className="absolute left-[17px] top-9 bottom-0 w-0.5 bg-gradient-to-b from-primary/20 to-transparent" />
-                            )}
+            {/* Custom Tabs */}
+            <div className="flex border-b border-[#334155]/50 px-6 pt-4">
+              {tabItems.map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={cn(
+                    'px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px',
+                    activeTab === tab
+                      ? 'text-indigo-400 border-indigo-400'
+                      : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-600'
+                  )}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {/* Process Tab */}
+              {activeTab === 'Process' && (
+                <div className="relative">
+                  {selectedCompany.rounds.map((round, idx) => (
+                    <div key={idx} className="flex gap-4 pb-8 relative last:pb-0">
+                      {idx < selectedCompany.rounds.length - 1 && (
+                        <div className="absolute left-[17px] top-9 bottom-0 w-0.5 bg-gradient-to-b from-indigo-500/30 to-transparent" />
+                      )}
+                      <div className={cn(
+                        'w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 mt-0.5 text-sm font-semibold',
+                        idx === 0
+                          ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                          : 'bg-indigo-500/10 text-indigo-400'
+                      )}>
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 pt-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="font-medium text-sm text-white">{round.name}</h4>
+                          <span className="text-xs text-gray-400 flex items-center gap-1 ml-auto">
+                            <Clock className="w-3 h-3" />
+                            {round.duration}
+                          </span>
+                        </div>
+                        <p className="text-sm text-gray-300 leading-relaxed">{round.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Questions Tab */}
+              {activeTab === 'Questions' && (
+                <div className="space-y-3">
+                  {selectedCompany.topQuestions.map((q) => (
+                    <div
+                      key={q.id}
+                      className="p-4 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 transition-all duration-200 hover:border-indigo-500/20"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-white leading-relaxed">{q.question}</p>
+                          <div className="flex items-center gap-2 mt-3 flex-wrap">
+                            <Badge className={cn('border text-xs px-2 py-0.5', getCategoryBadge(q.category))}>
+                              {q.category}
+                            </Badge>
+                            <Badge className={cn('capitalize border text-xs px-2 py-0.5', getDifficultyBadge(q.difficulty))}>
+                              {q.difficulty}
+                            </Badge>
+                            <span className="text-xs text-gray-400 bg-[#1E293B] px-2 py-0.5 rounded-md border border-[#334155]/30">
+                              {q.topic}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Topics Tab */}
+              {activeTab === 'Topics' && (
+                <div>
+                  <div className="mb-5 p-4 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-300">Preparation Progress</span>
+                      <span className="text-sm text-gray-400 font-medium">{completedTopics} / {totalTopics}</span>
+                    </div>
+                    <Progress
+                      value={totalTopics > 0 ? (completedTopics / totalTopics) * 100 : 0}
+                      className="h-2.5 bg-[#0F172A] [&>div]:bg-gradient-to-r [&>div]:from-indigo-500 [&>div]:to-purple-500"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    {selectedCompany.topics.map((topic) => {
+                      const checked = topicCheckState[topic.name] ?? topic.completed
+                      return (
+                        <button
+                          key={topic.name}
+                          onClick={() => toggleTopic(topic.name)}
+                          className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#1E293B]/50 transition-colors text-left group"
+                        >
+                          {checked ? (
+                            <CheckCircle className="w-5 h-5 text-indigo-400 shrink-0 transition-all duration-200" />
+                          ) : (
+                            <Circle className="w-5 h-5 text-gray-600 shrink-0 group-hover:text-gray-500 transition-colors" />
+                          )}
+                          <span className={cn(
+                            'text-sm transition-all duration-200',
+                            checked ? 'text-white font-medium' : 'text-gray-400'
+                          )}>
+                            {topic.name}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Roadmap Tab */}
+              {activeTab === 'Roadmap' && (
+                <div className="space-y-3">
+                  {roadmap.map((week) => {
+                    const isExpanded = expandedWeeks.has(week.week)
+                    return (
+                      <div key={week.week} className="rounded-xl border border-[#334155]/30 overflow-hidden transition-all duration-200 bg-[#1E293B]/30">
+                        <button
+                          onClick={() => toggleWeek(week.week)}
+                          className="w-full flex items-center justify-between p-4 hover:bg-[#1E293B]/50 transition-colors text-left"
+                        >
+                          <div className="flex items-center gap-3">
                             <div className={cn(
-                              "w-[34px] h-[34px] rounded-full flex items-center justify-center shrink-0 mt-0.5 text-sm font-semibold",
-                              idx === 0
-                                ? "bg-primary text-primary-foreground shadow-sm"
-                                : "bg-primary/10 text-primary"
+                              'w-9 h-9 rounded-xl flex items-center justify-center text-sm font-semibold transition-colors',
+                              isExpanded ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-indigo-500/10 text-indigo-400'
                             )}>
-                              {idx + 1}
+                              {week.week}
                             </div>
-                            <div className="flex-1 pt-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h4 className="font-medium text-sm">{round.name}</h4>
-                                <span className="text-xs text-muted-foreground flex items-center gap-1 ml-auto">
-                                  <Clock className="w-3 h-3" />
-                                  {round.duration}
-                                </span>
-                              </div>
-                              <p className="text-sm text-muted-foreground leading-relaxed">{round.description}</p>
+                            <div>
+                              <h4 className="font-medium text-sm text-white">Week {week.week}</h4>
+                              <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{week.topic}</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-
-                  <TabsContent value="questions" className="p-6 pt-4">
-                    <ScrollArea className="h-[420px] pr-4">
-                      <div className="space-y-3">
-                        {selectedCompany.topQuestions.map((q) => (
-                          <div
-                            key={q.id}
-                            className="p-4 rounded-xl bg-muted/30 border transition-all duration-200 hover:border-primary/20 hover:bg-muted/50"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium leading-relaxed">{q.question}</p>
-                                <div className="flex items-center gap-2 mt-3 flex-wrap">
-                                  <Badge variant={getCategoryVariant(q.category)}>
-                                    {q.category}
-                                  </Badge>
-<Badge
-                                  variant={getDifficultyVariant(q.difficulty)}
-                                  className="capitalize"
-                                >
-                                    {q.difficulty}
-                                  </Badge>
-                                  <span className="text-xs text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-md">
-                                    {q.topic}
+                          <div className="flex items-center gap-4">
+                            <div className="text-xs text-gray-400 text-right hidden sm:block">
+                              <p>{week.resources} resources</p>
+                              <p className="text-indigo-400 font-medium">{week.hours}h</p>
+                            </div>
+                            {isExpanded ? (
+                              <ChevronDown className="w-4 h-4 text-gray-400 transition-transform" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 text-gray-400 transition-transform" />
+                            )}
+                          </div>
+                        </button>
+                        {isExpanded && (
+                          <div className="border-t border-[#334155]/30 bg-[#0F172A]/50">
+                            <div className="p-4 pt-3">
+                              <div className="ml-12">
+                                <h5 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                                  Topics to cover
+                                </h5>
+                                <p className="text-sm text-gray-400 mb-3">{week.topic}</p>
+                                <div className="flex items-center gap-4 text-xs text-gray-400">
+                                  <span className="flex items-center gap-1.5">
+                                    <Clock className="w-3.5 h-3.5" />
+                                    {week.hours} hours
+                                  </span>
+                                  <span className="flex items-center gap-1.5">
+                                    <BarChart3 className="w-3.5 h-3.5" />
+                                    {week.resources} resources
                                   </span>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        ))}
+                        )}
                       </div>
-                    </ScrollArea>
-                  </TabsContent>
-
-                  <TabsContent value="topics" className="p-6 pt-4">
-                    <div className="mb-5 p-4 rounded-xl bg-muted/30 border">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">Preparation Progress</span>
-                        <span className="text-sm text-muted-foreground font-medium">{completedTopics} / {totalTopics}</span>
-                      </div>
-                      <Progress
-                        value={totalTopics > 0 ? (completedTopics / totalTopics) * 100 : 0}
-                        className="h-2.5"
-                      />
-                    </div>
-                    <ScrollArea className="h-[340px] pr-4">
-                      <div className="space-y-1">
-                        {selectedCompany.topics.map((topic) => {
-                          const checked = topicCheckState[topic.name] ?? topic.completed
-                          return (
-                            <button
-                              key={topic.name}
-                              onClick={() => toggleTopic(topic.name)}
-                              className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-muted/50 transition-colors text-left group"
-                            >
-                              {checked ? (
-                                <CheckCircle className="w-5 h-5 text-primary shrink-0 transition-all duration-200" />
-                              ) : (
-                                <Circle className="w-5 h-5 text-muted-foreground/40 shrink-0 group-hover:text-muted-foreground/60 transition-colors" />
-                              )}
-                              <span className={cn(
-                                "text-sm transition-all duration-200",
-                                checked ? "text-foreground font-medium" : "text-muted-foreground"
-                              )}>
-                                {topic.name}
-                              </span>
-                            </button>
-                          )
-                        })}
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-
-                  <TabsContent value="roadmap" className="p-6 pt-4">
-                    <ScrollArea className="h-[420px] pr-4">
-                      <div className="space-y-3">
-                        {roadmap.map((week) => {
-                          const isExpanded = expandedWeeks.has(week.week)
-                          return (
-                            <div key={week.week} className="rounded-xl border overflow-hidden transition-all duration-200">
-                              <button
-                                onClick={() => toggleWeek(week.week)}
-                                className="w-full flex items-center justify-between p-4 hover:bg-muted/30 transition-colors text-left"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className={cn(
-                                    "w-9 h-9 rounded-xl flex items-center justify-center text-sm font-semibold transition-colors",
-                                    isExpanded ? "bg-primary text-primary-foreground shadow-sm" : "bg-primary/10 text-primary"
-                                  )}>
-                                    {week.week}
-                                  </div>
-                                  <div>
-                                    <h4 className="font-medium text-sm">Week {week.week}</h4>
-                                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{week.topic}</p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                  <div className="text-xs text-muted-foreground text-right hidden sm:block">
-                                    <p>{week.resources} resources</p>
-                                    <p className="text-primary font-medium">{week.hours}h</p>
-                                  </div>
-                                  {isExpanded ? (
-                                    <ChevronDown className="w-4 h-4 text-muted-foreground transition-transform" />
-                                  ) : (
-                                    <ChevronRight className="w-4 h-4 text-muted-foreground transition-transform" />
-                                  )}
-                                </div>
-                              </button>
-                              {isExpanded && (
-                                <div className="border-t bg-muted/20">
-                                  <div className="p-4 pt-3">
-                                    <div className="ml-12">
-                                      <h5 className="text-sm font-medium mb-2 flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                        Topics to cover
-                                      </h5>
-                                      <p className="text-sm text-muted-foreground mb-3">{week.topic}</p>
-                                      <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                                        <span className="flex items-center gap-1.5">
-                                          <Clock className="w-3.5 h-3.5" />
-                                          {week.hours} hours
-                                        </span>
-                                        <span className="flex items-center gap-1.5">
-                                          <BarChart3 className="w-3.5 h-3.5" />
-                                          {week.resources} resources
-                                        </span>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </ScrollArea>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </div>
   )
 }

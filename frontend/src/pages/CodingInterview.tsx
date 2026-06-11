@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { mockCodingProblems } from '@/data/mockData'
 import { cn } from '@/lib/utils'
-import { Play, CheckCircle2, XCircle, Lightbulb, Bot, ChevronLeft, ChevronRight, Code2, Clock, Cpu, BarChart3, MessageSquare, Sparkles, Send, Menu } from 'lucide-react'
+import {
+  Play, CheckCircle2, XCircle, Lightbulb, Bot, ChevronLeft, ChevronRight,
+  Code2, Clock, Cpu, BarChart3, MessageSquare, Sparkles, Send, Menu
+} from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const LANGUAGES = [
@@ -31,6 +29,12 @@ const BUILTINS: Record<string, string[]> = {
   javascript: ['console', 'Math', 'JSON', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Map', 'Set', 'Promise', 'setTimeout', 'setInterval', 'parseInt', 'parseFloat', 'isNaN', 'Array.isArray', 'Object.keys', 'Object.values'],
 }
 
+const DIFFICULTY_COLORS: Record<string, string> = {
+  Easy: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+  Medium: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+  Hard: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+}
+
 function highlightSyntax(code: string, language: string): React.ReactNode[] {
   const lang = (language in KEYWORDS ? language : 'python') as keyof typeof KEYWORDS
   const kw = KEYWORDS[lang]
@@ -45,20 +49,20 @@ function highlightSyntax(code: string, language: string): React.ReactNode[] {
       if (part.startsWith('//') || part.startsWith('#')) {
         tokens.push(<span key={i} className="text-[#6A9955]">{part}</span>)
       } else if ((part.startsWith('"') && part.endsWith('"')) || (part.startsWith("'") && part.endsWith("'"))) {
-        tokens.push(<span key={i} className="text-[#ce9178]">{part}</span>)
+        tokens.push(<span key={i} className="text-[#CE9178]">{part}</span>)
       } else if (kw.includes(part)) {
-        tokens.push(<span key={i} className="text-[#569cd6]">{part}</span>)
+        tokens.push(<span key={i} className="text-[#569CD6]">{part}</span>)
       } else if (blt.includes(part)) {
-        tokens.push(<span key={i} className="text-[#4ec9b0]">{part}</span>)
+        tokens.push(<span key={i} className="text-[#4EC9B0]">{part}</span>)
       } else if (/^\d+$/.test(part)) {
-        tokens.push(<span key={i} className="text-[#b5cea8]">{part}</span>)
+        tokens.push(<span key={i} className="text-[#B5CEA8]">{part}</span>)
       } else {
-        tokens.push(<span key={i}>{part}</span>)
+        tokens.push(<span key={i} className="text-gray-300">{part}</span>)
       }
     })
     return (
       <div key={lineIdx} className="flex">
-        <span className="select-none w-12 flex-shrink-0 text-right pr-4 text-[#858585] text-sm leading-6">{lineIdx + 1}</span>
+        <span className="select-none w-12 flex-shrink-0 text-right pr-4 text-gray-600 text-sm leading-6">{lineIdx + 1}</span>
         <span className="leading-6 whitespace-pre">{tokens}</span>
       </div>
     )
@@ -81,7 +85,7 @@ function CircularGauge({ value, size = 100, strokeWidth = 8 }: { value: number; 
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--secondary))" strokeWidth={strokeWidth} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#1E293B" strokeWidth={strokeWidth} />
         <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={color} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" style={{ transition: 'stroke-dashoffset 0.8s ease-out' }} />
       </svg>
       <span className="absolute text-lg font-bold" style={{ color }}>{animated}</span>
@@ -91,29 +95,29 @@ function CircularGauge({ value, size = 100, strokeWidth = 8 }: { value: number; 
 
 function TestCaseGrid({ results }: { results: { passed: boolean }[] }) {
   const cols = Math.min(5, results.length)
-  
+
   return (
     <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {results.map((r, i) => (
-        <div key={i} className={cn("flex items-center gap-2 rounded-lg border p-3 text-sm", r.passed ? "border-emerald-200 bg-emerald-50 dark:border-emerald-900/50 dark:bg-emerald-950/20" : "border-red-200 bg-red-50 dark:border-red-900/50 dark:bg-red-950/20")}>
-          {r.passed ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <XCircle className="h-4 w-4 text-red-600" />}
-          <span>Test {i + 1}</span>
+        <div key={i} className={cn(
+          "flex items-center gap-2 rounded-lg border p-3 text-sm",
+          r.passed
+            ? "border-emerald-500/30 bg-emerald-500/10"
+            : "border-red-500/30 bg-red-500/10"
+        )}>
+          {r.passed
+            ? <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+            : <XCircle className="h-4 w-4 text-red-400" />
+          }
+          <span className="text-gray-300">Test {i + 1}</span>
         </div>
       ))}
     </div>
   )
 }
 
-const DIFFICULTY_DOT: Record<string, string> = {
-  Easy: 'bg-emerald-500',
-  Medium: 'bg-amber-500',
-  Hard: 'bg-red-500',
-}
-
-function getDifficultyVariant(d: string) {
-  if (d === 'Easy') return 'success' as const
-  if (d === 'Medium') return 'warning' as const
-  return 'destructive' as const
+function getDifficultyColor(d: string) {
+  return DIFFICULTY_COLORS[d] || ''
 }
 
 function generateMockTestResults(problem: typeof mockCodingProblems[0]) {
@@ -188,8 +192,6 @@ export default function CodingInterview() {
     (p) => difficultyFilter === 'All' || p.difficulty === difficultyFilter
   )
 
-  const difficultyBadgeVariant = getDifficultyVariant(selectedProblem.difficulty)
-
   function handleRun() {
     setShowResults(true)
     setTestResults(generateMockTestResults(selectedProblem))
@@ -218,28 +220,28 @@ export default function CodingInterview() {
   const codeQuality = Math.min(100, 65 + passedCount * 5 + Math.floor(Math.random() * 10))
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] bg-background">
+    <div className="flex h-[calc(100vh-3.5rem)] bg-[#0F172A]">
       {/* Problem Selector Sidebar */}
       <motion.div
-        animate={{ width: sidebarOpen ? 280 : 0 }}
+        animate={{ width: sidebarOpen ? 260 : 0 }}
         transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="flex-shrink-0 overflow-hidden border-r bg-card"
+        className="flex-shrink-0 overflow-hidden border-r border-[#334155]/50 bg-[#0F172A]/80"
       >
-        <div className={cn("w-[280px] h-full flex flex-col", !sidebarOpen && "hidden")}>
-          <div className="flex items-center justify-between p-4 border-b">
-            <h3 className="font-semibold text-sm">Problems</h3>
-            <span className="text-xs text-muted-foreground">{filteredProblems.length}</span>
+        <div className={cn("w-[260px] h-full flex flex-col", !sidebarOpen && "hidden")}>
+          <div className="flex items-center justify-between p-4 border-b border-[#334155]/50">
+            <h3 className="font-semibold text-sm text-white">Problems</h3>
+            <span className="text-xs text-gray-400">{filteredProblems.length}</span>
           </div>
-          <div className="flex gap-1 px-4 py-2 border-b">
+          <div className="flex gap-1.5 px-4 py-3 border-b border-[#334155]/50">
             {['All', 'Easy', 'Medium', 'Hard'].map((f) => (
               <button
                 key={f}
                 onClick={() => setDifficultyFilter(f)}
                 className={cn(
-                  "px-2.5 py-1 text-xs rounded-lg transition-colors",
+                  "px-3 py-1 text-xs rounded-lg transition-colors font-medium",
                   difficultyFilter === f
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent"
+                    ? "bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+                    : "text-gray-400 hover:text-gray-200 hover:bg-[#1E293B]/50 border border-transparent"
                 )}
               >
                 {f}
@@ -255,11 +257,14 @@ export default function CodingInterview() {
                   className={cn(
                     "w-full text-left px-3 py-2.5 rounded-xl text-sm transition-all flex items-center gap-3",
                     selectedProblem.id === p.id
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "hover:bg-accent text-muted-foreground hover:text-foreground"
+                      ? "bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
+                      : "text-gray-400 hover:text-gray-200 hover:bg-[#1E293B]/50 border border-transparent"
                   )}
                 >
-                  <span className={cn("w-2 h-2 rounded-full flex-shrink-0", DIFFICULTY_DOT[p.difficulty])} />
+                  <span className={cn(
+                    "w-2 h-2 rounded-full flex-shrink-0",
+                    p.difficulty === 'Easy' ? 'bg-emerald-400' : p.difficulty === 'Medium' ? 'bg-amber-400' : 'bg-rose-400'
+                  )} />
                   <span className="truncate">{p.title}</span>
                 </button>
               ))}
@@ -271,25 +276,37 @@ export default function CodingInterview() {
       {/* Sidebar toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="flex-shrink-0 w-8 border-r flex items-center justify-center hover:bg-accent transition-colors"
+        className="flex-shrink-0 w-8 border-r border-[#334155]/50 flex items-center justify-center hover:bg-[#1E293B]/50 transition-colors"
       >
-        {sidebarOpen ? <ChevronLeft className="h-4 w-4 text-muted-foreground" /> : <Menu className="h-4 w-4 text-muted-foreground" />}
+        {sidebarOpen
+          ? <ChevronLeft className="h-4 w-4 text-gray-400" />
+          : <Menu className="h-4 w-4 text-gray-400" />
+        }
       </button>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <div className="flex items-center gap-3 px-6 py-3 border-b bg-card">
-          <Code2 className="h-5 w-5 text-primary" />
-          <h1 className="font-semibold text-base truncate">{selectedProblem.title}</h1>
-          <Badge variant={difficultyBadgeVariant}>{selectedProblem.difficulty}</Badge>
-          <Badge variant="outline" className="text-xs">{selectedProblem.topic}</Badge>
+        <div className="flex items-center gap-3 px-6 py-3 border-b border-[#334155]/50 bg-[#0F172A]/80 backdrop-blur-xl">
+          <Code2 className="h-5 w-5 text-indigo-400" />
+          <h1 className="font-semibold text-base truncate text-white">{selectedProblem.title}</h1>
+          <span className={cn(
+            "px-2.5 py-0.5 rounded-full text-xs font-medium border",
+            getDifficultyColor(selectedProblem.difficulty)
+          )}>
+            {selectedProblem.difficulty}
+          </span>
+          <span className="px-2.5 py-0.5 rounded-full text-xs font-medium text-indigo-300 bg-indigo-500/10 border border-indigo-500/20">
+            {selectedProblem.topic}
+          </span>
           <div className="hidden md:flex items-center gap-1.5 ml-2">
             {selectedProblem.companyTags.slice(0, 4).map((c) => (
-              <Badge key={c} variant="secondary" className="text-[10px] px-1.5 py-0">{c}</Badge>
+              <span key={c} className="px-2 py-0.5 rounded text-[10px] font-medium text-gray-300 bg-[#1E293B]/50 border border-[#334155]/30">
+                {c}
+              </span>
             ))}
             {selectedProblem.companyTags.length > 4 && (
-              <span className="text-[10px] text-muted-foreground">+{selectedProblem.companyTags.length - 4}</span>
+              <span className="text-[10px] text-gray-400">+{selectedProblem.companyTags.length - 4}</span>
             )}
           </div>
         </div>
@@ -297,19 +314,19 @@ export default function CodingInterview() {
         {/* Body: Left Panel + Right Panel */}
         <div className="flex-1 flex min-h-0">
           {/* Left Panel - Problem Statement */}
-          <div className="w-[40%] flex-shrink-0 border-r flex flex-col min-w-0">
+          <div className="w-[40%] flex-shrink-0 border-r border-[#334155]/50 flex flex-col min-w-0">
             <ScrollArea className="flex-1">
               <div className="p-5 space-y-5">
                 <div>
-                  <p className="text-sm leading-relaxed text-foreground/90">{selectedProblem.description}</p>
+                  <p className="text-sm leading-relaxed text-gray-300">{selectedProblem.description}</p>
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Constraints</h4>
-                  <ul className="space-y-1">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Constraints</h4>
+                  <ul className="space-y-1.5">
                     {selectedProblem.constraints.map((c, i) => (
-                      <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                        <span className="text-primary mt-1.5 h-1 w-1 rounded-full bg-primary flex-shrink-0" />
+                      <li key={i} className="text-sm text-gray-400 flex items-start gap-2.5">
+                        <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
                         {c}
                       </li>
                     ))}
@@ -317,24 +334,24 @@ export default function CodingInterview() {
                 </div>
 
                 <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Examples</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Examples</h4>
                   <div className="space-y-3">
                     {selectedProblem.examples.map((ex, i) => (
-                      <Card key={i} className="overflow-hidden">
-                        <CardContent className="p-3 space-y-2">
+                      <div key={i} className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 overflow-hidden">
+                        <div className="p-3 space-y-2">
                           <div>
-                            <span className="text-[10px] font-semibold uppercase text-muted-foreground">Input:</span>
-                            <pre className="mt-0.5 text-sm bg-muted rounded-lg p-2 overflow-x-auto">{ex.input}</pre>
+                            <span className="text-[10px] font-semibold uppercase text-gray-400">Input:</span>
+                            <pre className="mt-0.5 text-sm bg-[#0B1121] rounded-lg p-2 overflow-x-auto text-gray-300 border border-[#334155]/20">{ex.input}</pre>
                           </div>
                           <div>
-                            <span className="text-[10px] font-semibold uppercase text-muted-foreground">Output:</span>
-                            <pre className="mt-0.5 text-sm bg-muted rounded-lg p-2 overflow-x-auto">{ex.output}</pre>
+                            <span className="text-[10px] font-semibold uppercase text-gray-400">Output:</span>
+                            <pre className="mt-0.5 text-sm bg-[#0B1121] rounded-lg p-2 overflow-x-auto text-gray-300 border border-[#334155]/20">{ex.output}</pre>
                           </div>
                           {ex.explanation && (
-                            <p className="text-xs text-muted-foreground">{ex.explanation}</p>
+                            <p className="text-xs text-gray-400">{ex.explanation}</p>
                           )}
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -342,47 +359,64 @@ export default function CodingInterview() {
             </ScrollArea>
 
             {/* Bottom toolbar */}
-            <div className="flex items-center gap-2 p-3 border-t bg-card">
-              <Button size="sm" onClick={handleRun}>
+            <div className="flex items-center gap-2 p-3 border-t border-[#334155]/50 bg-[#0F172A]/80">
+              <button
+                onClick={handleRun}
+                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors"
+              >
                 <Play className="h-3.5 w-3.5 mr-1.5" /> Run
-              </Button>
-              <Button size="sm" onClick={handleSubmit} variant="default">
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors"
+              >
                 <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Submit
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setShowHint(!showHint)}>
+              </button>
+              <button
+                onClick={() => setShowHint(!showHint)}
+                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-colors"
+              >
                 <Lightbulb className="h-3.5 w-3.5 mr-1.5" /> Hint
-              </Button>
-              <Button size="sm" variant="outline" onClick={() => setShowAiChat(!showAiChat)}>
+              </button>
+              <button
+                onClick={() => setShowAiChat(!showAiChat)}
+                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors"
+              >
                 <Bot className="h-3.5 w-3.5 mr-1.5" /> Ask AI
-              </Button>
+              </button>
             </div>
           </div>
 
           {/* Right Panel - Code Editor */}
-          <div className="flex-1 flex flex-col min-w-0 bg-[#1e1e1e]">
+          <div className="flex-1 flex flex-col min-w-0 bg-[#0B1121]">
             {/* Language selector */}
-            <div className="flex items-center justify-between px-4 py-2 bg-[#252526] border-b border-[#3c3c3c]">
+            <div className="flex items-center justify-between px-4 py-2 bg-[#0F172A]/80 border-b border-[#334155]/50">
               <div className="flex items-center gap-2">
-                <Code2 className="h-4 w-4 text-[#858585]" />
-                <span className="text-xs text-[#cccccc] font-medium">{selectedProblem.id} · {selectedProblem.title}</span>
+                <Code2 className="h-4 w-4 text-gray-400" />
+                <span className="text-xs text-gray-300 font-medium">{selectedProblem.id} · {selectedProblem.title}</span>
               </div>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-36 h-8 text-xs bg-[#3c3c3c] border-[#3c3c3c] text-[#cccccc]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
+              <div className="relative">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-36 h-8 text-xs rounded-lg bg-[#1E293B]/50 border border-[#334155]/50 text-gray-200 px-3 appearance-none cursor-pointer focus:outline-none focus:border-indigo-500/50"
+                >
                   {LANGUAGES.map((l) => (
-                    <SelectItem key={l.id} value={l.id}>{l.label}</SelectItem>
+                    <option key={l.id} value={l.id} className="bg-[#0F172A]">{l.label}</option>
                   ))}
-                </SelectContent>
-              </Select>
+                </select>
+                <ChevronRight className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-3 text-gray-400 pointer-events-none rotate-90" />
+              </div>
             </div>
 
             {/* Code editor area */}
             <div className="relative flex-1 overflow-auto">
-              <div className="absolute inset-0 p-0 font-mono text-sm leading-6 overflow-auto" style={{ fontFamily: "'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace" }}>
-                <pre className="p-0 m-0">
-                  <code className="text-[#d4d4d4]">
+              <div
+                className="absolute inset-0 p-0 font-mono text-sm leading-6 overflow-auto"
+                style={{ fontFamily: "'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace" }}
+              >
+                <pre className="p-4 m-0 min-h-full">
+                  <code>
                     {highlightSyntax(code, language)}
                   </code>
                 </pre>
@@ -391,7 +425,7 @@ export default function CodingInterview() {
                 ref={textareaRef}
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                className="absolute inset-0 w-full h-full resize-none bg-transparent text-transparent caret-[#cccccc] font-mono text-sm leading-6 p-0 outline-none border-none overflow-auto"
+                className="absolute inset-0 w-full h-full resize-none bg-transparent text-transparent caret-white font-mono text-sm leading-6 p-4 outline-none border-none overflow-auto"
                 style={{ fontFamily: "'Fira Code', 'JetBrains Mono', 'Cascadia Code', 'Consolas', monospace", WebkitTextFillColor: 'transparent', tabSize: 4 }}
                 spellCheck={false}
                 autoComplete="off"
@@ -409,21 +443,21 @@ export default function CodingInterview() {
         initial={false}
         animate={{ width: showHint ? 320 : 0 }}
         transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="flex-shrink-0 overflow-hidden border-l bg-card"
+        className="flex-shrink-0 overflow-hidden border-l border-[#334155]/50 bg-[#0F172A]/80 backdrop-blur-xl"
       >
         <div className={cn("w-[320px] h-full flex flex-col", !showHint && "hidden")}>
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-4 border-b border-[#334155]/50">
             <div className="flex items-center gap-2">
-              <Lightbulb className="h-4 w-4 text-amber-500" />
-              <h3 className="font-semibold text-sm">Hint</h3>
+              <Lightbulb className="h-4 w-4 text-amber-400" />
+              <h3 className="font-semibold text-sm text-white">Hint</h3>
             </div>
-            <button onClick={() => setShowHint(false)} className="text-muted-foreground hover:text-foreground">
+            <button onClick={() => setShowHint(false)} className="text-gray-400 hover:text-gray-200">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
           <div className="flex-1 p-4">
-            <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 p-4">
-              <p className="text-sm text-amber-900 dark:text-amber-300 leading-relaxed">
+            <div className="rounded-xl bg-amber-500/5 border border-amber-500/20 p-4">
+              <p className="text-sm text-amber-300 leading-relaxed">
                 {MOCK_HINTS[selectedProblem.id] || 'Think about using an efficient data structure to solve this problem optimally.'}
               </p>
             </div>
@@ -436,15 +470,15 @@ export default function CodingInterview() {
         initial={false}
         animate={{ width: showAiChat ? 360 : 0 }}
         transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="flex-shrink-0 overflow-hidden border-l bg-card"
+        className="flex-shrink-0 overflow-hidden border-l border-[#334155]/50 bg-[#0F172A]/80 backdrop-blur-xl"
       >
         <div className={cn("w-[360px] h-full flex flex-col", !showAiChat && "hidden")}>
-          <div className="flex items-center justify-between p-4 border-b">
+          <div className="flex items-center justify-between p-4 border-b border-[#334155]/50">
             <div className="flex items-center gap-2">
-              <Bot className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold text-sm">AI Assistant</h3>
+              <Bot className="h-4 w-4 text-purple-400" />
+              <h3 className="font-semibold text-sm text-white">AI Assistant</h3>
             </div>
-            <button onClick={() => setShowAiChat(false)} className="text-muted-foreground hover:text-foreground">
+            <button onClick={() => setShowAiChat(false)} className="text-gray-400 hover:text-gray-200">
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -452,8 +486,8 @@ export default function CodingInterview() {
             <div className="space-y-3">
               {aiMessages.length === 0 && (
                 <div className="text-center py-8">
-                  <Sparkles className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground">Ask me anything about this problem!</p>
+                  <Sparkles className="h-8 w-8 mx-auto text-gray-500 mb-2" />
+                  <p className="text-xs text-gray-400">Ask me anything about this problem!</p>
                 </div>
               )}
               {aiMessages.map((msg, i) => (
@@ -461,8 +495,8 @@ export default function CodingInterview() {
                   <div className={cn(
                     "max-w-[85%] rounded-xl px-3 py-2 text-sm",
                     msg.role === 'user'
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-foreground"
+                      ? "bg-indigo-500/20 text-indigo-200 border border-indigo-500/20"
+                      : "bg-[#1E293B]/50 text-gray-200 border border-[#334155]/30"
                   )}>
                     {msg.text}
                   </div>
@@ -470,93 +504,97 @@ export default function CodingInterview() {
               ))}
             </div>
           </ScrollArea>
-          <div className="p-3 border-t flex gap-2">
+          <div className="p-3 border-t border-[#334155]/50 flex gap-2">
             <input
               value={aiInput}
               onChange={(e) => setAiInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAiSend()}
               placeholder="Ask a question..."
-              className="flex-1 h-9 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+              className="flex-1 h-9 rounded-xl border border-[#334155]/50 bg-[#1E293B]/50 px-3 text-sm text-gray-200 outline-none focus:border-indigo-500/50 placeholder-gray-500"
             />
-            <Button size="icon" className="h-9 w-9 flex-shrink-0" onClick={handleAiSend}>
-              <Send className="h-4 w-4" />
-            </Button>
+            <button
+              onClick={handleAiSend}
+              className="h-9 w-9 flex-shrink-0 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center hover:bg-indigo-500/30 transition-colors"
+            >
+              <Send className="h-4 w-4 text-indigo-300" />
+            </button>
           </div>
         </div>
       </motion.div>
 
       {/* Submission Results Modal */}
       {showResults && testResults && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm" onClick={() => setShowResults(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowResults(false)}>
           <motion.div
             ref={resultsRef}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-card border rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto mx-4"
+            className="bg-[#0F172A] border border-[#334155]/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto mx-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Submission Results</h2>
-                <Badge variant={passedCount === totalTests ? 'success' : 'destructive'} className="text-xs">
+                <h2 className="text-lg font-semibold text-white">Submission Results</h2>
+                <span className={cn(
+                  "px-3 py-1 rounded-full text-xs font-medium border",
+                  passedCount === totalTests
+                    ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                    : "text-rose-400 bg-rose-500/10 border-rose-500/20"
+                )}>
                   {passedCount === totalTests ? 'All Tests Passed' : `${passedCount}/${totalTests} Passed`}
-                </Badge>
+                </span>
               </div>
 
               {/* Test Case Grid */}
               <div>
-                <h4 className="text-sm font-medium mb-3">Test Cases</h4>
+                <h4 className="text-sm font-medium text-gray-300 mb-3">Test Cases</h4>
                 <TestCaseGrid results={testResults} />
               </div>
 
               {/* Complexity & Quality */}
               <div className="grid grid-cols-3 gap-4">
-                <Card>
-                  <CardContent className="p-4 flex flex-col items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Time</span>
-                    <Badge variant="info" className="text-xs font-mono">{selectedProblem.optimalComplexity.time}</Badge>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 flex flex-col items-center gap-2">
-                    <Cpu className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Space</span>
-                    <Badge variant="info" className="text-xs font-mono">{selectedProblem.optimalComplexity.space}</Badge>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-4 flex flex-col items-center gap-2">
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Quality</span>
-                    <CircularGauge value={codeQuality} size={56} strokeWidth={6} />
-                  </CardContent>
-                </Card>
+                <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 flex flex-col items-center gap-2">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Time</span>
+                  <span className="px-2 py-0.5 rounded text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                    {selectedProblem.optimalComplexity.time}
+                  </span>
+                </div>
+                <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 flex flex-col items-center gap-2">
+                  <Cpu className="h-4 w-4 text-gray-400" />
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Space</span>
+                  <span className="px-2 py-0.5 rounded text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
+                    {selectedProblem.optimalComplexity.space}
+                  </span>
+                </div>
+                <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 flex flex-col items-center gap-2">
+                  <BarChart3 className="h-4 w-4 text-gray-400" />
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Quality</span>
+                  <CircularGauge value={codeQuality} size={56} strokeWidth={6} />
+                </div>
               </div>
 
               {/* AI Reviewer */}
-              <Card className="border-primary/20 bg-primary/5">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-primary" />
-                    AI Reviewer
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
+              <div className="rounded-xl bg-purple-500/5 border border-purple-500/20 p-4 space-y-3">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-purple-400" />
+                  <h3 className="text-sm font-medium text-purple-300">AI Reviewer</h3>
+                </div>
+                <div className="space-y-2">
                   <div className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-muted-foreground">Your solution follows the correct approach.</span>
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-300">Your solution follows the correct approach.</span>
                   </div>
                   <div className="flex items-start gap-2 text-sm">
-                    <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-muted-foreground">Consider adding input validation for edge cases like empty arrays.</span>
+                    <Sparkles className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-300">Consider adding input validation for edge cases like empty arrays.</span>
                   </div>
                   <div className="flex items-start gap-2 text-sm">
-                    <Lightbulb className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-muted-foreground">Your variable naming is clear. Try extracting the core logic into a helper function for better readability.</span>
+                    <Lightbulb className="h-4 w-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                    <span className="text-gray-300">Your variable naming is clear. Try extracting the core logic into a helper function for better readability.</span>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </motion.div>
         </div>

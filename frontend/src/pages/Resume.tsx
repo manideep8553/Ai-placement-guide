@@ -1,23 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Textarea } from '@/components/ui/textarea'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { mockResumeAnalysis } from '@/data/mockData'
 import { cn } from '@/lib/utils'
 import { Upload, FileText, FileCheck, Sparkles, RefreshCw, CheckCircle, AlertTriangle, Lightbulb, Download, PenLine, Gauge } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-const sectionColors: Record<string, string> = {
-  summary: 'bg-blue-500',
-  skills: 'bg-purple-500',
-  experience: 'bg-amber-500',
-  projects: 'bg-rose-500',
-  education: 'bg-emerald-500',
-}
+import { mockResumeAnalysis } from '@/data/mockData'
 
 const sectionLabels: Record<string, string> = {
   summary: 'Summary',
@@ -27,10 +16,26 @@ const sectionLabels: Record<string, string> = {
   education: 'Education',
 }
 
+const sectionBadgeColors: Record<string, string> = {
+  summary: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
+  skills: 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+  experience: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+  projects: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+  education: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+}
+
+const progressColors: Record<string, string> = {
+  summary: 'bg-blue-500',
+  skills: 'bg-purple-500',
+  experience: 'bg-amber-500',
+  projects: 'bg-rose-500',
+  education: 'bg-emerald-500',
+}
+
 function AtsGauge({ value }: { value: number }) {
   const [animated, setAnimated] = useState(0)
-  const size = 160
-  const strokeWidth = 14
+  const size = 180
+  const strokeWidth = 16
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   const offset = circumference - (animated / 100) * circumference
@@ -45,7 +50,7 @@ function AtsGauge({ value }: { value: number }) {
   return (
     <div className="relative inline-flex items-center justify-center">
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--secondary))" strokeWidth={strokeWidth} />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#1E293B" strokeWidth={strokeWidth} />
         <circle
           cx={size / 2} cy={size / 2} r={radius}
           fill="none" stroke={color} strokeWidth={strokeWidth}
@@ -55,19 +60,24 @@ function AtsGauge({ value }: { value: number }) {
         />
       </svg>
       <div className="absolute flex flex-col items-center">
-        <span className="text-3xl font-bold" style={{ color }}>{Math.round(animated)}</span>
-        <span className="text-xs text-muted-foreground">/ 100</span>
+        <span className="text-4xl font-bold" style={{ color }}>{Math.round(animated)}</span>
+        <span className="text-xs text-gray-500">/ 100</span>
       </div>
     </div>
   )
 }
 
+const tabs = ['Overview', 'Suggestions', 'Keywords', 'Rewrite'] as const
+type Tab = typeof tabs[number]
+
 export default function Resume() {
   const [file, setFile] = useState<File | null>(null)
   const [analyzed, setAnalyzed] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [activeTab, setActiveTab] = useState<Tab>('Overview')
   const [bullet, setBullet] = useState('')
   const [rewritten, setRewritten] = useState<string | null>(null)
+  const [rewriting, setRewriting] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const analysis = mockResumeAnalysis
@@ -86,253 +96,326 @@ export default function Resume() {
     if (f) setFile(f)
   }
 
+  const handleAnalyze = () => {
+    setAnalyzed(true)
+    setActiveTab('Overview')
+  }
+
   const handleRewrite = () => {
-    setRewritten(
-      "Developed and deployed a scalable microservices architecture using Node.js and Docker, " +
-      "resulting in a 40% reduction in API response time and supporting 10x growth in user traffic."
-    )
+    setRewriting(true)
+    setTimeout(() => {
+      setRewritten(
+        "Developed and deployed a scalable microservices architecture using Node.js and Docker, " +
+        "resulting in a 40% reduction in API response time and supporting 10x growth in user traffic."
+      )
+      setRewriting(false)
+    }, 1200)
+  }
+
+  const resetFile = () => {
+    setFile(null)
+    setAnalyzed(false)
+    setRewritten(null)
+    setBullet('')
   }
 
   return (
-    <div className="min-h-screen p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-          <FileText className="h-6 w-6" />
+    <div className="min-h-screen bg-[#0F172A]/80 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2.5 rounded-xl bg-[#1E293B]/50 border border-[#334155]/50">
+            <FileText className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Resume Analyzer</h1>
+            <p className="text-sm text-gray-400">Get AI-powered insights to optimize your resume for ATS systems</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold">Resume Analyzer</h1>
-          <p className="text-sm text-muted-foreground">Get AI-powered insights to optimize your resume for ATS systems</p>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 items-start">
-        {/* Left Column - Upload */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm flex items-center gap-2">
-                <Upload className="h-4 w-4 text-primary" />
-                Upload Resume
-              </CardTitle>
-              <CardDescription>Upload your resume in PDF format</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {!file ? (
-                <div
-                  onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                  onClick={handleClick}
-                  className={cn(
-                    'border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200',
-                    dragOver
-                      ? 'border-primary bg-primary/5'
-                      : 'border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30'
-                  )}
-                >
-                  <input ref={inputRef} type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" />
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="p-4 rounded-full bg-primary/10 text-primary">
-                      <Upload className="h-8 w-8" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">Drop your resume here</p>
-                      <p className="text-xs text-muted-foreground mt-1">or click to browse</p>
-                    </div>
-                    <Badge variant="secondary" className="text-[10px]">PDF only</Badge>
+        <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-6">
+          {/* Left Column - Upload Area */}
+          <div className="space-y-4">
+            {!file ? (
+              <div
+                onDragOver={(e) => { e.preventDefault(); setDragOver(true) }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={handleDrop}
+                onClick={handleClick}
+                className={cn(
+                  'border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-200',
+                  'bg-[#1E293B]/50',
+                  dragOver
+                    ? 'border-blue-500 bg-blue-500/5'
+                    : 'border-[#334155]/50 hover:border-blue-500/50 hover:bg-[#1E293B]/80'
+                )}
+              >
+                <input ref={inputRef} type="file" accept="application/pdf" onChange={handleFileChange} className="hidden" />
+                <div className="flex flex-col items-center gap-4">
+                  <div className="p-5 rounded-full bg-blue-500/10 border border-blue-500/20">
+                    <Upload className="h-10 w-10 text-blue-400" />
                   </div>
+                  <div>
+                    <p className="text-base font-medium text-white">Drop your resume here</p>
+                    <p className="text-sm text-gray-400 mt-1">or click to browse files</p>
+                  </div>
+                  <Badge variant="outline" className="border-[#334155]/50 text-gray-400 bg-[#1E293B]/50 text-[10px]">
+                    PDF only
+                  </Badge>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-muted/50">
-                    <div className="p-2.5 rounded-lg bg-primary/10 text-primary shrink-0">
-                      <FileCheck className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{file.name}</p>
-                      <p className="text-xs text-muted-foreground">2 pages</p>
-                    </div>
-                    <Button variant="ghost" size="icon" onClick={() => { setFile(null); setAnalyzed(false) }} className="shrink-0">
-                      <RefreshCw className="h-4 w-4" />
-                    </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-[#1E293B]/50 border border-[#334155]/50">
+                  <div className="p-2.5 rounded-lg bg-blue-500/10 text-blue-400 shrink-0">
+                    <FileCheck className="h-5 w-5" />
                   </div>
-
-                  {/* Preview Placeholder */}
-                  <div className="rounded-2xl border bg-muted/30 flex items-center justify-center h-56">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <FileText className="h-12 w-12" />
-                      <span className="text-xs">Resume Preview</span>
-                    </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-white truncate">{file.name}</p>
+                    <p className="text-xs text-gray-400">Uploaded successfully</p>
                   </div>
-
-                  <Button className="w-full gap-2" onClick={() => setAnalyzed(true)} disabled={analyzed}>
-                    {analyzed ? (
-                      <><CheckCircle className="h-4 w-4" /> Analyzed</>
-                    ) : (
-                      <><Sparkles className="h-4 w-4" /> Analyze Resume</>
-                    )}
+                  <Button variant="ghost" size="icon" onClick={resetFile} className="shrink-0 text-gray-400 hover:text-white">
+                    <RefreshCw className="h-4 w-4" />
                   </Button>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Right Column - Analysis */}
-        <div className="space-y-4">
-          {!analyzed ? (
-            <Card className="h-full">
-              <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="p-4 rounded-full bg-muted text-muted-foreground mb-4">
-                  <Gauge className="h-10 w-10" />
+                {/* Preview Placeholder */}
+                <div className="rounded-2xl border border-[#334155]/50 bg-[#1E293B]/50 flex items-center justify-center h-56">
+                  <div className="flex flex-col items-center gap-2 text-gray-500">
+                    <FileText className="h-14 w-14" />
+                    <span className="text-xs text-gray-400">Resume Preview</span>
+                  </div>
                 </div>
-                <p className="text-sm font-medium">Upload a resume to see analysis</p>
-                <p className="text-xs text-muted-foreground mt-1">Get your ATS score, suggestions, and more</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card>
-              <Tabs defaultValue="overview">
-                <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0 h-auto">
-                  <TabsTrigger value="overview" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-3 px-4 text-xs">
-                    Overview
-                  </TabsTrigger>
-                  <TabsTrigger value="suggestions" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-3 px-4 text-xs">
-                    Suggestions
-                  </TabsTrigger>
-                  <TabsTrigger value="keywords" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-3 px-4 text-xs">
-                    Keywords
-                  </TabsTrigger>
-                  <TabsTrigger value="rewrite" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none py-3 px-4 text-xs">
-                    Rewrite
-                  </TabsTrigger>
-                </TabsList>
 
-                {/* Overview Tab */}
-                <TabsContent value="overview" className="mt-4 space-y-4">
-                  <div className="flex flex-col items-center py-4">
-                    <AtsGauge value={analysis.atsScore} />
-                    <p className="text-sm font-medium mt-2">ATS Score</p>
-                    <p className="text-xs text-muted-foreground">How well your resume ranks against ATS parsers</p>
-                  </div>
+                <Button
+                  className="w-full gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0"
+                  onClick={handleAnalyze}
+                  disabled={analyzed}
+                >
+                  {analyzed ? (
+                    <><CheckCircle className="h-4 w-4" /> Analyzed</>
+                  ) : (
+                    <><Sparkles className="h-4 w-4" /> Analyze Resume</>
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
 
-                  <div className="space-y-3">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Section Scores</p>
-                    {Object.entries(analysis.sectionScores).map(([key, val]) => (
-                      <div key={key} className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span>{sectionLabels[key] || key}</span>
-                          <span className="font-medium">{val}%</span>
-                        </div>
-                        <Progress value={val} className="h-2" />
+          {/* Right Column - AI Feedback Panel */}
+          <div>
+            {!analyzed ? (
+              <div className="rounded-2xl border border-[#334155]/50 bg-[#1E293B]/50 backdrop-blur-xl h-full flex flex-col items-center justify-center py-20 text-center">
+                <div className="p-5 rounded-full bg-[#1E293B]/80 border border-[#334155]/50 mb-4">
+                  <Gauge className="h-12 w-12 text-gray-500" />
+                </div>
+                <p className="text-base font-medium text-gray-300">Upload a resume to see analysis</p>
+                <p className="text-sm text-gray-500 mt-1">Get your ATS score, suggestions, and more</p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-[#334155]/50 bg-[#1E293B]/50 backdrop-blur-xl overflow-hidden">
+                {/* Tab Navigation */}
+                <div className="flex border-b border-[#334155]/50">
+                  {tabs.map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={cn(
+                        'flex-1 py-3.5 px-4 text-sm font-medium transition-all duration-200 relative',
+                        activeTab === tab
+                          ? 'text-white'
+                          : 'text-gray-500 hover:text-gray-300'
+                      )}
+                    >
+                      {tab}
+                      {activeTab === tab && (
+                        <motion.div
+                          layoutId="activeTab"
+                          className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500"
+                        />
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="p-5">
+                  {/* Overview Tab */}
+                  {activeTab === 'Overview' && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-6"
+                    >
+                      <div className="flex flex-col items-center py-4">
+                        <AtsGauge value={analysis.atsScore} />
+                        <p className="text-sm font-medium text-white mt-3">ATS Score</p>
+                        <p className="text-xs text-gray-400 mt-1">How well your resume ranks against ATS parsers</p>
                       </div>
-                    ))}
-                  </div>
-                </TabsContent>
 
-                {/* Suggestions Tab */}
-                <TabsContent value="suggestions" className="mt-4">
-                  <ScrollArea className="h-[460px] pr-2">
-                    <div className="space-y-3">
+                      <div className="space-y-4">
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Section Scores</p>
+                        {Object.entries(analysis.sectionScores).map(([key, val]) => (
+                          <div key={key} className="space-y-1.5">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-gray-300">{sectionLabels[key] || key}</span>
+                              <span className="font-medium text-white">{val}%</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-[#0F172A] overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: `${val}%` }}
+                                transition={{ duration: 1, delay: 0.3, ease: 'easeOut' }}
+                                className={cn('h-full rounded-full', progressColors[key])}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Suggestions Tab */}
+                  {activeTab === 'Suggestions' && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-3 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar"
+                    >
                       {analysis.suggestions.map((s, i) => (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.04 }}
-                          className="p-4 rounded-xl border bg-card"
+                          className="p-4 rounded-xl bg-[#0F172A]/60 border border-[#334155]/50"
                         >
                           <div className="flex items-start gap-3">
-                            <div className={cn('p-1.5 rounded-lg shrink-0 mt-0.5', sectionColors[s.section]?.replace('bg-', 'bg-').replace('500', '100 dark:bg-opacity-20') || 'bg-muted')}>
-                              <Lightbulb className={cn('h-4 w-4', sectionColors[s.section]?.replace('bg-', 'text-').replace('500', '600 dark:text-400') || 'text-muted-foreground')} />
+                            <div className={cn(
+                              'p-1.5 rounded-lg shrink-0 mt-0.5',
+                              sectionBadgeColors[s.section]?.replace(/bg-.*?text-.*?border-.*?\s/, '').trim() || 'bg-[#1E293B]/50'
+                            )}>
+                              <Lightbulb className="h-4 w-4 text-gray-300" />
                             </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <Badge variant={s.section === 'summary' ? 'info' : s.section === 'skills' ? 'secondary' : s.section === 'experience' ? 'warning' : s.section === 'projects' ? 'default' : 'success'} className="text-[10px] capitalize">
-                                  {s.section}
-                                </Badge>
-                              </div>
-                              <p className="text-xs font-medium">{s.bullet}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{s.suggestion}</p>
+                            <div className="min-w-0 space-y-1.5">
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  'text-[10px] capitalize border px-2 py-0.5',
+                                  sectionBadgeColors[s.section] || 'border-[#334155]/50 text-gray-400'
+                                )}
+                              >
+                                {s.section}
+                              </Badge>
+                              <p className="text-sm text-gray-300">{s.bullet}</p>
+                              <p className="text-xs text-gray-400">{s.suggestion}</p>
                             </div>
                           </div>
                         </motion.div>
                       ))}
-                    </div>
-                  </ScrollArea>
-                </TabsContent>
-
-                {/* Keywords Tab */}
-                <TabsContent value="keywords" className="mt-4">
-                  <div className="space-y-4">
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Missing Keywords</p>
-                      <div className="flex flex-wrap gap-2">
-                        {analysis.missingKeywords.map((kw) => (
-                          <Badge key={kw} variant="outline" className="text-xs px-3 py-1.5 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40">
-                            {kw}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="p-4 rounded-xl border bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800">
-                      <div className="flex items-start gap-2">
-                        <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
-                        <div>
-                          <p className="text-xs font-medium text-amber-800 dark:text-amber-300">Action Verb Strength</p>
-                          <p className="text-xs text-amber-700 dark:text-amber-400 mt-1">Your resume uses 60% strong action verbs</p>
-                          <Progress value={60} className="h-2 mt-2" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-
-                {/* Rewrite Tab */}
-                <TabsContent value="rewrite" className="mt-4 space-y-4">
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Rewrite This Bullet</p>
-                    <p className="text-xs text-muted-foreground mb-3">Paste a bullet point from your resume to get an AI-enhanced version</p>
-                    <Textarea
-                      placeholder="e.g. Worked on improving API performance..."
-                      value={bullet}
-                      onChange={(e) => setBullet(e.target.value)}
-                      className="min-h-[90px] text-sm"
-                    />
-                    <Button
-                      className="mt-2 gap-2 w-full"
-                      size="sm"
-                      onClick={handleRewrite}
-                      disabled={!bullet.trim()}
-                    >
-                      <PenLine className="h-4 w-4" />
-                      Rewrite
-                    </Button>
-                  </div>
-
-                  {rewritten && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 rounded-xl border border-primary/30 bg-primary/5"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                        <span className="text-xs font-semibold text-primary">AI Enhanced Version</span>
-                      </div>
-                      <p className="text-sm">{rewritten}</p>
-                      <Button variant="ghost" size="sm" className="mt-2 gap-1.5 text-xs h-8">
-                        <Download className="h-3 w-3" />
-                        Copy
-                      </Button>
                     </motion.div>
                   )}
-                </TabsContent>
-              </Tabs>
-            </Card>
-          )}
+
+                  {/* Keywords Tab */}
+                  {activeTab === 'Keywords' && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-6"
+                    >
+                      <div>
+                        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Missing Keywords</p>
+                        <div className="flex flex-wrap gap-2">
+                          {analysis.missingKeywords.map((kw) => (
+                            <Badge
+                              key={kw}
+                              variant="outline"
+                              className="text-xs px-3 py-1.5 border-rose-500/40 text-rose-300 bg-rose-500/10"
+                            >
+                              {kw}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="p-5 rounded-xl bg-amber-500/5 border border-amber-500/20">
+                        <div className="flex items-start gap-3">
+                          <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 shrink-0" />
+                          <div className="space-y-2 flex-1">
+                            <p className="text-sm font-medium text-amber-300">Action Verb Strength</p>
+                            <p className="text-xs text-amber-400/80">Your resume uses 60% strong action verbs</p>
+                            <div className="h-2 rounded-full bg-[#0F172A] overflow-hidden">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: '60%' }}
+                                transition={{ duration: 1, ease: 'easeOut' }}
+                                className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Rewrite Tab */}
+                  {activeTab === 'Rewrite' && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="space-y-5"
+                    >
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Rewrite This Bullet</p>
+                          <p className="text-xs text-gray-500 mb-3">Paste a bullet point from your resume to get an AI-enhanced version</p>
+                        </div>
+                        <Textarea
+                          placeholder="e.g. Worked on improving API performance..."
+                          value={bullet}
+                          onChange={(e) => setBullet(e.target.value)}
+                          className="min-h-[100px] text-sm bg-[#0F172A]/80 border-[#334155]/50 text-white placeholder:text-gray-500 focus:border-blue-500/50 resize-none"
+                        />
+                        <Button
+                          className="w-full gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0"
+                          onClick={handleRewrite}
+                          disabled={!bullet.trim() || rewriting}
+                        >
+                          {rewriting ? (
+                            <><RefreshCw className="h-4 w-4 animate-spin" /> Rewriting...</>
+                          ) : (
+                            <><PenLine className="h-4 w-4" /> Rewrite with AI</>
+                          )}
+                        </Button>
+                      </div>
+
+                      {rewritten && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-5 rounded-xl bg-blue-500/5 border border-blue-500/20"
+                        >
+                          <div className="flex items-center gap-2 mb-3">
+                            <Sparkles className="h-4 w-4 text-blue-400" />
+                            <span className="text-xs font-semibold text-blue-300">AI Enhanced Version</span>
+                          </div>
+                          <p className="text-sm text-gray-200 leading-relaxed">{rewritten}</p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="mt-3 gap-1.5 text-xs h-8 text-gray-400 hover:text-white hover:bg-[#1E293B]/80"
+                            onClick={() => navigator.clipboard.writeText(rewritten)}
+                          >
+                            <Download className="h-3 w-3" />
+                            Copy
+                          </Button>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

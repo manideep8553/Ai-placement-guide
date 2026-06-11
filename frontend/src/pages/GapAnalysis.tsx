@@ -1,12 +1,6 @@
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Progress } from '@/components/ui/progress'
 import { mockGapAnalysisResult } from '@/data/mockData'
-import { cn } from '@/lib/utils'
-import { Upload, Search, GitBranch, AlertTriangle, CheckCircle, XCircle, Download, ArrowRight, Loader2, FileText, Code2, BookOpen } from 'lucide-react'
+import { Upload, Search, Loader2, AlertTriangle, CheckCircle, XCircle, Download, ArrowRight, FileText, Code2, GitBranch, BookOpen } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 interface LeetCodeData {
@@ -120,183 +114,186 @@ export default function GapAnalysis() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gap Analysis</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold tracking-tight text-white">AI Gap Analysis</h1>
+          <p className="text-gray-400 mt-1">
             Identify skill gaps between your profile and industry expectations
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <FileText className="h-5 w-5 text-primary" />
+        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 rounded-lg bg-[#1E293B]/50">
+              <FileText className="h-5 w-5 text-indigo-400" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-white">Resume Upload</h3>
+              <p className="text-sm text-gray-400">Upload your resume to parse skills</p>
+            </div>
+          </div>
+          {!resumeUploaded ? (
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              className={`border-2 border-dashed border-[#334155] bg-[#1E293B]/50 rounded-xl p-8 text-center cursor-pointer transition-colors ${
+                isDragOver ? 'border-indigo-500 bg-indigo-500/10' : 'hover:border-indigo-500/50'
+              }`}
+            >
+              <Upload className="h-8 w-8 mx-auto text-gray-400 mb-3" />
+              <p className="text-sm font-medium text-gray-300 mb-1">Drop PDF here</p>
+              <p className="text-xs text-gray-500">or click to browse</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm text-emerald-400">
+                <CheckCircle className="h-4 w-4" />
+                <span className="font-medium">Resume uploaded successfully</span>
               </div>
-              <div>
-                <CardTitle className="text-base">Resume Upload</CardTitle>
-                <CardDescription>Upload your resume to parse skills</CardDescription>
+              <div className="flex flex-wrap gap-1.5">
+                {parsedSkills.map((skill) => (
+                  <span key={skill} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    {skill}
+                  </span>
+                ))}
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            {!resumeUploaded ? (
-              <div
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                className={cn(
-                  "border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors",
-                  isDragOver
-                    ? "border-primary bg-primary/5"
-                    : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"
-                )}
-              >
-                <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
-                <p className="text-sm font-medium mb-1">Drop PDF here</p>
-                <p className="text-xs text-muted-foreground">or click to browse</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm text-success">
-                  <CheckCircle className="h-4 w-4" />
-                  <span className="font-medium">Resume uploaded successfully</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {parsedSkills.map((skill) => (
-                    <Badge key={skill} variant="secondary" className="text-xs">
-                      {skill}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          )}
+        </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Code2 className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-base">LeetCode Username</CardTitle>
-                <CardDescription>Fetch your coding stats</CardDescription>
-              </div>
+        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 rounded-lg bg-[#1E293B]/50">
+              <Code2 className="h-5 w-5 text-indigo-400" />
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
+            <div>
+              <h3 className="text-base font-semibold text-white">LeetCode Username</h3>
+              <p className="text-sm text-gray-400">Fetch your coding stats</p>
+            </div>
+          </div>
+          <div className="space-y-3">
             <div className="flex gap-2">
-              <Input
+              <input
                 placeholder="e.g. johndoe"
                 value={leetcodeUsername}
                 onChange={(e) => setLeetcodeUsername(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleLeetcodeFetch()}
+                className="flex-1 h-10 px-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/50 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
               />
-              <Button size="sm" onClick={handleLeetcodeFetch} disabled={leetcodeLoading}>
+              <button
+                onClick={handleLeetcodeFetch}
+                disabled={leetcodeLoading}
+                className="h-10 px-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
+              >
                 {leetcodeLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-              </Button>
+              </button>
             </div>
             {leetcodeData && (
               <div className="space-y-3 pt-1">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-muted rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Solved</p>
+                  <div className="bg-[#1E293B]/50 rounded-xl p-3 text-center">
+                    <p className="text-xs text-gray-400 mb-1">Solved</p>
                     <div className="flex items-baseline justify-center gap-0.5">
-                      <span className="text-lg font-bold">{leetcodeData.solved}</span>
-                      <span className="text-xs text-muted-foreground">/{leetcodeData.total}</span>
+                      <span className="text-lg font-bold text-white">{leetcodeData.solved}</span>
+                      <span className="text-xs text-gray-400">/{leetcodeData.total}</span>
                     </div>
-                    <Progress value={solvedPercentage} className="mt-2 h-1.5" />
+                    <div className="mt-2 h-1.5 w-full bg-[#1E293B] rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${solvedPercentage}%`, background: solvedPercentage > 60 ? 'linear-gradient(to right, #22c55e, #16a34a)' : solvedPercentage > 30 ? 'linear-gradient(to right, #eab308, #ca8a04)' : 'linear-gradient(to right, #ef4444, #dc2626)' }}
+                      />
+                    </div>
                   </div>
-                  <div className="bg-muted rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Rating</p>
-                    <p className="text-lg font-bold">{leetcodeData.rating}</p>
-                    <p className="text-xs text-muted-foreground mt-1">contest</p>
+                  <div className="bg-[#1E293B]/50 rounded-xl p-3 text-center">
+                    <p className="text-xs text-gray-400 mb-1">Rating</p>
+                    <p className="text-lg font-bold text-white">{leetcodeData.rating}</p>
+                    <p className="text-xs text-gray-500 mt-1">contest</p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1.5">Weak Topics</p>
+                  <p className="text-xs font-medium text-gray-400 mb-1.5">Weak Topics</p>
                   <div className="flex flex-wrap gap-1.5">
                     {leetcodeData.weakTopics.map((topic) => (
-                      <Badge key={topic} variant="warning" className="text-xs">
+                      <span key={topic} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
                         {topic}
-                      </Badge>
+                      </span>
                     ))}
                   </div>
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <GitBranch className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <CardTitle className="text-base">GitHub Username</CardTitle>
-                <CardDescription>Fetch your coding activity</CardDescription>
-              </div>
+        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 rounded-lg bg-[#1E293B]/50">
+              <GitBranch className="h-5 w-5 text-indigo-400" />
             </div>
-          </CardHeader>
-          <CardContent className="space-y-3">
+            <div>
+              <h3 className="text-base font-semibold text-white">GitHub Username</h3>
+              <p className="text-sm text-gray-400">Fetch your coding activity</p>
+            </div>
+          </div>
+          <div className="space-y-3">
             <div className="flex gap-2">
-              <Input
+              <input
                 placeholder="e.g. johndoe"
                 value={githubUsername}
                 onChange={(e) => setGithubUsername(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleGithubFetch()}
+                className="flex-1 h-10 px-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/50 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
               />
-              <Button size="sm" onClick={handleGithubFetch} disabled={githubLoading}>
+              <button
+                onClick={handleGithubFetch}
+                disabled={githubLoading}
+                className="h-10 px-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
+              >
                 {githubLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-              </Button>
+              </button>
             </div>
             {githubData && (
               <div className="space-y-3 pt-1">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-muted rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Repositories</p>
-                    <p className="text-lg font-bold">{githubData.repos}</p>
+                  <div className="bg-[#1E293B]/50 rounded-xl p-3 text-center">
+                    <p className="text-xs text-gray-400 mb-1">Repositories</p>
+                    <p className="text-lg font-bold text-white">{githubData.repos}</p>
                   </div>
-                  <div className="bg-muted rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground mb-1">Contributions</p>
-                    <p className="text-lg font-bold">{githubData.contributions}</p>
-                    <p className="text-xs text-muted-foreground mt-1">this year</p>
+                  <div className="bg-[#1E293B]/50 rounded-xl p-3 text-center">
+                    <p className="text-xs text-gray-400 mb-1">Contributions</p>
+                    <p className="text-lg font-bold text-white">{githubData.contributions}</p>
+                    <p className="text-xs text-gray-500 mt-1">this year</p>
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-1.5">Top Languages</p>
+                  <p className="text-xs font-medium text-gray-400 mb-1.5">Top Languages</p>
                   <div className="space-y-1.5">
                     {githubData.languages.map((lang) => (
                       <div key={lang.name} className="flex items-center gap-2">
-                        <span className="text-xs w-20 truncate">{lang.name}</span>
-                        <div className="flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+                        <span className="text-xs text-gray-300 w-20 truncate">{lang.name}</span>
+                        <div className="flex-1 h-2 rounded-full bg-[#1E293B] overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500"
                             style={{ width: `${lang.percentage}%`, backgroundColor: lang.color }}
                           />
                         </div>
-                        <span className="text-xs text-muted-foreground w-8 text-right">{lang.percentage}%</span>
+                        <span className="text-xs text-gray-400 w-8 text-right">{lang.percentage}%</span>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col items-center gap-6">
-        <Button
-          size="lg"
+        <button
           onClick={handleAnalyze}
           disabled={analyzing || !resumeUploaded}
-          className="min-w-[200px] h-12 text-base gap-2"
+          className="min-w-[200px] h-12 text-base gap-2 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center shadow-lg shadow-indigo-500/25"
         >
           {analyzing ? (
             <>
@@ -309,7 +306,7 @@ export default function GapAnalysis() {
               <ArrowRight className="h-5 w-5" />
             </>
           )}
-        </Button>
+        </button>
 
         {analyzing && (
           <div className="w-full max-w-md space-y-3">
@@ -319,14 +316,13 @@ export default function GapAnalysis() {
               return (
                 <div key={step} className="flex items-center gap-3">
                   <div
-                    className={cn(
-                      "flex items-center justify-center w-7 h-7 rounded-full border-2 text-xs font-bold transition-all duration-300 shrink-0",
+                    className={`flex items-center justify-center w-7 h-7 rounded-full border-2 text-xs font-bold transition-all duration-300 shrink-0 ${
                       isComplete
-                        ? "border-success bg-success text-white"
+                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
                         : isActive
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-muted-foreground/30 text-muted-foreground/50"
-                    )}
+                          ? 'border-indigo-500 bg-indigo-500/20 text-indigo-400'
+                          : 'border-gray-600 text-gray-500'
+                    }`}
                   >
                     {isComplete ? (
                       <CheckCircle className="h-4 w-4" />
@@ -335,20 +331,19 @@ export default function GapAnalysis() {
                     )}
                   </div>
                   <span
-                    className={cn(
-                      "text-sm transition-colors",
+                    className={`text-sm transition-colors ${
                       isComplete
-                        ? "text-success font-medium"
+                        ? 'text-emerald-400 font-medium'
                         : isActive
-                          ? "text-foreground font-medium"
-                          : "text-muted-foreground/50"
-                    )}
+                          ? 'text-white font-medium'
+                          : 'text-gray-500'
+                    }`}
                   >
                     {step}
                   </span>
                   {isActive && (
-                    <div className="flex-1 h-1 rounded-full bg-secondary overflow-hidden">
-                      <div className="h-full rounded-full bg-primary animate-pulse" />
+                    <div className="flex-1 h-1 rounded-full bg-[#1E293B] overflow-hidden">
+                      <div className="h-full rounded-full bg-indigo-500 animate-pulse" />
                     </div>
                   )}
                 </div>
@@ -365,120 +360,80 @@ export default function GapAnalysis() {
             className="w-full space-y-6"
           >
             <div className="flex items-center justify-center gap-3">
-              <div className="h-px flex-1 bg-border" />
-              <h2 className="text-xl font-semibold">Analysis Results</h2>
-              <div className="h-px flex-1 bg-border" />
+              <div className="h-px flex-1 bg-[#334155]/50" />
+              <h2 className="text-xl font-semibold text-white">Analysis Results</h2>
+              <div className="h-px flex-1 bg-[#334155]/50" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-red-200/50 dark:border-red-900/30">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <XCircle className="h-5 w-5 text-destructive" />
-                    <CardTitle className="text-base">Missing Skills</CardTitle>
-                  </div>
-                  <CardDescription>Skills you should acquire</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {mockGapAnalysisResult.missingSkills.map((skill) => (
-                      <div key={skill} className="group relative">
-                        <Badge variant="destructive" className="text-xs pr-1.5">
-                          {skill}
-                          <div className="ml-1.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="cursor-pointer rounded-full hover:bg-destructive/20 p-0.5" title="Add to Roadmap">
-                              <BookOpen className="h-3 w-3" />
-                            </span>
-                            <span className="cursor-pointer rounded-full hover:bg-destructive/20 p-0.5" title="Find Resources">
-                              <Search className="h-3 w-3" />
-                            </span>
-                          </div>
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm" className="text-xs h-8 gap-1">
-                      <BookOpen className="h-3.5 w-3.5" />
-                      Add to Roadmap
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-xs h-8 gap-1">
-                      <Search className="h-3.5 w-3.5" />
-                      Find Resources
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-amber-200/50 dark:border-amber-900/30">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-warning" />
-                    <CardTitle className="text-base">Weak Areas</CardTitle>
-                  </div>
-                  <CardDescription>Topics needing improvement</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {mockGapAnalysisResult.weakAreas.map((area) => (
-                      <div key={area} className="group relative">
-                        <Badge variant="warning" className="text-xs pr-1.5">
-                          {area}
-                          <div className="ml-1.5 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <span className="cursor-pointer rounded-full hover:bg-amber-200 dark:hover:bg-amber-800 p-0.5" title="Add to Roadmap">
-                              <BookOpen className="h-3 w-3" />
-                            </span>
-                            <span className="cursor-pointer rounded-full hover:bg-amber-200 dark:hover:bg-amber-800 p-0.5" title="Find Resources">
-                              <Search className="h-3 w-3" />
-                            </span>
-                          </div>
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <Button variant="outline" size="sm" className="text-xs h-8 gap-1">
-                      <BookOpen className="h-3.5 w-3.5" />
-                      Add to Roadmap
-                    </Button>
-                    <Button variant="outline" size="sm" className="text-xs h-8 gap-1">
-                      <Search className="h-3.5 w-3.5" />
-                      Find Resources
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-emerald-200/50 dark:border-emerald-900/30">
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-success" />
-                    <CardTitle className="text-base">Strengths</CardTitle>
-                  </div>
-                  <CardDescription>Your strong skill areas</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {mockGapAnalysisResult.strengths.map((skill) => (
-                      <Badge key={skill} variant="success" className="text-xs">
+              <div className="bg-[#0F172A]/80 border border-rose-500/30 rounded-2xl backdrop-blur-xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <XCircle className="h-5 w-5 text-rose-400" />
+                  <h3 className="text-base font-semibold text-white">Missing Skills</h3>
+                </div>
+                <p className="text-sm text-gray-400 mb-4">Skills you should acquire</p>
+                <div className="flex flex-wrap gap-2">
+                  {mockGapAnalysisResult.missingSkills.map((skill) => (
+                    <div key={skill} className="group relative">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                        <XCircle className="h-3 w-3" />
                         {skill}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-[#0F172A]/80 border border-amber-500/30 rounded-2xl backdrop-blur-xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertTriangle className="h-5 w-5 text-amber-400" />
+                  <h3 className="text-base font-semibold text-white">Weak Areas</h3>
+                </div>
+                <p className="text-sm text-gray-400 mb-4">Topics needing improvement</p>
+                <div className="flex flex-wrap gap-2">
+                  {mockGapAnalysisResult.weakAreas.map((area) => (
+                    <div key={area} className="group relative">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        <AlertTriangle className="h-3 w-3" />
+                        {area}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-[#0F172A]/80 border border-emerald-500/30 rounded-2xl backdrop-blur-xl p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <CheckCircle className="h-5 w-5 text-emerald-400" />
+                  <h3 className="text-base font-semibold text-white">Strengths</h3>
+                </div>
+                <p className="text-sm text-gray-400 mb-4">Your strong skill areas</p>
+                <div className="flex flex-wrap gap-2">
+                  {mockGapAnalysisResult.strengths.map((skill) => (
+                    <span key={skill} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      <CheckCircle className="h-3 w-3" />
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center justify-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-gray-400">
                 <span>Overall Match:</span>
-                <span className="font-bold text-foreground">{mockGapAnalysisResult.overallMatch}%</span>
-                <Progress value={mockGapAnalysisResult.overallMatch} className="w-24 h-2" />
+                <span className="font-bold text-white">{mockGapAnalysisResult.overallMatch}%</span>
+                <div className="w-24 h-2 bg-[#1E293B] rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-500"
+                    style={{ width: `${mockGapAnalysisResult.overallMatch}%` }}
+                  />
+                </div>
               </div>
-              <Button variant="outline" size="sm" className="gap-2">
+              <button className="h-9 px-4 rounded-xl text-sm font-medium text-gray-300 bg-[#1E293B]/50 border border-[#334155]/50 hover:bg-[#1E293B] transition-colors flex items-center gap-2">
                 <Download className="h-4 w-4" />
                 Export PDF
-              </Button>
+              </button>
             </div>
           </motion.div>
         )}
