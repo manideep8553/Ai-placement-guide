@@ -1,5 +1,6 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useThemeStore } from '@/store/useStore'
+import { useAuthStore } from '@/store/authStore'
 import {
   LayoutDashboard, Building2, BarChart3, Mic, Code2, Map, FileText,
   Bell, Search, Menu, X, ChevronLeft, Moon, Sun, Settings, LogOut,
@@ -23,6 +24,8 @@ const navItems = [
 
 export default function Layout() {
   const { dark, toggleDark, sidebarOpen, setSidebarOpen } = useThemeStore()
+  const { user, logout } = useAuthStore()
+  const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
 
@@ -81,12 +84,14 @@ export default function Layout() {
               className={cn("flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-colors", !sidebarOpen && "justify-center")}
             >
               <Avatar className="w-9 h-9 ring-2 ring-indigo-500/30">
-                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs">MK</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs">
+                  {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                </AvatarFallback>
               </Avatar>
               {sidebarOpen && (
                 <div className="flex-1 min-w-0 text-left">
-                  <p className="text-sm font-medium text-gray-200 truncate">Manideep</p>
-                  <p className="text-xs text-gray-500 truncate">manideep@college.edu</p>
+                  <p className="text-sm font-medium text-gray-200 truncate">{user?.name || 'User'}</p>
+                  <p className="text-xs text-gray-500 truncate">{user?.email || ''}</p>
                 </div>
               )}
               {sidebarOpen && <ChevronDown className="w-3.5 h-3.5 text-gray-500" />}
@@ -97,7 +102,10 @@ export default function Layout() {
                   <Settings className="w-4 h-4" />
                   Settings
                 </button>
-                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors">
+                <button
+                  onClick={() => { logout(); navigate('/login'); setShowProfile(false) }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                >
                   <LogOut className="w-4 h-4" />
                   Sign Out
                 </button>
@@ -172,11 +180,13 @@ export default function Layout() {
             </button>
             <div className="ml-2 pl-2 border-l border-[#1E293B] flex items-center gap-3">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-medium text-gray-200">Manideep</p>
-                <p className="text-xs text-gray-500">B.Tech CSE</p>
+                <p className="text-sm font-medium text-gray-200">{user?.name || 'User'}</p>
+                <p className="text-xs text-gray-500">{user?.email || ''}</p>
               </div>
               <Avatar className="w-9 h-9 cursor-pointer ring-2 ring-indigo-500/30">
-                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs">MK</AvatarFallback>
+                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-xs">
+                  {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                </AvatarFallback>
               </Avatar>
             </div>
           </div>
