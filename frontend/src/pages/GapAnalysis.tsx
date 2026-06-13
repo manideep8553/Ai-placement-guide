@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { mockGapAnalysisResult } from '@/data/mockData'
-import { Upload, Search, Loader2, AlertTriangle, CheckCircle, XCircle, Download, ArrowRight, FileText, Code2, GitBranch, BookOpen } from 'lucide-react'
+import { Upload, Search, Loader2, AlertTriangle, CheckCircle, XCircle, Download, ArrowRight, FileText, Code2, GitBranch } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 interface LeetCodeData {

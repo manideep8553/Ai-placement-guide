@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { mockCompanies } from '@/data/mockData'
 import { cn } from '@/lib/utils'
-import { X, Building2, Clock, ChevronDown, ChevronRight, CheckCircle, Circle, BarChart3, ExternalLink } from 'lucide-react'
+import { X, Building2, Clock, ChevronDown, ChevronRight, CheckCircle, Circle, BarChart3 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const companyColors = [
@@ -38,15 +38,6 @@ function getCategoryBadge(category: string) {
     case 'HR': return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
     case 'Core Subject': return 'bg-amber-500/10 text-amber-400 border-amber-500/20'
     default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20'
-  }
-}
-
-function getDifficultyColor(difficulty: string) {
-  switch (difficulty) {
-    case 'Easy': return 'bg-emerald-500'
-    case 'Medium': return 'bg-amber-500'
-    case 'Hard': return 'bg-rose-500'
-    default: return 'bg-primary'
   }
 }
 

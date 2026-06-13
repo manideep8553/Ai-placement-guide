@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { mockCompanies } from '@/data/mockData'
 
@@ -30,6 +31,7 @@ const interviewTypeConfig = {
 }
 
 export default function MockInterview() {
+  const navigate = useNavigate()
   const [sessionActive, setSessionActive] = useState(false)
   const [interviewType, setInterviewType] = useState<string | null>(null)
   const [selectedCompany, setSelectedCompany] = useState("")
@@ -136,12 +138,31 @@ export default function MockInterview() {
               <h1 className="text-3xl font-bold text-white">Interview Complete</h1>
               <p className="text-gray-400 mt-1">{interviewType} Round · {selectedCompany} · Duration: {formatTime(elapsed)}</p>
             </div>
-            <button
-              onClick={handleRestart}
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition-all"
-            >
-              Start New Interview
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/interview-replay', {
+                  state: {
+                    interviewType,
+                    selectedCompany,
+                    elapsed,
+                    fillerWords,
+                    wpm,
+                    transcript,
+                    questions: mockQuestions[interviewType as keyof typeof mockQuestions] || [],
+                    overallScore,
+                  }
+                })}
+                className="px-6 py-3 rounded-2xl bg-[#1E293B] border border-[#334155] text-gray-300 font-semibold hover:bg-white/5 transition-all"
+              >
+                View Replay
+              </button>
+              <button
+                onClick={handleRestart}
+                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold hover:opacity-90 transition-all"
+              >
+                Start New Interview
+              </button>
+            </div>
           </div>
         </motion.div>
 

@@ -10,6 +10,9 @@ import Resume from './pages/Resume'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Layout from './components/Layout'
+import InterviewReplay from './pages/InterviewReplay'
+import PlacementTwin from './pages/PlacementTwin'
+import PlacementCoach from './pages/PlacementCoach'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
@@ -30,6 +33,9 @@ function App() {
         <Route path="/coding-interview" element={<ProtectedRoute><CodingInterview /></ProtectedRoute>} />
         <Route path="/roadmap" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
         <Route path="/resume" element={<ProtectedRoute><Resume /></ProtectedRoute>} />
+        <Route path="/interview-replay" element={<ProtectedRoute><InterviewReplay /></ProtectedRoute>} />
+        <Route path="/placement-twin" element={<ProtectedRoute><PlacementTwin /></ProtectedRoute>} />
+        <Route path="/placement-coach" element={<ProtectedRoute><PlacementCoach /></ProtectedRoute>} />
       </Route>
     </Routes>
   )

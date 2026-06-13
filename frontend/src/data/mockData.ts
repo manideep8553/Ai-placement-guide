@@ -183,6 +183,58 @@ export interface Topics {
   systemDesign: string[];
 }
 
+export interface ReplayQuestion {
+  id: string;
+  questionNumber: number;
+  question: string;
+  userAnswer: string;
+  expectedAnswer: string;
+  confidence: number;
+  technicalScore: number;
+  communicationScore: number;
+  clarityScore: number;
+  overallScore: number;
+  strengths: string[];
+  weaknesses: string[];
+  improvementSuggestions: string[];
+}
+
+export interface Agent {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  gradient: string;
+  border: string;
+  functions: string[];
+  suggestedPrompts: string[];
+}
+
+export interface SimulationScenario {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  category: string;
+  impact: {
+    readiness: { from: number; to: number };
+    dsa?: number;
+    resume?: number;
+    interview?: number;
+    aptitude?: number;
+    projects?: number;
+    communication?: number;
+  };
+  probabilityImpact: {
+    service: number;
+    midProduct: number;
+    topProduct: number;
+    faang: number;
+  };
+}
+
 // ============================================================
 // mockStudents
 // ============================================================
@@ -1581,3 +1633,369 @@ export const mockTopics: Topics = {
     "Design a Notification System",
   ],
 };
+
+// ============================================================
+// mockReplayQuestions
+// ============================================================
+
+export const mockReplayQuestions: Record<string, ReplayQuestion[]> = {
+  HR: [
+    {
+      id: "RQ-HR-001",
+      questionNumber: 1,
+      question: "Tell me about yourself",
+      userAnswer: "I am a computer science student at VIT with experience in full-stack development. I have worked on several projects including a real-time chat application and an e-commerce platform. I am passionate about building scalable systems and solving complex problems.",
+      expectedAnswer: "Start with your current role/education, highlight 2-3 key achievements relevant to the role, and conclude with why you are interested in this opportunity. Keep it concise and structured.",
+      confidence: 82,
+      technicalScore: 70,
+      communicationScore: 85,
+      clarityScore: 80,
+      overallScore: 79,
+      strengths: ["Good structure", "Relevant projects mentioned", "Clear career narrative"],
+      weaknesses: ["Could be more concise", "Missing specific metrics"],
+      improvementSuggestions: ["Add quantifiable achievements", "Keep answer under 60 seconds", "Connect experience to company needs"],
+    },
+    {
+      id: "RQ-HR-002",
+      questionNumber: 2,
+      question: "Why do you want to work here?",
+      userAnswer: "I admire this company's innovative culture and the impact they have on the industry. The projects they work on align with my skills and career goals. I believe I can contribute meaningfully to the team.",
+      expectedAnswer: "Research the company thoroughly and mention specific products, culture aspects, or initiatives. Connect your skills and values to what the company stands for. Show genuine enthusiasm.",
+      confidence: 75,
+      technicalScore: 60,
+      communicationScore: 78,
+      clarityScore: 72,
+      overallScore: 71,
+      strengths: ["Positive attitude", "Shows enthusiasm"],
+      weaknesses: ["Too generic", "Lacks specific company research", "No personal connection"],
+      improvementSuggestions: ["Mention specific company products", "Reference recent company news", "Explain how values align with culture"],
+    },
+    {
+      id: "RQ-HR-003",
+      questionNumber: 3,
+      question: "What are your strengths and weaknesses?",
+      userAnswer: "My biggest strength is my problem-solving ability and quick learning. I pick up new technologies fast. My weakness is that I sometimes spend too much time on details, but I am working on being more efficient.",
+      expectedAnswer: "Strengths should be backed by examples. Weaknesses should be genuine but show self-awareness and active improvement efforts. Avoid cliché weaknesses like 'perfectionism'.",
+      confidence: 78,
+      technicalScore: 65,
+      communicationScore: 80,
+      clarityScore: 75,
+      overallScore: 75,
+      strengths: ["Honest self-assessment", "Mentions improvement efforts", "Relevant strengths"],
+      weaknesses: ["Weakness is somewhat cliché", "Missing concrete examples"],
+      improvementSuggestions: ["Provide a specific strength example", "Choose a genuine weakness with clear plan", "Connect strengths to role requirements"],
+    },
+  ],
+  TECHNICAL: [
+    {
+      id: "RQ-TECH-001",
+      questionNumber: 1,
+      question: "Explain REST API principles",
+      userAnswer: "REST stands for Representational State Transfer. It uses HTTP methods like GET, POST, PUT, DELETE. It is stateless and uses JSON for data exchange. Resources are identified by URLs.",
+      expectedAnswer: "REST is an architectural style with six constraints: statelessness, client-server separation, uniform interface, cacheability, layered system, and code on demand. Resources are manipulated through representations using standard HTTP methods.",
+      confidence: 80,
+      technicalScore: 75,
+      communicationScore: 82,
+      clarityScore: 78,
+      overallScore: 79,
+      strengths: ["Covers HTTP methods", "Mentions statelessness", "Good foundational understanding"],
+      weaknesses: ["Missing key constraints", "No mention of idempotency"],
+      improvementSuggestions: ["Study all six REST constraints", "Explain with a real-world API example", "Discuss idempotency and safety of methods"],
+    },
+    {
+      id: "RQ-TECH-002",
+      questionNumber: 2,
+      question: "What is the difference between SQL and NoSQL?",
+      userAnswer: "SQL databases are relational with structured schemas while NoSQL databases are non-relational with flexible schemas. SQL is good for complex queries and transactions while NoSQL is better for scalability and unstructured data.",
+      expectedAnswer: "SQL databases use structured schemas with tables, support ACID transactions, and use SQL for querying. NoSQL databases have flexible schemas, scale horizontally, and come in types: document, key-value, column-family, and graph stores.",
+      confidence: 85,
+      technicalScore: 80,
+      communicationScore: 85,
+      clarityScore: 82,
+      overallScore: 83,
+      strengths: ["Clear differentiation", "Mentions scalability", "Covers key concepts"],
+      weaknesses: ["No mention of NoSQL types", "Missing ACID vs BASE comparison"],
+      improvementSuggestions: ["Learn NoSQL database types with examples", "Understand ACID vs BASE models", "Practice explaining use cases"],
+    },
+    {
+      id: "RQ-TECH-003",
+      questionNumber: 3,
+      question: "Explain OOP concepts",
+      userAnswer: "OOP has four main concepts: encapsulation, inheritance, polymorphism, and abstraction. Encapsulation hides internal state, inheritance allows code reuse, polymorphism enables multiple forms, and abstraction hides complexity.",
+      expectedAnswer: "Object-Oriented Programming is a paradigm based on objects containing data and methods. The four pillars are: Encapsulation, Inheritance, Polymorphism (compile-time and runtime), and Abstraction.",
+      confidence: 88,
+      technicalScore: 82,
+      communicationScore: 80,
+      clarityScore: 85,
+      overallScore: 84,
+      strengths: ["All four pillars covered", "Good concise explanation", "Clear definitions"],
+      weaknesses: ["No real-world examples", "Missing compile-time vs runtime polymorphism"],
+      improvementSuggestions: ["Provide code examples for each concept", "Explain overloading vs overriding", "Discuss practical use cases"],
+    },
+  ],
+  MANAGER: [
+    {
+      id: "RQ-MGR-001",
+      questionNumber: 1,
+      question: "How do you handle team conflicts?",
+      userAnswer: "I believe in addressing conflicts early before they escalate. I listen to both sides, understand the root cause, and facilitate a constructive discussion. I focus on finding a solution that works for the team.",
+      expectedAnswer: "Use the STAR method: describe a specific situation, explain the task at hand, detail the actions taken, and share the positive result. Show emotional intelligence and leadership.",
+      confidence: 76,
+      technicalScore: 60,
+      communicationScore: 78,
+      clarityScore: 74,
+      overallScore: 72,
+      strengths: ["Proactive approach", "Focus on listening", "Solution-oriented"],
+      weaknesses: ["No specific example", "Lacks structure", "Missing follow-up actions"],
+      improvementSuggestions: ["Use STAR format for structured answers", "Prepare 2-3 conflict resolution stories", "Include measurable outcomes"],
+    },
+    {
+      id: "RQ-MGR-002",
+      questionNumber: 2,
+      question: "Describe your leadership style",
+      userAnswer: "I would describe my leadership style as collaborative and empowering. I believe in giving team members autonomy while providing support when needed. I focus on clear communication and setting achievable goals.",
+      expectedAnswer: "Effective leaders adapt their style to the situation. Common styles include: transformational, servant, democratic, and situational. Provide examples of when you used each.",
+      confidence: 72,
+      technicalScore: 55,
+      communicationScore: 75,
+      clarityScore: 70,
+      overallScore: 68,
+      strengths: ["Positive leadership qualities", "Team-focused mindset"],
+      weaknesses: ["Too generic", "No adaptability examples", "Missing leadership framework"],
+      improvementSuggestions: ["Learn about different leadership frameworks", "Prepare examples of adapting style", "Connect leadership to team results"],
+    },
+    {
+      id: "RQ-MGR-003",
+      questionNumber: 3,
+      question: "How do you prioritize tasks?",
+      userAnswer: "I use a priority matrix to categorize tasks by urgency and importance. I focus on high-impact tasks first and delegate when possible. I also communicate with stakeholders about deadlines.",
+      expectedAnswer: "Use frameworks like Eisenhower Matrix, MoSCoW method, or RICE scoring. Explain how you handle competing priorities and manage stakeholder expectations.",
+      confidence: 74,
+      technicalScore: 62,
+      communicationScore: 76,
+      clarityScore: 72,
+      overallScore: 71,
+      strengths: ["Uses prioritization framework", "Mentions delegation", "Stakeholder communication"],
+      weaknesses: ["Missing specific example", "No mention of handling priority shifts"],
+      improvementSuggestions: ["Walk through a real prioritization scenario", "Explain handling urgent unplanned tasks", "Discuss task management tools"],
+    },
+  ],
+};
+
+// ============================================================
+// mockAgents
+// ============================================================
+
+export const mockAgents: Agent[] = [
+  {
+    id: "agent-1",
+    name: "Resume Agent",
+    title: "ATS & Resume Optimization",
+    description: "Analyze and improve your resume with AI-powered ATS review, keyword optimization, and professional rewriting.",
+    icon: "FileText",
+    color: "#6366F1",
+    gradient: "from-indigo-500/20 to-purple-500/10",
+    border: "border-indigo-500/20",
+    functions: ["ATS Review", "Resume Improvement", "Keyword Suggestions", "Resume Rewrite"],
+    suggestedPrompts: [
+      "Review my resume for ATS compatibility",
+      "Suggest keywords for a software engineering role",
+      "Rewrite my experience section",
+      "Improve my resume summary",
+    ],
+  },
+  {
+    id: "agent-2",
+    name: "Coding Agent",
+    title: "DSA & LeetCode Coach",
+    description: "Master data structures and algorithms with personalized coding roadmaps, LeetCode planning, and topic recommendations.",
+    icon: "Code2",
+    color: "#10B981",
+    gradient: "from-emerald-500/20 to-teal-500/10",
+    border: "border-emerald-500/20",
+    functions: ["DSA Analysis", "Coding Roadmaps", "LeetCode Planning", "Topic Recommendations"],
+    suggestedPrompts: [
+      "Create a DSA study plan for Amazon",
+      "Which topics should I focus on?",
+      "Analyze my LeetCode progress",
+      "Recommend problems for dynamic programming",
+    ],
+  },
+  {
+    id: "agent-3",
+    name: "Interview Agent",
+    title: "Mock Interview Coach",
+    description: "Practice and improve your interview skills with AI-driven feedback, confidence analysis, and communication coaching.",
+    icon: "Mic",
+    color: "#F59E0B",
+    gradient: "from-amber-500/20 to-orange-500/10",
+    border: "border-amber-500/20",
+    functions: ["Interview Review", "Confidence Analysis", "Communication Feedback"],
+    suggestedPrompts: [
+      "Review my last mock interview",
+      "How can I improve my confidence?",
+      "Give me feedback on my communication",
+      "Practice a behavioral question with me",
+    ],
+  },
+  {
+    id: "agent-4",
+    name: "Roadmap Agent",
+    title: "Learning Path Optimizer",
+    description: "Get personalized weekly study plans, progress optimization tips, and adaptive learning path suggestions.",
+    icon: "Map",
+    color: "#22D3EE",
+    gradient: "from-cyan-500/20 to-blue-500/10",
+    border: "border-cyan-500/20",
+    functions: ["Weekly Plans", "Progress Optimization", "Learning Path Suggestions"],
+    suggestedPrompts: [
+      "Create a weekly study plan",
+      "Optimize my current roadmap",
+      "Suggest next topics to learn",
+      "Adjust my plan for better progress",
+    ],
+  },
+  {
+    id: "agent-5",
+    name: "Recruiter Agent",
+    title: "Placement Probability & Screening",
+    description: "Simulate recruiter screening, get hiring feedback, and understand your placement probability at target companies.",
+    icon: "Building2",
+    color: "#A78BFA",
+    gradient: "from-violet-500/20 to-purple-500/10",
+    border: "border-violet-500/20",
+    functions: ["Resume Screening", "Hiring Simulation", "Recruiter Feedback", "Placement Probability Review"],
+    suggestedPrompts: [
+      "Screen my resume like a recruiter",
+      "Simulate a hiring review",
+      "What are my chances at Google?",
+      "Give me recruiter feedback",
+    ],
+  },
+];
+
+// ============================================================
+// mockSimulationScenarios
+// ============================================================
+
+export const mockSimulationScenarios: SimulationScenario[] = [
+  {
+    id: "scenario-1",
+    title: "Complete 50 DSA Problems",
+    description: "Solve 50 hand-picked DSA problems covering arrays, strings, trees, graphs, and dynamic programming.",
+    icon: "Code2",
+    category: "DSA",
+    impact: {
+      readiness: { from: 68, to: 76 },
+      dsa: 12,
+    },
+    probabilityImpact: {
+      service: 5,
+      midProduct: 8,
+      topProduct: 10,
+      faang: 12,
+    },
+  },
+  {
+    id: "scenario-2",
+    title: "Complete Dynamic Programming Track",
+    description: "Master DP from basics to advanced with 30 curated DP problems and pattern recognition.",
+    icon: "Brain",
+    category: "DSA",
+    impact: {
+      readiness: { from: 68, to: 74 },
+      dsa: 15,
+    },
+    probabilityImpact: {
+      service: 3,
+      midProduct: 10,
+      topProduct: 15,
+      faang: 18,
+    },
+  },
+  {
+    id: "scenario-3",
+    title: "Improve Resume ATS Score",
+    description: "Optimize your resume with industry keywords, better formatting, and quantified achievements.",
+    icon: "FileText",
+    category: "Resume",
+    impact: {
+      readiness: { from: 68, to: 75 },
+      resume: 20,
+    },
+    probabilityImpact: {
+      service: 10,
+      midProduct: 12,
+      topProduct: 8,
+      faang: 5,
+    },
+  },
+  {
+    id: "scenario-4",
+    title: "Finish System Design Module",
+    description: "Complete the system design curriculum covering distributed systems, scalability patterns, and architecture design.",
+    icon: "Server",
+    category: "System Design",
+    impact: {
+      readiness: { from: 68, to: 72 },
+      interview: 10,
+    },
+    probabilityImpact: {
+      service: 2,
+      midProduct: 8,
+      topProduct: 15,
+      faang: 20,
+    },
+  },
+  {
+    id: "scenario-5",
+    title: "Complete 5 Mock Interviews",
+    description: "Practice with 5 full-length mock interviews covering HR, technical, and managerial rounds.",
+    icon: "Mic",
+    category: "Interview",
+    impact: {
+      readiness: { from: 68, to: 78 },
+      interview: 18,
+    },
+    probabilityImpact: {
+      service: 8,
+      midProduct: 10,
+      topProduct: 12,
+      faang: 15,
+    },
+  },
+  {
+    id: "scenario-6",
+    title: "Build One Industry Project",
+    description: "Build and deploy a full-stack project that demonstrates your engineering skills and product thinking.",
+    icon: "Rocket",
+    category: "Projects",
+    impact: {
+      readiness: { from: 68, to: 73 },
+      projects: 15,
+    },
+    probabilityImpact: {
+      service: 6,
+      midProduct: 10,
+      topProduct: 12,
+      faang: 10,
+    },
+  },
+  {
+    id: "scenario-7",
+    title: "Improve Communication Skills",
+    description: "Practice structured communication, reduce filler words, and improve articulation with daily exercises.",
+    icon: "MessageSquare",
+    category: "Communication",
+    impact: {
+      readiness: { from: 68, to: 72 },
+      communication: 15,
+    },
+    probabilityImpact: {
+      service: 8,
+      midProduct: 6,
+      topProduct: 5,
+      faang: 5,
+    },
+  },
+];

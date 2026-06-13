@@ -25,6 +25,7 @@ model User {
   roadmaps           Roadmap[]
   gapAnalyses        GapAnalysis[]
   resumes            Resume[]
+  userActivities     UserActivity[]
 }
 
 model Profile {
@@ -186,4 +187,17 @@ model Resume {
   uploadedAt     DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserActivity {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // INTERVIEW | CODING_PROBLEM | RESUME_ANALYSIS | ROADMAP_TASK
+  metadata  Json?    // { score, problemId, sessionId, etc. }
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userId, type])
 }
