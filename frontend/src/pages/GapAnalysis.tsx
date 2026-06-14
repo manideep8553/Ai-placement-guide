@@ -1,5 +1,6 @@
-import { useState } from 'react'
-import { mockGapAnalysisResult } from '@/data/mockData'
+import { useState, useRef } from 'react'
+import { useAuthStore } from '@/store/authStore'
+import { uploadResumeApi, startGapAnalysisApi, getGapAnalysisResultApi } from '@/services/api'
 import { Upload, Search, Loader2, AlertTriangle, CheckCircle, XCircle, Download, ArrowRight, FileText, Code2, GitBranch, BookOpen } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -16,40 +17,28 @@ interface GitHubData {
   languages: { name: string; percentage: number; color: string }[]
 }
 
-const INITIAL_LEETCODE_DATA: LeetCodeData = {
-  solved: 124,
-  total: 200,
-  rating: 1689,
-  weakTopics: ['Dynamic Programming', 'Graphs', 'Trees'],
-}
-
-const INITIAL_GITHUB_DATA: GitHubData = {
-  repos: 24,
-  contributions: 587,
-  languages: [
-    { name: 'TypeScript', percentage: 40, color: '#3178C6' },
-    { name: 'Python', percentage: 25, color: '#3572A5' },
-    { name: 'JavaScript', percentage: 20, color: '#F7DF1E' },
-    { name: 'Java', percentage: 10, color: '#B07219' },
-    { name: 'Go', percentage: 5, color: '#00ADD8' },
-  ],
-}
-
-const STEPS = ['Analyzing Resume', 'Evaluating Skills', 'Generating Report']
-
 export default function GapAnalysis() {
+  const { user } = useAuthStore()
+  const [resumeId, setResumeId] = useState<string | null>(null)
   const [resumeUploaded, setResumeUploaded] = useState(false)
   const [parsedSkills, setParsedSkills] = useState<string[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [leetcodeUsername, setLeetcodeUsername] = useState('')
-  const [leetcodeData, setLeetcodeData] = useState<LeetCodeData | null>(null)
-  const [leetcodeLoading, setLeetcodeLoading] = useState(false)
   const [githubUsername, setGithubUsername] = useState('')
-  const [githubData, setGithubData] = useState<GitHubData | null>(null)
-  const [githubLoading, setGithubLoading] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [showResults, setShowResults] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState<{
+    missingSkills: string[]
+    weakAreas: string[]
+    strengths: string[]
+    overallMatch: number
+  } | null>(null)
+
+  const STEPS = ['Analyzing Resume', 'Evaluating Skills', 'Generating Report']
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -58,32 +47,30 @@ export default function GapAnalysis() {
 
   const handleDragLeave = () => setIsDragOver(false)
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
-    setParsedSkills(['React', 'Node.js', 'Python', 'JavaScript', 'SQL', 'Git', 'REST APIs', 'HTML/CSS', 'MongoDB', 'Express'])
-    setResumeUploaded(true)
+    const file = e.dataTransfer.files[0]
+    if (file) await handleUploadFile(file)
   }
 
-  const handleLeetcodeFetch = () => {
-    if (!leetcodeUsername.trim()) return
-    setLeetcodeLoading(true)
-    setTimeout(() => {
-      setLeetcodeData(INITIAL_LEETCODE_DATA)
-      setLeetcodeLoading(false)
-    }, 1200)
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) await handleUploadFile(file)
   }
 
-  const handleGithubFetch = () => {
-    if (!githubUsername.trim()) return
-    setGithubLoading(true)
-    setTimeout(() => {
-      setGithubData(INITIAL_GITHUB_DATA)
-      setGithubLoading(false)
-    }, 1200)
+  const handleUploadFile = async (file: File) => {
+    setUploading(true)
+    const result = await uploadResumeApi(file)
+    if (result.data) {
+      setResumeId(result.data.id)
+      setParsedSkills(['React', 'Node.js', 'Python', 'JavaScript', 'SQL', 'Git', 'REST APIs', 'HTML/CSS', 'MongoDB', 'Express'])
+      setResumeUploaded(true)
+    }
+    setUploading(false)
   }
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     setAnalyzing(true)
     setShowResults(false)
     setCurrentStep(0)
@@ -98,12 +85,26 @@ export default function GapAnalysis() {
       })
     }, 600)
 
-    setTimeout(() => {
-      clearInterval(interval)
-      setCurrentStep(STEPS.length)
-      setAnalyzing(false)
-      setShowResults(true)
-    }, 2000)
+    const result = await startGapAnalysisApi({
+      resume_id: resumeId || undefined,
+      leetcode_username: leetcodeUsername || undefined,
+      github_username: githubUsername || undefined,
+      target_role: 'SDE',
+    })
+
+    clearInterval(interval)
+    setCurrentStep(STEPS.length)
+    setAnalyzing(false)
+
+    if (result.data) {
+      setAnalysisResult({
+        missingSkills: result.data.missingSkills,
+        weakAreas: result.data.weakAreas,
+        strengths: result.data.strengths,
+        overallMatch: result.data.overallMatch,
+      })
+    }
+    setShowResults(true)
   }
 
   const solvedPercentage = leetcodeData
@@ -137,12 +138,18 @@ export default function GapAnalysis() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
               className={`border-2 border-dashed border-[#334155] bg-[#1E293B]/50 rounded-xl p-8 text-center cursor-pointer transition-colors ${
                 isDragOver ? 'border-indigo-500 bg-indigo-500/10' : 'hover:border-indigo-500/50'
               }`}
             >
-              <Upload className="h-8 w-8 mx-auto text-gray-400 mb-3" />
-              <p className="text-sm font-medium text-gray-300 mb-1">Drop PDF here</p>
+              <input ref={fileInputRef} type="file" accept="application/pdf" onChange={handleFileSelect} className="hidden" />
+              {uploading ? (
+                <Loader2 className="h-8 w-8 mx-auto text-indigo-400 mb-3 animate-spin" />
+              ) : (
+                <Upload className="h-8 w-8 mx-auto text-gray-400 mb-3" />
+              )}
+              <p className="text-sm font-medium text-gray-300 mb-1">{uploading ? 'Uploading...' : 'Drop PDF here'}</p>
               <p className="text-xs text-gray-500">or click to browse</p>
             </div>
           ) : (
@@ -352,7 +359,7 @@ export default function GapAnalysis() {
           </div>
         )}
 
-        {showResults && (
+        {showResults && analysisResult && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -373,7 +380,7 @@ export default function GapAnalysis() {
                 </div>
                 <p className="text-sm text-gray-400 mb-4">Skills you should acquire</p>
                 <div className="flex flex-wrap gap-2">
-                  {mockGapAnalysisResult.missingSkills.map((skill) => (
+                  {analysisResult.missingSkills.map((skill) => (
                     <div key={skill} className="group relative">
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30">
                         <XCircle className="h-3 w-3" />
@@ -391,7 +398,7 @@ export default function GapAnalysis() {
                 </div>
                 <p className="text-sm text-gray-400 mb-4">Topics needing improvement</p>
                 <div className="flex flex-wrap gap-2">
-                  {mockGapAnalysisResult.weakAreas.map((area) => (
+                  {analysisResult.weakAreas.map((area) => (
                     <div key={area} className="group relative">
                       <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
                         <AlertTriangle className="h-3 w-3" />
@@ -409,7 +416,7 @@ export default function GapAnalysis() {
                 </div>
                 <p className="text-sm text-gray-400 mb-4">Your strong skill areas</p>
                 <div className="flex flex-wrap gap-2">
-                  {mockGapAnalysisResult.strengths.map((skill) => (
+                  {analysisResult.strengths.map((skill) => (
                     <span key={skill} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                       <CheckCircle className="h-3 w-3" />
                       {skill}
@@ -422,11 +429,11 @@ export default function GapAnalysis() {
             <div className="flex items-center justify-center gap-4">
               <div className="flex items-center gap-2 text-sm text-gray-400">
                 <span>Overall Match:</span>
-                <span className="font-bold text-white">{mockGapAnalysisResult.overallMatch}%</span>
+                <span className="font-bold text-white">{analysisResult.overallMatch}%</span>
                 <div className="w-24 h-2 bg-[#1E293B] rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-500"
-                    style={{ width: `${mockGapAnalysisResult.overallMatch}%` }}
+                    style={{ width: `${analysisResult.overallMatch}%` }}
                   />
                 </div>
               </div>

@@ -9,8 +9,10 @@ import {
   Target, TrendingUp, Mic, FileText, Map, Code2, Brain, ArrowRight,
   Sparkles, CheckCircle, Clock, Zap, BarChart3, Flame, ChevronUp,
   ChevronDown, Lightbulb, Rocket, Award, AlertTriangle, XCircle, Check,
-  Play, Upload, ExternalLink
+  Play, Upload, ExternalLink, Loader2
 } from 'lucide-react'
+import { useAuthStore } from '@/store/authStore'
+import { getPlacementScoreApi, getGapAnalysisResultApi } from '@/services/api'
 import { mockStudents, mockGapAnalysisResult } from '@/data/mockData'
 import { cn } from '@/lib/utils'
 
@@ -71,8 +73,37 @@ function SubScoreRow({ label, value, trend }: { label: string; value: number; tr
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { placementScore, companyChances, streak } = student
+  const { user } = useAuthStore()
+  const [placementScore, setPlacementScore] = useState(student.placementScore)
+  const [companyChances, setCompanyChances] = useState(student.companyChances)
+  const [streak, setStreak] = useState(student.streak)
+  const [loading, setLoading] = useState(true)
   const [insights, setInsights] = useState(0)
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!user) { setLoading(false); return }
+      const result = await getPlacementScoreApi(user.id)
+      if (result.data) {
+        setPlacementScore({
+          overall: result.data.overall,
+          aptitude: result.data.aptitude,
+          dsa: result.data.dsa,
+          coreSubjects: result.data.coreSubjects,
+          communication: result.data.communication,
+          resume: result.data.resumeScore,
+        })
+        setCompanyChances(
+          result.data.companyChances.map(c => ({
+            company: c.companyName,
+            chance: c.chancePercent,
+          }))
+        )
+      }
+      setLoading(false)
+    }
+    fetchData()
+  }, [user])
 
   const todayTasks = [
     { label: 'Solve 3 Array Problems', done: false },
@@ -87,6 +118,14 @@ export default function Dashboard() {
     'Adding Docker and Kubernetes projects can improve your ATS score by 8%.',
     'Your DSA practice consistency is up 15% — great job maintaining the streak!',
   ]
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">

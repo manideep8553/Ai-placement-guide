@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
+import { getCompaniesApi, getCompanyApi, type CompanyData, type CompanyDetailData } from '@/services/api'
 import { mockCompanies } from '@/data/mockData'
 import { cn } from '@/lib/utils'
-import { X, Building2, Clock, ChevronDown, ChevronRight, CheckCircle, Circle, BarChart3, ExternalLink } from 'lucide-react'
+import { X, Building2, Clock, ChevronDown, ChevronRight, CheckCircle, Circle, BarChart3, ExternalLink, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const companyColors = [
@@ -66,10 +67,24 @@ function generateRoadmap(topics: { name: string }[]) {
 }
 
 export default function CompanyPrep() {
-  const [selectedCompany, setSelectedCompany] = useState<typeof mockCompanies[number] | null>(null)
+  const [companies, setCompanies] = useState<CompanyData[]>([])
+  const [selectedCompany, setSelectedCompany] = useState<CompanyDetailData | null>(null)
   const [activeTab, setActiveTab] = useState<Tab>('Process')
   const [topicCheckState, setTopicCheckState] = useState<Record<string, boolean>>({})
   const [expandedWeeks, setExpandedWeeks] = useState<Set<number>>(new Set([1]))
+  const [loading, setLoading] = useState(true)
+  const [detailLoading, setDetailLoading] = useState(false)
+
+  useEffect(() => {
+    async function fetchCompanies() {
+      const result = await getCompaniesApi()
+      if (result.data) {
+        setCompanies(result.data)
+      }
+      setLoading(false)
+    }
+    fetchCompanies()
+  }, [])
 
   const roadmap = selectedCompany ? generateRoadmap(selectedCompany.topics) : []
 
@@ -78,13 +93,26 @@ export default function CompanyPrep() {
     : 0
   const totalTopics = selectedCompany?.topics.length ?? 0
 
-  function handleCompanySelect(company: typeof mockCompanies[number]) {
-    setSelectedCompany(company)
-    const initial: Record<string, boolean> = {}
-    company.topics.forEach(t => { initial[t.name] = t.completed })
-    setTopicCheckState(initial)
-    setExpandedWeeks(new Set([1]))
-    setActiveTab('Process')
+  async function handleCompanySelect(company: CompanyData) {
+    setDetailLoading(true)
+    const result = await getCompanyApi(company.slug)
+    if (result.data) {
+      setSelectedCompany(result.data)
+      const initial: Record<string, boolean> = {}
+      result.data.topics.forEach(t => { initial[t.name] = t.completed })
+      setTopicCheckState(initial)
+      setExpandedWeeks(new Set([1]))
+      setActiveTab('Process')
+    }
+    setDetailLoading(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+      </div>
+    )
   }
 
   function toggleWeek(week: number) {
@@ -110,7 +138,7 @@ export default function CompanyPrep() {
 
       {/* Company Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {mockCompanies.map((company, idx) => (
+        {companies.map((company, idx) => (
           <motion.div
             key={company.slug}
             initial={{ opacity: 0, y: 20 }}
@@ -165,12 +193,18 @@ export default function CompanyPrep() {
             transition={{ duration: 0.2 }}
             className="w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl bg-[#0F172A] border border-[#334155] shadow-2xl"
           >
+            {detailLoading ? (
+              <div className="flex items-center justify-center p-20">
+                <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+              </div>
+            ) : (
+            <>
             {/* Detail Header */}
             <div className="flex items-start justify-between p-6 pb-4 border-b border-[#334155]/50">
               <div className="flex items-center gap-4">
                 <div className={cn(
                   'w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold shrink-0',
-                  companyColors[mockCompanies.indexOf(selectedCompany) % companyColors.length]
+                  companyColors[companies.indexOf(selectedCompany as any) % companyColors.length]
                 )}>
                   {selectedCompany.name[0]}
                 </div>
@@ -383,6 +417,8 @@ export default function CompanyPrep() {
                 </div>
               )}
             </div>
+            </>
+            )}
           </motion.div>
         </motion.div>
       )}

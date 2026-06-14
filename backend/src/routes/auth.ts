@@ -3,6 +3,7 @@ import { z } from 'zod'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import { prisma } from '../index'
+import { authenticate, AuthRequest } from '../middleware/auth'
 
 const router = Router()
 
@@ -97,6 +98,66 @@ router.post('/refresh', async (req: Request, res: Response) => {
 router.post('/logout', (_req: Request, res: Response) => {
   res.clearCookie('refreshToken')
   res.json({ message: 'Logged out successfully' })
+})
+
+const updateProfileSchema = z.object({
+  name: z.string().min(2).optional(),
+  college: z.string().optional(),
+  branch: z.string().optional(),
+  graduationYear: z.number().optional(),
+})
+
+router.patch('/profile', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const data = updateProfileSchema.parse(req.body)
+    const user = await prisma.user.update({
+      where: { id: req.userId! },
+      data,
+      select: { id: true, email: true, name: true, college: true, branch: true, graduationYear: true }
+    })
+    res.json({ user })
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Validation failed', code: 'VALIDATION_ERROR', details: err.issues })
+    }
+    res.status(500).json({ error: 'Profile update failed', code: 'UPDATE_ERROR' })
+  }
+})
+
+router.get('/me', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId! },
+      select: { id: true, email: true, name: true, college: true, branch: true, graduationYear: true }
+    })
+    if (!user) return res.status(404).json({ error: 'User not found', code: 'USER_NOT_FOUND' })
+    res.json({ user })
+  } catch {
+    res.status(500).json({ error: 'Failed to fetch user', code: 'FETCH_ERROR' })
+  }
+})
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(6),
+})
+
+router.post('/change-password', authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const data = changePasswordSchema.parse(req.body)
+    const user = await prisma.user.findUnique({ where: { id: req.userId! } })
+    if (!user) return res.status(404).json({ error: 'User not found', code: 'USER_NOT_FOUND' })
+    const valid = await bcrypt.compare(data.currentPassword, user.passwordHash)
+    if (!valid) return res.status(400).json({ error: 'Current password is incorrect', code: 'INVALID_PASSWORD' })
+    const passwordHash = await bcrypt.hash(data.newPassword, 10)
+    await prisma.user.update({ where: { id: req.userId! }, data: { passwordHash } })
+    res.json({ message: 'Password changed successfully' })
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return res.status(400).json({ error: 'Validation failed', code: 'VALIDATION_ERROR', details: err.issues })
+    }
+    res.status(500).json({ error: 'Password change failed', code: 'PASSWORD_CHANGE_ERROR' })
+  }
 })
 
 export default router
