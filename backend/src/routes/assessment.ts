@@ -20,7 +20,7 @@ router.get('/', async (_req, res: Response) => {
 router.get('/:id', async (req, res: Response) => {
   try {
     const assessment = await prisma.assessment.findUnique({
-      where: { id: req.params.id },
+      where: { id: req.params.id as string },
       include: {
         questions: { orderBy: { orderIndex: 'asc' } }
       }
@@ -35,19 +35,19 @@ router.get('/:id', async (req, res: Response) => {
 router.post('/:id/start', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const existing = await prisma.assessmentAttempt.findFirst({
-      where: { userId: req.userId!, assessmentId: req.params.id, status: 'IN_PROGRESS' }
+      where: { userId: req.userId!, assessmentId: req.params.id as string, status: 'IN_PROGRESS' }
     })
     if (existing) return res.json(existing)
 
     const assessment = await prisma.assessment.findUnique({
-      where: { id: req.params.id }
-    })
+  where: { id: req.params.id as string }
+})
     if (!assessment) return res.status(404).json({ error: 'Assessment not found', code: 'NOT_FOUND' })
 
     const attempt = await prisma.assessmentAttempt.create({
       data: {
         userId: req.userId!,
-        assessmentId: req.params.id,
+        assessmentId: req.params.id as string,
         status: 'IN_PROGRESS',
         totalMarks: assessment.totalMarks,
       }
@@ -187,7 +187,7 @@ router.post('/:id/submit', authenticate, async (req: AuthRequest, res: Response)
 router.get('/:id/attempts', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const attempts = await prisma.assessmentAttempt.findMany({
-      where: { userId: req.userId!, assessmentId: req.params.id },
+      where: { userId: req.userId!, assessmentId: req.params.id as string},
       orderBy: { startedAt: 'desc' },
       take: 10
     })
@@ -200,7 +200,7 @@ router.get('/:id/attempts', authenticate, async (req: AuthRequest, res: Response
 router.get('/attempt/:attemptId', authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const attempt = await prisma.assessmentAttempt.findUnique({
-      where: { id: req.params.attemptId },
+      where: { id: req.params.attemptId as string },
       include: {
         assessment: true,
         answers: {
