@@ -521,3 +521,47 @@ export function getAttemptApi(attemptId: string) {
 export function getAllAttemptsApi() {
   return request<AssessmentAttemptData[]>('/assessments/attempts/all')
 }
+
+export interface PlacementTwinResponse {
+  readinessScore: number
+  subScores: {
+    dsa: { score: number; details: { label: string; value: number; max: number }[] }
+    resume: { score: number; details: { label: string; value: number; max: number }[] }
+    interview: { score: number; details: { label: string; value: number; max: number }[] }
+    aptitude: { score: number; details: { label: string; value: number; max: number }[] }
+    projects: { score: number; details: { label: string; value: number; max: number }[] }
+    communication: { score: number; details: { label: string; value: number; max: number }[] }
+    consistency: { score: number; details: { label: string; value: number; max: number }[] }
+  }
+  companyEligibility: {
+    companyName: string
+    chancePercent: number
+    category: string
+    missingSkills: string[]
+    avgPackage: string
+  }[]
+  predictedPackage: { min: number; max: number; currency: string }
+  interviewReadiness: { level: string; score: number }
+  strengths: string[]
+  weaknesses: string[]
+  missingSkills: string[]
+  recommendations: {
+    id: string
+    title: string
+    description: string
+    impact: string
+    category: string
+    priority: 'high' | 'medium' | 'low'
+  }[]
+  improvementRoadmap: {
+    phase: string
+    title: string
+    tasks: string[]
+    duration: string
+  }[]
+  lastUpdated: string
+}
+
+export function getPlacementTwinApi() {
+  return request<PlacementTwinResponse>('/placement-twin')
+}

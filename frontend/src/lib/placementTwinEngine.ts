@@ -1,158 +1,196 @@
-import { mockStudents } from '@/data/mockData'
-import type { SimulationScenario } from '@/data/mockData'
-
-export interface PlacementProfile {
-  readinessScore: number;
-  dsaScore: number;
-  resumeScore: number;
-  interviewScore: number;
-  aptitudeScore: number;
-  projectsScore: number;
-  communicationScore: number;
+export interface SubScoreDetail {
+  label: string
+  value: number
+  max: number
 }
 
-export interface PlacementProbability {
-  service: number;
-  midProduct: number;
-  topProduct: number;
-  faang: number;
+export interface SubScore {
+  score: number
+  details: SubScoreDetail[]
+}
+
+export interface CompanyEligibility {
+  companyName: string
+  chancePercent: number
+  category: string
+  missingSkills: string[]
+  avgPackage: string
 }
 
 export interface Recommendation {
-  id: string;
-  title: string;
-  description: string;
-  impact: string;
-  category: string;
-  priority: 'high' | 'medium' | 'low';
+  id: string
+  title: string
+  description: string
+  impact: string
+  category: string
+  priority: 'high' | 'medium' | 'low'
 }
 
-export function getCurrentProfile(): PlacementProfile {
-  const student = mockStudents[3]
-  return {
-    readinessScore: student.placementScore.overall,
-    dsaScore: student.placementScore.dsa,
-    resumeScore: student.placementScore.resume,
-    interviewScore: student.placementScore.coreSubjects,
-    aptitudeScore: student.placementScore.aptitude,
-    projectsScore: 55,
-    communicationScore: student.placementScore.communication,
+export interface RoadmapItem {
+  phase: string
+  title: string
+  tasks: string[]
+  duration: string
+}
+
+export interface PlacementTwinData {
+  readinessScore: number
+  subScores: {
+    dsa: SubScore
+    resume: SubScore
+    interview: SubScore
+    aptitude: SubScore
+    projects: SubScore
+    communication: SubScore
+    consistency: SubScore
   }
+  companyEligibility: CompanyEligibility[]
+  predictedPackage: { min: number; max: number; currency: string }
+  interviewReadiness: { level: string; score: number }
+  strengths: string[]
+  weaknesses: string[]
+  missingSkills: string[]
+  recommendations: Recommendation[]
+  improvementRoadmap: RoadmapItem[]
+  lastUpdated: string
 }
 
-export function getPlacementProbability(profile: PlacementProfile): PlacementProbability {
-  const base = profile.readinessScore
-  return {
-    service: Math.min(98, Math.round(base * 0.95 + 10)),
-    midProduct: Math.min(95, Math.round(base * 0.82 + 5)),
-    topProduct: Math.min(90, Math.round(base * 0.65)),
-    faang: Math.min(85, Math.round(base * 0.48 - 5)),
+export interface ScenarioImpact {
+  dsa?: number
+  resume?: number
+  interview?: number
+  aptitude?: number
+  projects?: number
+  communication?: number
+  consistency?: number
+  readiness: { from: number; to: number }
+}
+
+export interface SimulationScenario {
+  id: string
+  title: string
+  description: string
+  icon: string
+  impact: ScenarioImpact
+}
+
+export const mockSimulationScenarios: SimulationScenario[] = [
+  {
+    id: 'scenario-1',
+    title: 'Complete 50 DSA Problems',
+    description: 'Solve 50 additional DSA problems focusing on Medium/Hard difficulty across all topics.',
+    icon: 'Code2',
+    impact: { dsa: 12, readiness: { from: 0, to: 0 } },
+  },
+  {
+    id: 'scenario-2',
+    title: 'Complete Dynamic Programming Track',
+    description: 'Master DP concepts with 30+ problems from basic recursion to advanced DP patterns.',
+    icon: 'Brain',
+    impact: { dsa: 8, readiness: { from: 0, to: 0 } },
+  },
+  {
+    id: 'scenario-3',
+    title: 'Improve Resume ATS Score',
+    description: 'Optimize resume with industry keywords, quantified achievements, proper formatting.',
+    icon: 'FileText',
+    impact: { resume: 15, readiness: { from: 0, to: 0 } },
+  },
+  {
+    id: 'scenario-4',
+    title: 'Finish System Design Module',
+    description: 'Master distributed systems, scalability patterns, and system design interview prep.',
+    icon: 'Server',
+    impact: { interview: 10, readiness: { from: 0, to: 0 } },
+  },
+  {
+    id: 'scenario-5',
+    title: 'Complete 5 Mock Interviews',
+    description: 'Practice 5 full-length mock interviews covering technical, HR, and behavioral rounds.',
+    icon: 'Mic',
+    impact: { interview: 10, communication: 8, readiness: { from: 0, to: 0 } },
+  },
+  {
+    id: 'scenario-6',
+    title: 'Build One Industry Project',
+    description: 'Create a full-stack project with proper documentation, deployment, and GitHub README.',
+    icon: 'Rocket',
+    impact: { projects: 20, readiness: { from: 0, to: 0 } },
+  },
+  {
+    id: 'scenario-7',
+    title: 'Improve Communication Skills',
+    description: 'Practice STAR method, reduce filler words, improve speaking confidence and pace.',
+    icon: 'MessageSquare',
+    impact: { communication: 12, readiness: { from: 0, to: 0 } },
+  },
+  {
+    id: 'scenario-8',
+    title: 'Complete 10 Aptitude Tests',
+    description: 'Practice timed aptitude tests covering quantitative, logical, and verbal sections.',
+    icon: 'Target',
+    impact: { aptitude: 14, readiness: { from: 0, to: 0 } },
+  },
+]
+
+const WEIGHTS = {
+  dsa: 0.25,
+  resume: 0.15,
+  interview: 0.15,
+  aptitude: 0.10,
+  projects: 0.10,
+  communication: 0.10,
+  consistency: 0.15,
+}
+
+export function applyScenarioProfile(profile: PlacementTwinData, scenario: SimulationScenario): PlacementTwinData {
+  const clamp = (v: number) => Math.min(100, Math.max(0, v))
+
+  const applySubScore = (sub: SubScore, boost: number | undefined): SubScore => {
+    if (!boost) return sub
+    return {
+      score: clamp(sub.score + boost),
+      details: sub.details,
+    }
   }
+
+  const newSubScores = {
+    dsa: applySubScore(profile.subScores.dsa, scenario.impact.dsa),
+    resume: applySubScore(profile.subScores.resume, scenario.impact.resume),
+    interview: applySubScore(profile.subScores.interview, scenario.impact.interview),
+    aptitude: applySubScore(profile.subScores.aptitude, scenario.impact.aptitude),
+    projects: applySubScore(profile.subScores.projects, scenario.impact.projects),
+    communication: applySubScore(profile.subScores.communication, scenario.impact.communication),
+    consistency: applySubScore(profile.subScores.consistency, scenario.impact.consistency),
+  }
+
+  const s = newSubScores
+  const newReadiness = Math.round(
+    clamp(
+      s.dsa.score * WEIGHTS.dsa +
+      s.resume.score * WEIGHTS.resume +
+      s.interview.score * WEIGHTS.interview +
+      s.aptitude.score * WEIGHTS.aptitude +
+      s.projects.score * WEIGHTS.projects +
+      s.communication.score * WEIGHTS.communication +
+      s.consistency.score * WEIGHTS.consistency,
+      0, 100
+    )
+  )
+
+  scenario.impact.readiness.from = profile.readinessScore
+  scenario.impact.readiness.to = newReadiness
+
+  return { ...profile, readinessScore: newReadiness, subScores: newSubScores }
 }
 
-export function applyScenario(
-  profile: PlacementProfile,
+export function getProjectedCompanyEligibility(
+  profile: PlacementTwinData,
   scenario: SimulationScenario
-): PlacementProfile {
-  return {
-    readinessScore: Math.min(100, scenario.impact.readiness.to),
-    dsaScore: Math.min(100, profile.dsaScore + (scenario.impact.dsa ?? 0)),
-    resumeScore: Math.min(100, profile.resumeScore + (scenario.impact.resume ?? 0)),
-    interviewScore: Math.min(100, profile.interviewScore + (scenario.impact.interview ?? 0)),
-    aptitudeScore: Math.min(100, profile.aptitudeScore + (scenario.impact.aptitude ?? 0)),
-    projectsScore: Math.min(100, profile.projectsScore + (scenario.impact.projects ?? 0)),
-    communicationScore: Math.min(100, profile.communicationScore + (scenario.impact.communication ?? 0)),
-  }
-}
-
-export function getProbabilityAfterScenario(
-  profile: PlacementProfile,
-  scenario: SimulationScenario
-): PlacementProbability {
-  const projected = applyScenario(profile, scenario)
-  return getPlacementProbability(projected)
-}
-
-export function getRecommendations(profile: PlacementProfile): Recommendation[] {
-  const recommendations: Recommendation[] = []
-
-  if (profile.dsaScore < 70) {
-    recommendations.push({
-      id: "rec-1",
-      title: "Strengthen DSA Fundamentals",
-      description: "Focus on arrays, strings, trees, and dynamic programming. Solve at least 3 problems daily.",
-      impact: `Expected: +${Math.round((70 - profile.dsaScore) * 0.4)}% readiness`,
-      category: "DSA",
-      priority: profile.dsaScore < 50 ? 'high' : 'medium',
-    })
-  }
-
-  if (profile.resumeScore < 70) {
-    recommendations.push({
-      id: "rec-2",
-      title: "Optimize Your Resume",
-      description: "Improve ATS score by adding industry keywords, quantifying achievements, and fixing formatting.",
-      impact: `Expected: +${Math.round((70 - profile.resumeScore) * 0.3)}% readiness`,
-      category: "Resume",
-      priority: profile.resumeScore < 50 ? 'high' : 'medium',
-    })
-  }
-
-  if (profile.interviewScore < 65) {
-    recommendations.push({
-      id: "rec-3",
-      title: "Practice Mock Interviews",
-      description: "Complete at least 5 mock interviews focusing on technical and HR rounds.",
-      impact: `Expected: +${Math.round((65 - profile.interviewScore) * 0.5)}% readiness`,
-      category: "Interview",
-      priority: profile.interviewScore < 50 ? 'high' : 'medium',
-    })
-  }
-
-  if (profile.communicationScore < 70) {
-    recommendations.push({
-      id: "rec-4",
-      title: "Improve Communication Skills",
-      description: "Practice structuring answers using STAR method and reduce filler words.",
-      impact: `Expected: +${Math.round((70 - profile.communicationScore) * 0.3)}% readiness`,
-      category: "Communication",
-      priority: 'medium',
-    })
-  }
-
-  if (profile.aptitudeScore < 70) {
-    recommendations.push({
-      id: "rec-5",
-      title: "Practice Aptitude & Logical Reasoning",
-      description: "Dedicate 30 minutes daily to quantitative aptitude, logical reasoning, and verbal ability.",
-      impact: `Expected: +${Math.round((70 - profile.aptitudeScore) * 0.25)}% readiness`,
-      category: "Aptitude",
-      priority: profile.aptitudeScore < 50 ? 'high' : 'low',
-    })
-  }
-
-  if (profile.projectsScore < 60) {
-    recommendations.push({
-      id: "rec-6",
-      title: "Build Industry-Level Projects",
-      description: "Create 1-2 full-stack projects demonstrating scalability, system design, and modern tech stack.",
-      impact: `Expected: +${Math.round((60 - profile.projectsScore) * 0.35)}% readiness`,
-      category: "Projects",
-      priority: 'medium',
-    })
-  }
-
-  recommendations.push({
-    id: "rec-7",
-    title: "Complete System Design Module",
-    description: "Learn distributed systems concepts, scalability patterns, and practice designing large-scale systems.",
-    impact: "Expected: +8% readiness",
-    category: "System Design",
-    priority: 'medium',
-  })
-
-  return recommendations.sort((a, b) => {
-    const priorityOrder = { high: 0, medium: 1, low: 2 }
-    return priorityOrder[a.priority] - priorityOrder[b.priority]
-  })
+): CompanyEligibility[] {
+  const projected = applyScenarioProfile(profile, scenario)
+  return projected.companyEligibility.map(c => ({
+    ...c,
+    chancePercent: Math.min(98, c.chancePercent + Math.round((projected.readinessScore - profile.readinessScore) * 0.3)),
+  }))
 }
