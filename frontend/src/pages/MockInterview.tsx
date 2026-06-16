@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { mockCompanies } from '@/data/mockData'
+import { useAuthStore } from '@/store/authStore'
+import { getCompaniesApi, startInterviewApi, endInterviewApi, type CompanyData } from '@/services/api'
+import { Loader2 } from 'lucide-react'
 
 const mockQuestions = {
   HR: ["Tell me about yourself", "Why do you want to work here?", "What are your strengths and weaknesses?"],
@@ -31,8 +33,9 @@ const interviewTypeConfig = {
 }
 
 export default function MockInterview() {
-  const navigate = useNavigate()
+  const { user } = useAuthStore()
   const [sessionActive, setSessionActive] = useState(false)
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const [interviewType, setInterviewType] = useState<string | null>(null)
   const [selectedCompany, setSelectedCompany] = useState("")
   const [showFeedback, setShowFeedback] = useState(false)
@@ -41,8 +44,19 @@ export default function MockInterview() {
   const [wpm, setWpm] = useState(120)
   const [transcript, setTranscript] = useState<string[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [companies, setCompanies] = useState<CompanyData[]>([])
+  const [loading, setLoading] = useState(true)
 
   const transcriptRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    async function init() {
+      const result = await getCompaniesApi()
+      if (result.data) setCompanies(result.data)
+      setLoading(false)
+    }
+    init()
+  }, [])
 
   const questions = interviewType ? mockQuestions[interviewType as keyof typeof mockQuestions] : []
   const typeConfig = interviewType ? interviewTypeConfig[interviewType as keyof typeof interviewTypeConfig] : null
@@ -91,8 +105,12 @@ export default function MockInterview() {
     return `${m}:${s}`
   }
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!interviewType || !selectedCompany) return
+    const result = await startInterviewApi({ type: interviewType, company: selectedCompany })
+    if (result.data) {
+      setSessionId(result.data.sessionId)
+    }
     setSessionActive(true)
     setElapsed(0)
     setTranscript([])
@@ -101,7 +119,10 @@ export default function MockInterview() {
     setWpm(120)
   }
 
-  const handleEnd = () => {
+  const handleEnd = async () => {
+    if (sessionId) {
+      await endInterviewApi(sessionId, { duration: elapsed })
+    }
     setSessionActive(false)
     setShowFeedback(true)
   }
@@ -591,7 +612,7 @@ export default function MockInterview() {
             className="w-full bg-[#0F172A]/80 border border-[#334155]/50 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-indigo-500/50 transition-colors appearance-none cursor-pointer"
           >
             <option value="" disabled>Select a company...</option>
-            {mockCompanies.map(c => (
+            {(companies.length ? companies : []).map(c => (
               <option key={c.name} value={c.name}>
                 {c.logo} {c.name} - {c.difficulty}
               </option>

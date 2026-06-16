@@ -7,6 +7,7 @@ import MockInterview from './pages/MockInterview'
 import CodingInterview from './pages/CodingInterview'
 import Roadmap from './pages/Roadmap'
 import Resume from './pages/Resume'
+import Settings from './pages/Settings'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Layout from './components/Layout'
@@ -33,9 +34,7 @@ function App() {
         <Route path="/coding-interview" element={<ProtectedRoute><CodingInterview /></ProtectedRoute>} />
         <Route path="/roadmap" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
         <Route path="/resume" element={<ProtectedRoute><Resume /></ProtectedRoute>} />
-        <Route path="/interview-replay" element={<ProtectedRoute><InterviewReplay /></ProtectedRoute>} />
-        <Route path="/placement-twin" element={<ProtectedRoute><PlacementTwin /></ProtectedRoute>} />
-        <Route path="/placement-coach" element={<ProtectedRoute><PlacementCoach /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
       </Route>
     </Routes>
   )

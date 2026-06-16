@@ -3,9 +3,9 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
-import { Upload, FileText, FileCheck, Sparkles, RefreshCw, CheckCircle, AlertTriangle, Lightbulb, Download, PenLine, Gauge } from 'lucide-react'
+import { uploadResumeApi, analyzeResumeApi, rewriteBulletApi, type ResumeAnalysisData } from '@/services/api'
+import { Upload, FileText, FileCheck, Sparkles, RefreshCw, CheckCircle, AlertTriangle, Lightbulb, Download, PenLine, Gauge, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { mockResumeAnalysis } from '@/data/mockData'
 
 const sectionLabels: Record<string, string> = {
   summary: 'Summary',
@@ -71,49 +71,69 @@ type Tab = typeof tabs[number]
 
 export default function Resume() {
   const [file, setFile] = useState<File | null>(null)
+  const [resumeId, setResumeId] = useState<string | null>(null)
   const [analyzed, setAnalyzed] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('Overview')
   const [bullet, setBullet] = useState('')
   const [rewritten, setRewritten] = useState<string | null>(null)
   const [rewriting, setRewriting] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analysis, setAnalysis] = useState<ResumeAnalysisData | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const analysis = mockResumeAnalysis
-
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
     const f = e.dataTransfer.files[0]
-    if (f && f.type === 'application/pdf') setFile(f)
+    if (f && f.type === 'application/pdf') await handleUpload(f)
   }
 
   const handleClick = () => inputRef.current?.click()
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
-    if (f) setFile(f)
+    if (f) await handleUpload(f)
   }
 
-  const handleAnalyze = () => {
-    setAnalyzed(true)
-    setActiveTab('Overview')
+  const handleUpload = async (f: File) => {
+    setFile(f)
+    setUploading(true)
+    const result = await uploadResumeApi(f)
+    if (result.data) {
+      setResumeId(result.data.id)
+    }
+    setUploading(false)
   }
 
-  const handleRewrite = () => {
+  const handleAnalyze = async () => {
+    if (!resumeId) return
+    setAnalyzing(true)
+    const result = await analyzeResumeApi(resumeId)
+    if (result.data) {
+      setAnalysis(result.data)
+      setAnalyzed(true)
+      setActiveTab('Overview')
+    }
+    setAnalyzing(false)
+  }
+
+  const handleRewrite = async () => {
+    if (!resumeId || !bullet.trim()) return
     setRewriting(true)
-    setTimeout(() => {
-      setRewritten(
-        "Developed and deployed a scalable microservices architecture using Node.js and Docker, " +
-        "resulting in a 40% reduction in API response time and supporting 10x growth in user traffic."
-      )
-      setRewriting(false)
-    }, 1200)
+    const result = await rewriteBulletApi(resumeId, { bullet_text: bullet })
+    if (result.data) {
+      setRewritten(result.data.improved)
+    }
+    setRewriting(false)
   }
 
   const resetFile = () => {
     setFile(null)
+    setResumeId(null)
     setAnalyzed(false)
+    setAnalysis(null)
     setRewritten(null)
     setBullet('')
   }
@@ -189,9 +209,11 @@ export default function Resume() {
                 <Button
                   className="w-full gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white border-0"
                   onClick={handleAnalyze}
-                  disabled={analyzed}
+                  disabled={analyzing || analyzed}
                 >
-                  {analyzed ? (
+                  {analyzing ? (
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Analyzing...</>
+                  ) : analyzed ? (
                     <><CheckCircle className="h-4 w-4" /> Analyzed</>
                   ) : (
                     <><Sparkles className="h-4 w-4" /> Analyze Resume</>
@@ -204,6 +226,14 @@ export default function Resume() {
           {/* Right Column - AI Feedback Panel */}
           <div>
             {!analyzed ? (
+              <div className="rounded-2xl border border-[#334155]/50 bg-[#1E293B]/50 backdrop-blur-xl h-full flex flex-col items-center justify-center py-20 text-center">
+                <div className="p-5 rounded-full bg-[#1E293B]/80 border border-[#334155]/50 mb-4">
+                  <Gauge className="h-12 w-12 text-gray-500" />
+                </div>
+                <p className="text-base font-medium text-gray-300">Upload a resume to see analysis</p>
+                <p className="text-sm text-gray-500 mt-1">Get your ATS score, suggestions, and more</p>
+              </div>
+            ) : !analysis ? (
               <div className="rounded-2xl border border-[#334155]/50 bg-[#1E293B]/50 backdrop-blur-xl h-full flex flex-col items-center justify-center py-20 text-center">
                 <div className="p-5 rounded-full bg-[#1E293B]/80 border border-[#334155]/50 mb-4">
                   <Gauge className="h-12 w-12 text-gray-500" />
@@ -280,7 +310,7 @@ export default function Resume() {
                       animate={{ opacity: 1 }}
                       className="space-y-3 max-h-[500px] overflow-y-auto pr-1 custom-scrollbar"
                     >
-                      {analysis.suggestions.map((s, i) => (
+                      {analysis.specificSuggestions.map((s, i) => (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0, x: -10 }}
@@ -341,11 +371,15 @@ export default function Resume() {
                           <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 shrink-0" />
                           <div className="space-y-2 flex-1">
                             <p className="text-sm font-medium text-amber-300">Action Verb Strength</p>
-                            <p className="text-xs text-amber-400/80">Your resume uses 60% strong action verbs</p>
+                            <p className="text-xs text-amber-400/80">
+                              {analysis.actionVerbScore !== undefined
+                                ? `Your resume uses ${analysis.actionVerbScore}% strong action verbs`
+                                : 'Your resume uses 60% strong action verbs'}
+                            </p>
                             <div className="h-2 rounded-full bg-[#0F172A] overflow-hidden">
                               <motion.div
                                 initial={{ width: 0 }}
-                                animate={{ width: '60%' }}
+                                animate={{ width: `${analysis.actionVerbScore || 60}%` }}
                                 transition={{ duration: 1, ease: 'easeOut' }}
                                 className="h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500"
                               />

@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useAuthStore } from '@/store/authStore'
+import { getCompaniesApi, generateRoadmapApi, getActiveRoadmapApi, completeWeekApi, type CompanyData, type RoadmapData } from '@/services/api'
 import { mockRoadmap, mockCompanies } from '@/data/mockData'
 import { cn } from '@/lib/utils'
-import { Calendar, Clock, BookOpen, CheckCircle, Target, RefreshCw, BarChart3, Sparkles, Map } from 'lucide-react'
+import { Calendar, Clock, BookOpen, CheckCircle, Target, RefreshCw, BarChart3, Sparkles, Map, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const levels = ['Beginner', 'Intermediate', 'Advanced'] as const
@@ -35,7 +37,7 @@ const phaseConfig: Record<string, { label: string; color: string; bar: string; b
   },
 }
 
-function WeekCard({ week, index }: { week: typeof mockRoadmap.weeks[0]; index: number }) {
+function WeekCard({ week, index, onToggle }: { week: any; index: number; onToggle: (weekId: string, completed: boolean) => void }) {
   const phase = phaseConfig[week.phase]
   return (
     <motion.div
@@ -78,7 +80,8 @@ function WeekCard({ week, index }: { week: typeof mockRoadmap.weeks[0]; index: n
               <label className="flex items-center gap-2 cursor-pointer shrink-0">
                 <input
                   type="checkbox"
-                  defaultChecked={week.completed}
+                  checked={week.completed}
+                  onChange={() => onToggle(week.id, week.completed)}
                   className="h-4 w-4 rounded border-gray-600 bg-[#1E293B]/50 text-indigo-500 focus:ring-indigo-500"
                 />
                 <span className="text-xs text-gray-400">{week.completed ? 'Done' : 'Todo'}</span>
@@ -92,16 +95,73 @@ function WeekCard({ week, index }: { week: typeof mockRoadmap.weeks[0]; index: n
 }
 
 export default function Roadmap() {
+  const { user } = useAuthStore()
   const [level, setLevel] = useState<string>('Intermediate')
   const [company, setCompany] = useState<string>('Amazon')
   const [hours, setHours] = useState<number>(4)
   const [targetDate, setTargetDate] = useState<string>('2026-09-28')
   const [generated, setGenerated] = useState(false)
+  const [roadmap, setRoadmap] = useState<RoadmapData | null>(null)
+  const [companies, setCompanies] = useState<CompanyData[]>([])
+  const [generating, setGenerating] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  const roadmap = mockRoadmap
-  const totalWeeks = roadmap.weeks.length
-  const completedWeeks = roadmap.weeks.filter((w) => w.completed).length
+  useEffect(() => {
+    async function init() {
+      const result = await getCompaniesApi()
+      if (result.data) setCompanies(result.data)
+      if (user) {
+        const active = await getActiveRoadmapApi(user.id)
+        if (active.data) {
+          setRoadmap(active.data)
+          setGenerated(true)
+        }
+      }
+      setLoading(false)
+    }
+    init()
+  }, [user])
+
+  async function handleGenerate() {
+    if (!user) return
+    setGenerating(true)
+    const result = await generateRoadmapApi({
+      target_company: company,
+      current_level: level,
+      daily_hours: hours,
+      target_date: targetDate || undefined,
+    })
+    if (result.data) {
+      setRoadmap(result.data)
+      setGenerated(true)
+    }
+    setGenerating(false)
+  }
+
+  async function handleToggleWeek(weekId: string, completed: boolean) {
+    await completeWeekApi(weekId, !completed)
+    if (roadmap) {
+      setRoadmap({
+        ...roadmap,
+        weeks: roadmap.weeks.map(w =>
+          w.id === weekId ? { ...w, completed: !completed } : w
+        ),
+      })
+    }
+  }
+
+  const currentRoadmap = roadmap || mockRoadmap
+  const totalWeeks = currentRoadmap.weeks.length
+  const completedWeeks = currentRoadmap.weeks.filter((w) => w.completed).length
   const progress = Math.round((completedWeeks / totalWeeks) * 100)
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-[#0F172A]/80 p-6 space-y-6">
@@ -152,7 +212,7 @@ export default function Roadmap() {
                   onChange={(e) => setCompany(e.target.value)}
                   className="flex h-10 w-full rounded-xl border border-[#334155]/50 bg-[#0F172A]/60 text-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 transition-all duration-200"
                 >
-                  {mockCompanies.map((c) => (
+                  {(companies.length ? companies : mockCompanies).map((c) => (
                     <option key={c.name} value={c.name} className="bg-[#0F172A] text-white">{c.logo} {c.name}</option>
                   ))}
                 </select>
@@ -189,9 +249,9 @@ export default function Roadmap() {
             </div>
 
             <div className="mt-6 flex justify-end">
-              <Button onClick={() => setGenerated(true)} className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0">
-                <Sparkles className="h-4 w-4" />
-                Generate Roadmap
+              <Button onClick={handleGenerate} disabled={generating} className="gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white border-0">
+                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {generating ? 'Generating...' : 'Generate Roadmap'}
               </Button>
             </div>
           </div>
@@ -202,7 +262,7 @@ export default function Roadmap() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
           <div>
             <div className="flex items-center gap-4 mb-4 overflow-x-auto pb-2">
-              {roadmap.weeks.map((w) => (
+              {currentRoadmap.weeks.map((w) => (
                 <div key={w.weekNumber} className="flex flex-col items-center shrink-0">
                   <div className={cn(
                     'w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all',
@@ -218,8 +278,8 @@ export default function Roadmap() {
             </div>
 
             <div className="pl-0">
-              {roadmap.weeks.map((week, i) => (
-                <WeekCard key={week.weekNumber} week={week} index={i} />
+              {currentRoadmap.weeks.map((week, i) => (
+                <WeekCard key={week.weekNumber} week={week} index={i} onToggle={handleToggleWeek} />
               ))}
             </div>
           </div>
@@ -230,9 +290,9 @@ export default function Roadmap() {
                 <Calendar className="h-4 w-4 text-indigo-400" />
                 This Week's Tasks
               </h3>
-              {roadmap.weeks.find((w) => !w.completed) ? (
+              {currentRoadmap.weeks.find((w) => !w.completed) ? (
                 <div className="space-y-3">
-                  {roadmap.weeks
+                  {currentRoadmap.weeks
                     .filter((w) => !w.completed)
                     .slice(0, 1)
                     .map((w) => {
@@ -306,9 +366,10 @@ export default function Roadmap() {
               variant="outline"
               className="w-full gap-2 border-[#334155]/50 text-gray-300 hover:text-white hover:bg-[#1E293B]/80"
               onClick={() => setGenerated(false)}
+              disabled={generating}
             >
-              <RefreshCw className="h-4 w-4" />
-              Regenerate Roadmap
+              <RefreshCw className={cn("h-4 w-4", generating && "animate-spin")} />
+              {generating ? 'Generating...' : 'Regenerate Roadmap'}
             </Button>
           </div>
         </div>

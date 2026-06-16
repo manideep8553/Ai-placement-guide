@@ -100,7 +100,10 @@ export default function Layout() {
             </button>
             {showProfile && sidebarOpen && (
               <div className="absolute bottom-full left-0 right-0 mb-2 p-2 rounded-xl bg-[#1E293B] border border-[#334155] shadow-xl">
-                <button className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 rounded-lg transition-colors">
+                <button
+                  onClick={() => { navigate('/settings'); setShowProfile(false) }}
+                  className="flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-400 hover:text-gray-200 hover:bg-white/5 rounded-lg transition-colors"
+                >
                   <Settings className="w-4 h-4" />
                   Settings
                 </button>

@@ -7,8 +7,11 @@ import {
   Target, TrendingUp, Mic, FileText, Map, Code2, ArrowRight,
   Sparkles, CheckCircle, Clock, BarChart3, Flame, ChevronUp,
   ChevronDown, Lightbulb, Rocket, Award, AlertTriangle, XCircle, Check,
-  Play, ExternalLink, Loader2, AlertCircle
+  Play, Upload, ExternalLink, Loader2
 } from 'lucide-react'
+import { useAuthStore } from '@/store/authStore'
+import { getPlacementScoreApi, getGapAnalysisResultApi } from '@/services/api'
+import { mockStudents, mockGapAnalysisResult } from '@/data/mockData'
 import { cn } from '@/lib/utils'
 import { useDashboard } from '@/hooks/useDashboard'
 
@@ -129,33 +132,43 @@ function EmptyState({ title, description, action }: { title: string; description
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { data, loading, error, refetch } = useDashboard()
+  const { user } = useAuthStore()
+  const [placementScore, setPlacementScore] = useState(student.placementScore)
+  const [companyChances, setCompanyChances] = useState(student.companyChances)
+  const [streak, setStreak] = useState(student.streak)
+  const [loading, setLoading] = useState(true)
   const [insights, setInsights] = useState(0)
 
-  if (loading && !data) return <DashboardSkeleton />
-  if (error && !data) return <DashboardError message={error} onRetry={refetch} />
+  useEffect(() => {
+    async function fetchData() {
+      if (!user) { setLoading(false); return }
+      const result = await getPlacementScoreApi(user.id)
+      if (result.data) {
+        setPlacementScore({
+          overall: result.data.overall,
+          aptitude: result.data.aptitude,
+          dsa: result.data.dsa,
+          coreSubjects: result.data.coreSubjects,
+          communication: result.data.communication,
+          resume: result.data.resumeScore,
+        })
+        setCompanyChances(
+          result.data.companyChances.map(c => ({
+            company: c.companyName,
+            chance: c.chancePercent,
+          }))
+        )
+      }
+      setLoading(false)
+    }
+    fetchData()
+  }, [user])
 
-  if (!data) return <DashboardError message="No dashboard data available" onRetry={refetch} />
-
-  const { user, placementScore, companyChances, streak, progress, gapAnalysis, codingAnalytics, interviewAnalytics, roadmap, todayTasks } = data
-
-  const now = new Date()
-  const hour = now.getHours()
-  const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening'
-
-  const aiInsights: string[] = [
-    interviewAnalytics.improvement.score > 0
-      ? `Your interview scores improved by ${interviewAnalytics.improvement.score} points. Keep practicing!`
-      : 'Start mock interviews to track your improvement.',
-    gapAnalysis?.weakAreas?.length
-      ? `Focus on ${gapAnalysis.weakAreas.slice(0, 2).join(', ')} to boost readiness.`
-      : 'Complete a gap analysis to identify weak areas.',
-    placementScore?.resumeScore && placementScore.resumeScore < 70
-      ? `Your resume score is ${Math.round(placementScore.resumeScore)}. Improving it can boost your chances significantly.`
-      : 'Your resume looks solid! Focus on DSA and interview skills.',
-    streak.current > 0
-      ? `You're on a ${streak.current}-day streak! Consistency is key to placement success.`
-      : 'Start a streak by completing daily tasks!',
+  const todayTasks = [
+    { label: 'Solve 3 Array Problems', done: false },
+    { label: 'Attend Mock Interview', done: false },
+    { label: 'Update Resume', done: false },
+    { label: 'Complete Aptitude Quiz', done: false },
   ]
 
   const readinessLabel = placementScore
@@ -163,6 +176,14 @@ export default function Dashboard() {
       : placementScore.overall >= 60 ? 'Good – Needs Focus'
       : 'Needs Improvement'
     : 'Not Calculated'
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">

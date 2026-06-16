@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { mockCodingProblems } from '@/data/mockData'
+import { getProblemsApi, getProblemApi, submitProblemApi, type CodingProblemData } from '@/services/api'
 import { cn } from '@/lib/utils'
 import {
   Play, CheckCircle2, XCircle, Lightbulb, Bot, ChevronLeft, ChevronRight,
-  Code2, Clock, Cpu, BarChart3, MessageSquare, Sparkles, Send, Menu
+  Code2, Clock, Cpu, BarChart3, MessageSquare, Sparkles, Send, Menu, Loader2
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -116,16 +116,6 @@ function TestCaseGrid({ results }: { results: { passed: boolean }[] }) {
   )
 }
 
-function getDifficultyColor(d: string) {
-  return DIFFICULTY_COLORS[d] || ''
-}
-
-function generateMockTestResults(problem: typeof mockCodingProblems[0]) {
-  return problem.testCases.map(() => ({
-    passed: Math.random() > 0.25,
-  }))
-}
-
 const MOCK_HINTS: Record<string, string> = {
   'CP001': 'Try using a hash map to store elements you have seen so far. For each element, check if target - current element exists in the map.',
   'CP002': 'Use a stack data structure. Push opening brackets, and when you see a closing bracket, check if it matches the top of the stack.',
@@ -162,7 +152,8 @@ const DEFAULT_AI_CHAT = [
 ]
 
 export default function CodingInterview() {
-  const [selectedProblem, setSelectedProblem] = useState(mockCodingProblems[0])
+  const [problems, setProblems] = useState<CodingProblemData[]>([])
+  const [selectedProblem, setSelectedProblem] = useState<CodingProblemData | null>(null)
   const [language, setLanguage] = useState('python')
   const [code, setCode] = useState('')
   const [showResults, setShowResults] = useState(false)
@@ -173,8 +164,25 @@ export default function CodingInterview() {
   const [difficultyFilter, setDifficultyFilter] = useState<string>('All')
   const [aiInput, setAiInput] = useState('')
   const [aiMessages, setAiMessages] = useState<{ role: 'user' | 'assistant'; text: string }[]>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [codeQuality, setCodeQuality] = useState(0)
+  const [timeComplexity, setTimeComplexity] = useState('')
+  const [spaceComplexity, setSpaceComplexity] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const resultsRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    async function fetchProblems() {
+      const result = await getProblemsApi()
+      if (result.data && result.data.problems.length > 0) {
+        setProblems(result.data.problems)
+        setSelectedProblem(result.data.problems[0])
+      }
+      setLoading(false)
+    }
+    fetchProblems()
+  }, [])
 
   useEffect(() => {
     if (selectedProblem) {
@@ -185,27 +193,46 @@ export default function CodingInterview() {
       setShowHint(false)
       setShowAiChat(false)
       setAiMessages([])
+      setCodeQuality(0)
     }
   }, [selectedProblem, language])
 
-  const filteredProblems = mockCodingProblems.filter(
+  const filteredProblems = problems.filter(
     (p) => difficultyFilter === 'All' || p.difficulty === difficultyFilter
   )
 
-  function handleRun() {
-    setShowResults(true)
-    setTestResults(generateMockTestResults(selectedProblem))
-    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+  async function handleRun() {
+    if (!selectedProblem) return
+    setSubmitting(true)
+    const result = await submitProblemApi(selectedProblem.id, { code, language })
+    if (result.data) {
+      setTestResults(result.data.test_results)
+      setTimeComplexity(result.data.complexity?.time || '')
+      setSpaceComplexity(result.data.complexity?.space || '')
+      setCodeQuality(result.data.quality_score || 0)
+      setShowResults(true)
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+    }
+    setSubmitting(false)
   }
 
-  function handleSubmit() {
-    setShowResults(true)
-    setTestResults(generateMockTestResults(selectedProblem))
-    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+  async function handleSubmit() {
+    if (!selectedProblem) return
+    setSubmitting(true)
+    const result = await submitProblemApi(selectedProblem.id, { code, language })
+    if (result.data) {
+      setTestResults(result.data.test_results)
+      setTimeComplexity(result.data.complexity?.time || '')
+      setSpaceComplexity(result.data.complexity?.space || '')
+      setCodeQuality(result.data.quality_score || 0)
+      setShowResults(true)
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+    }
+    setSubmitting(false)
   }
 
   function handleAiSend() {
-    if (!aiInput.trim()) return
+    if (!aiInput.trim() || !selectedProblem) return
     setAiMessages((prev) => [...prev, { role: 'user', text: aiInput }])
     setAiInput('')
     const chat = MOCK_AI_CHAT[selectedProblem.id] || DEFAULT_AI_CHAT
@@ -217,7 +244,22 @@ export default function CodingInterview() {
 
   const passedCount = testResults?.filter((r) => r.passed).length ?? 0
   const totalTests = testResults?.length ?? 0
-  const codeQuality = Math.min(100, 65 + passedCount * 5 + Math.floor(Math.random() * 10))
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-3.5rem)] bg-[#0F172A]">
+        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+      </div>
+    )
+  }
+
+  if (!selectedProblem) {
+    return (
+      <div className="flex items-center justify-center h-[calc(100vh-3.5rem)] bg-[#0F172A]">
+        <p className="text-gray-400">No problems available</p>
+      </div>
+    )
+  }
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)] bg-[#0F172A]">
@@ -292,7 +334,7 @@ export default function CodingInterview() {
           <h1 className="font-semibold text-base truncate text-white">{selectedProblem.title}</h1>
           <span className={cn(
             "px-2.5 py-0.5 rounded-full text-xs font-medium border",
-            getDifficultyColor(selectedProblem.difficulty)
+            DIFFICULTY_COLORS[selectedProblem.difficulty] || ''
           )}>
             {selectedProblem.difficulty}
           </span>
@@ -362,15 +404,19 @@ export default function CodingInterview() {
             <div className="flex items-center gap-2 p-3 border-t border-[#334155]/50 bg-[#0F172A]/80">
               <button
                 onClick={handleRun}
-                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors"
+                disabled={submitting}
+                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
               >
-                <Play className="h-3.5 w-3.5 mr-1.5" /> Run
+                {submitting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Play className="h-3.5 w-3.5 mr-1.5" />}
+                Run
               </button>
               <button
                 onClick={handleSubmit}
-                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors"
+                disabled={submitting}
+                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
               >
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Submit
+                {submitting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />}
+                Submit
               </button>
               <button
                 onClick={() => setShowHint(!showHint)}
@@ -557,20 +603,20 @@ export default function CodingInterview() {
                   <Clock className="h-4 w-4 text-gray-400" />
                   <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Time</span>
                   <span className="px-2 py-0.5 rounded text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
-                    {selectedProblem.optimalComplexity.time}
+                    {timeComplexity || selectedProblem.optimalComplexity.time}
                   </span>
                 </div>
                 <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 flex flex-col items-center gap-2">
                   <Cpu className="h-4 w-4 text-gray-400" />
                   <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Space</span>
                   <span className="px-2 py-0.5 rounded text-xs font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20">
-                    {selectedProblem.optimalComplexity.space}
+                    {spaceComplexity || selectedProblem.optimalComplexity.space}
                   </span>
                 </div>
                 <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 flex flex-col items-center gap-2">
                   <BarChart3 className="h-4 w-4 text-gray-400" />
                   <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Quality</span>
-                  <CircularGauge value={codeQuality} size={56} strokeWidth={6} />
+                  <CircularGauge value={codeQuality || 65} size={56} strokeWidth={6} />
                 </div>
               </div>
 
