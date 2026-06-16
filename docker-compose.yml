@@ -42,16 +42,5 @@ services:
         condition: service_started
     command: sh -c "npx prisma generate --no-hints 2>/dev/null; npx prisma db push --accept-data-loss 2>/dev/null; npx tsx prisma/seed.ts 2>/dev/null; npx tsx watch src/index.ts"
 
-  frontend:
-    image: node:22-alpine
-    working_dir: /app
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/app
-    depends_on:
-      - backend
-    command: sh -c "npx vite --host 0.0.0.0"
-
 volumes:
   pgdata:

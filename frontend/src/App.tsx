@@ -35,6 +35,8 @@ function App() {
         <Route path="/roadmap" element={<ProtectedRoute><Roadmap /></ProtectedRoute>} />
         <Route path="/resume" element={<ProtectedRoute><Resume /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/placement-twin" element={<ProtectedRoute><PlacementTwin /></ProtectedRoute>} />
+        <Route path="/placement-coach" element={<ProtectedRoute><PlacementCoach /></ProtectedRoute>} />
       </Route>
     </Routes>
   )

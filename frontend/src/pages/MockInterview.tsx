@@ -34,6 +34,7 @@ const interviewTypeConfig = {
 
 export default function MockInterview() {
   const { user } = useAuthStore()
+  const navigate = useNavigate()
   const [sessionActive, setSessionActive] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [interviewType, setInterviewType] = useState<string | null>(null)

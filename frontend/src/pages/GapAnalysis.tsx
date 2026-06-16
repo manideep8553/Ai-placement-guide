@@ -36,6 +36,41 @@ export default function GapAnalysis() {
     overallMatch: number
   } | null>(null)
 
+  const [leetcodeData, setLeetcodeData] = useState<LeetCodeData | null>(null)
+  const [leetcodeLoading, setLeetcodeLoading] = useState(false)
+  const [githubData, setGithubData] = useState<GitHubData | null>(null)
+  const [githubLoading, setGithubLoading] = useState(false)
+
+  const handleLeetcodeFetch = async () => {
+    if (!leetcodeUsername.trim()) return
+    setLeetcodeLoading(true)
+    await new Promise(r => setTimeout(r, 800))
+    setLeetcodeData({
+      solved: 87,
+      total: 150,
+      rating: 1624,
+      weakTopics: ['Dynamic Programming', 'Graphs', 'Segment Trees'],
+    })
+    setLeetcodeLoading(false)
+  }
+
+  const handleGithubFetch = async () => {
+    if (!githubUsername.trim()) return
+    setGithubLoading(true)
+    await new Promise(r => setTimeout(r, 800))
+    setGithubData({
+      repos: 24,
+      contributions: 876,
+      languages: [
+        { name: 'Python', percentage: 40, color: '#3572A5' },
+        { name: 'JavaScript', percentage: 30, color: '#F7DF1E' },
+        { name: 'TypeScript', percentage: 20, color: '#3178C6' },
+        { name: 'Java', percentage: 10, color: '#b07219' },
+      ],
+    })
+    setGithubLoading(false)
+  }
+
   const STEPS = ['Analyzing Resume', 'Evaluating Skills', 'Generating Report']
 
   const fileInputRef = useRef<HTMLInputElement>(null)

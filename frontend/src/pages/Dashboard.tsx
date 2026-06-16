@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
@@ -6,12 +6,9 @@ import { motion } from 'framer-motion'
 import {
   Target, TrendingUp, Mic, FileText, Map, Code2, ArrowRight,
   Sparkles, CheckCircle, Clock, BarChart3, Flame, ChevronUp,
-  ChevronDown, Lightbulb, Rocket, Award, AlertTriangle, XCircle, Check,
-  Play, Upload, ExternalLink, Loader2
+  ChevronDown, Lightbulb, Rocket, Award, AlertTriangle, XCircle, AlertCircle, Check,
+  Play, ExternalLink, Loader2
 } from 'lucide-react'
-import { useAuthStore } from '@/store/authStore'
-import { getPlacementScoreApi, getGapAnalysisResultApi } from '@/services/api'
-import { mockStudents, mockGapAnalysisResult } from '@/data/mockData'
 import { cn } from '@/lib/utils'
 import { useDashboard } from '@/hooks/useDashboard'
 
@@ -130,46 +127,31 @@ function EmptyState({ title, description, action }: { title: string; description
   )
 }
 
+const getGreeting = () => {
+  const h = new Date().getHours()
+  if (h < 12) return 'Good morning'
+  if (h < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+const aiInsights = [
+  'Based on your progress, focus on Dynamic Programming to improve your DSA score by 15%.',
+  'Your communication score improved by 8% this week. Keep practicing mock interviews!',
+  'Companies like Amazon and Google value system design skills — start preparing early.',
+]
+
 export default function Dashboard() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
-  const [placementScore, setPlacementScore] = useState(student.placementScore)
-  const [companyChances, setCompanyChances] = useState(student.companyChances)
-  const [streak, setStreak] = useState(student.streak)
-  const [loading, setLoading] = useState(true)
+  const { data, loading, error, refetch } = useDashboard()
   const [insights, setInsights] = useState(0)
+  const greeting = getGreeting()
 
-  useEffect(() => {
-    async function fetchData() {
-      if (!user) { setLoading(false); return }
-      const result = await getPlacementScoreApi(user.id)
-      if (result.data) {
-        setPlacementScore({
-          overall: result.data.overall,
-          aptitude: result.data.aptitude,
-          dsa: result.data.dsa,
-          coreSubjects: result.data.coreSubjects,
-          communication: result.data.communication,
-          resume: result.data.resumeScore,
-        })
-        setCompanyChances(
-          result.data.companyChances.map(c => ({
-            company: c.companyName,
-            chance: c.chancePercent,
-          }))
-        )
-      }
-      setLoading(false)
-    }
-    fetchData()
-  }, [user])
-
-  const todayTasks = [
-    { label: 'Solve 3 Array Problems', done: false },
-    { label: 'Attend Mock Interview', done: false },
-    { label: 'Update Resume', done: false },
-    { label: 'Complete Aptitude Quiz', done: false },
-  ]
+  const placementScore = data?.placementScore ?? null
+  const companyChances = data?.companyChances ?? []
+  const streak = data?.streak ?? null
+  const progress = data?.progress ?? null
+  const gapAnalysis = data?.gapAnalysis ?? null
+  const todayTasks = data?.todayTasks ?? []
 
   const readinessLabel = placementScore
     ? placementScore.overall >= 80 ? 'Excellent'
@@ -177,29 +159,26 @@ export default function Dashboard() {
       : 'Needs Improvement'
     : 'Not Calculated'
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
-      </div>
-    )
-  }
+  if (loading) return <DashboardSkeleton />
+  if (error) return <DashboardError message={error} onRetry={refetch} />
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Greeting */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">{greeting}, {user.name.split(' ')[0]} 👋</h1>
+          <h1 className="text-2xl font-bold text-white">{greeting}, {data?.user.name.split(' ')[0] ?? 'there'} 👋</h1>
           <p className="text-sm text-gray-400 mt-1">
-            {user.college && `${user.college}`}{user.branch && ` • ${user.branch}`}
-            {user.graduationYear && ` • Class of ${user.graduationYear}`}
+            {data?.user.college && `${data.user.college}`}{data?.user.branch && ` • ${data.user.branch}`}
+            {data?.user.graduationYear && ` • Class of ${data.user.graduationYear}`}
           </p>
         </div>
-        <Badge className="gap-2 px-4 py-2 text-sm bg-[#1E293B] border-[#334155] text-gray-300">
-          <Flame className="w-4 h-4 text-orange-400" />
-          <span className="font-semibold">{streak.current} day streak</span>
-        </Badge>
+        {streak && (
+          <Badge className="gap-2 px-4 py-2 text-sm bg-[#1E293B] border-[#334155] text-gray-300">
+            <Flame className="w-4 h-4 text-orange-400" />
+            <span className="font-semibold">{streak.current} day streak</span>
+          </Badge>
+        )}
       </motion.div>
 
       {/* Row 1: Readiness + Chances */}
@@ -228,12 +207,12 @@ export default function Dashboard() {
                 </div>
                 <div className="space-y-3.5">
                   {([
-                    ['Communication', placementScore.communication, 'up'],
-                    ['DSA', placementScore.dsa, 'down'],
-                    ['Core Subjects', placementScore.coreSubjects, 'up'],
-                    ['Resume', placementScore.resumeScore, 'stable'],
-                    ['Aptitude', placementScore.aptitude, 'up'],
-                  ] as const).map(([label, value, trend], i) => (
+                    ['Communication', placementScore.communication, 'up' as const],
+                    ['DSA', placementScore.dsa, 'down' as const],
+                    ['Core Subjects', placementScore.coreSubjects, 'up' as const],
+                    ['Resume', placementScore.resumeScore, 'stable' as const],
+                    ['Aptitude', placementScore.aptitude, 'up' as const],
+                  ]).map(([label, value, trend], i) => (
                     <motion.div key={label} initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.2 + i * 0.08 }}>
                       <SubScoreRow label={label} value={value} trend={trend} />
@@ -406,48 +385,57 @@ export default function Dashboard() {
               <Award className="w-5 h-5 text-indigo-400" />
               <h2 className="text-lg font-semibold text-white">Progress</h2>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: 'Problems Solved', value: String(progress.problemsSolved), icon: Code2, color: 'text-cyan-400 bg-cyan-500/10' },
-                { label: 'Mock Interviews', value: String(progress.mockInterviews), icon: Mic, color: 'text-violet-400 bg-violet-500/10' },
-                { label: 'Roadmap Completion', value: `${Math.round(progress.roadmapCompletion)}%`, icon: Map, color: 'text-emerald-400 bg-emerald-500/10' },
-                { label: 'Resume Score', value: progress.resumeScore !== null ? `${Math.round(progress.resumeScore)}%` : '--', icon: FileText, color: 'text-amber-400 bg-amber-500/10' },
-              ].map((m, i) => (
-                <motion.div key={m.label} initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.06 }}
-                  className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 text-center">
-                  <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center mx-auto mb-2", m.color)}>
-                    <m.icon className="w-4.5 h-4.5" />
+            {progress ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: 'Problems Solved', value: String(progress.problemsSolved), icon: Code2, color: 'text-cyan-400 bg-cyan-500/10' },
+                    { label: 'Mock Interviews', value: String(progress.mockInterviews), icon: Mic, color: 'text-violet-400 bg-violet-500/10' },
+                    { label: 'Roadmap Completion', value: `${Math.round(progress.roadmapCompletion)}%`, icon: Map, color: 'text-emerald-400 bg-emerald-500/10' },
+                    { label: 'Resume Score', value: progress.resumeScore !== null ? `${Math.round(progress.resumeScore)}%` : '--', icon: FileText, color: 'text-amber-400 bg-amber-500/10' },
+                  ].map((m, i) => (
+                    <motion.div key={m.label} initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.06 }}
+                      className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 text-center">
+                      <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center mx-auto mb-2", m.color)}>
+                        <m.icon className="w-4.5 h-4.5" />
+                      </div>
+                      <p className="text-xl font-bold text-white">{m.value}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{m.label}</p>
+                    </motion.div>
+                  ))}
+                </div>
+                <div className="mt-4 p-4 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-400">Weekly Activity</span>
+                    <span className={cn(
+                      'font-medium',
+                      progress.weeklyGrowth > 0 ? 'text-emerald-400' : progress.weeklyGrowth < 0 ? 'text-rose-400' : 'text-gray-400'
+                    )}>
+                      {progress.weeklyGrowth > 0 ? '+' : ''}{progress.weeklyGrowth}%
+                    </span>
                   </div>
-                  <p className="text-xl font-bold text-white">{m.value}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{m.label}</p>
-                </motion.div>
-              ))}
-            </div>
-            <div className="mt-4 p-4 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-400">Weekly Activity</span>
-                <span className={cn(
-                  'font-medium',
-                  progress.weeklyGrowth > 0 ? 'text-emerald-400' : progress.weeklyGrowth < 0 ? 'text-rose-400' : 'text-gray-400'
-                )}>
-                  {progress.weeklyGrowth > 0 ? '+' : ''}{progress.weeklyGrowth}%
-                </span>
-              </div>
-              <div className="flex items-end gap-1 h-16">
-                {progress.weeklyActivity.map((h, i) => {
-                  const maxVal = Math.max(...progress.weeklyActivity, 1)
-                  const height = Math.max(4, (h / maxVal) * 100)
-                  return (
-                    <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-indigo-500/40 to-indigo-400/20"
-                      style={{ height: `${height}%`, transition: 'height 0.5s ease' }} />
-                  )
-                })}
-              </div>
-              <div className="flex justify-between text-xs text-gray-500 mt-1">
-                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-              </div>
-            </div>
+                  <div className="flex items-end gap-1 h-16">
+                    {progress.weeklyActivity.map((h, i) => {
+                      const maxVal = Math.max(...progress.weeklyActivity, 1)
+                      const height = Math.max(4, (h / maxVal) * 100)
+                      return (
+                        <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-indigo-500/40 to-indigo-400/20"
+                          style={{ height: `${height}%`, transition: 'height 0.5s ease' }} />
+                      )
+                    })}
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <EmptyState
+                title="No progress data yet"
+                description="Start practicing to see your progress."
+              />
+            )}
           </div>
         </motion.div>
       </div>
@@ -485,30 +473,39 @@ export default function Dashboard() {
               <Clock className="w-5 h-5 text-indigo-400" />
               <h2 className="text-lg font-semibold text-white">Today's Tasks</h2>
             </div>
-            <div className="space-y-3">
-              {todayTasks.map((task, i) => (
-                <motion.div key={task.label} initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + i * 0.08 }}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 hover:border-indigo-500/20 transition-colors cursor-pointer">
-                  <div className="w-5 h-5 rounded-md border-2 border-gray-600 flex items-center justify-center">
-                    {task.done && <Check className="w-3 h-3 text-indigo-400" />}
-                  </div>
-                  <span className={cn("text-sm", task.done ? "text-gray-600 line-through" : "text-gray-300")}>{task.label}</span>
-                </motion.div>
-              ))}
-            </div>
-            <div className="mt-4 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
-              <p className="text-xs text-gray-400">Progress</p>
-              <div className="flex items-center gap-3 mt-2">
-                <div className="flex-1 h-2 rounded-full bg-[#1E293B] overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
-                    style={{ width: `${(todayTasks.filter(t => t.done).length / Math.max(todayTasks.length, 1)) * 100}%` }} />
+            {todayTasks.length > 0 ? (
+              <>
+                <div className="space-y-3">
+                  {todayTasks.map((task, i) => (
+                    <motion.div key={task.label} initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + i * 0.08 }}
+                      className="flex items-center gap-3 p-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 hover:border-indigo-500/20 transition-colors cursor-pointer">
+                      <div className="w-5 h-5 rounded-md border-2 border-gray-600 flex items-center justify-center">
+                        {task.done && <Check className="w-3 h-3 text-indigo-400" />}
+                      </div>
+                      <span className={cn("text-sm", task.done ? "text-gray-600 line-through" : "text-gray-300")}>{task.label}</span>
+                    </motion.div>
+                  ))}
                 </div>
-                <span className="text-sm font-medium text-gray-300">
-                  {todayTasks.filter(t => t.done).length}/{todayTasks.length}
-                </span>
-              </div>
-            </div>
+                <div className="mt-4 p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                  <p className="text-xs text-gray-400">Progress</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="flex-1 h-2 rounded-full bg-[#1E293B] overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
+                        style={{ width: `${(todayTasks.filter(t => t.done).length / Math.max(todayTasks.length, 1)) * 100}%` }} />
+                    </div>
+                    <span className="text-sm font-medium text-gray-300">
+                      {todayTasks.filter(t => t.done).length}/{todayTasks.length}
+                    </span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <EmptyState
+                title="No tasks for today"
+                description="Complete some activities to get personalized tasks."
+              />
+            )}
           </div>
         </motion.div>
       </div>
