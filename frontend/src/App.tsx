@@ -14,6 +14,9 @@ import Layout from './components/Layout'
 import InterviewReplay from './pages/InterviewReplay'
 import PlacementTwin from './pages/PlacementTwin'
 import PlacementCoach from './pages/PlacementCoach'
+import AssessmentList from './pages/AssessmentList'
+import AssessmentPlayer from './pages/AssessmentPlayer'
+import AssessmentResults from './pages/AssessmentResults'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
@@ -37,6 +40,9 @@ function App() {
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="/placement-twin" element={<ProtectedRoute><PlacementTwin /></ProtectedRoute>} />
         <Route path="/placement-coach" element={<ProtectedRoute><PlacementCoach /></ProtectedRoute>} />
+        <Route path="/assessments" element={<ProtectedRoute><AssessmentList /></ProtectedRoute>} />
+        <Route path="/assessment/:id" element={<ProtectedRoute><AssessmentPlayer /></ProtectedRoute>} />
+        <Route path="/assessment-results/:attemptId" element={<ProtectedRoute><AssessmentResults /></ProtectedRoute>} />
       </Route>
     </Routes>
   )

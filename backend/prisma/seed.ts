@@ -6,6 +6,10 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
 
 async function main() {
+  await prisma.assessmentAnswer.deleteMany()
+  await prisma.assessmentAttempt.deleteMany()
+  await prisma.assessmentQuestion.deleteMany()
+  await prisma.assessment.deleteMany()
   await prisma.companyChance.deleteMany()
   await prisma.placementScore.deleteMany()
   await prisma.profile.deleteMany()
@@ -118,6 +122,10 @@ async function main() {
   }
 
   console.log(`Created ${problems.length} problems`)
+
+  console.log('Seeding assessment data...')
+  const { seedAssessments } = await import('./seed-assessments')
+  await seedAssessments()
 }
 
 main()

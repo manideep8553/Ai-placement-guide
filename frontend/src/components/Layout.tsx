@@ -4,7 +4,7 @@ import { useAuthStore } from '@/store/authStore'
 import {
   LayoutDashboard, Building2, BarChart3, Mic, Code2, Map, FileText,
   Bell, Search, Menu, X, ChevronLeft, Moon, Sun, Settings, LogOut,
-  ChevronDown, Bot, Brain
+  ChevronDown, Bot, Brain, ClipboardCheck
 } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,7 @@ const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/company-prep', icon: Building2, label: 'Company Prep' },
   { to: '/gap-analysis', icon: BarChart3, label: 'Gap Analysis' },
+  { to: '/assessments', icon: ClipboardCheck, label: 'Mock Assessments' },
   { to: '/resume', icon: FileText, label: 'Resume Analyzer' },
   { to: '/coding-interview', icon: Code2, label: 'AI Coding Interview' },
   { to: '/mock-interview', icon: Mic, label: 'Voice Mock Interview' },

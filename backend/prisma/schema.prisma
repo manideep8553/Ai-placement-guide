@@ -26,6 +26,7 @@ model User {
   gapAnalyses        GapAnalysis[]
   resumes            Resume[]
   userActivities     UserActivity[]
+  assessmentAttempts AssessmentAttempt[]
 }
 
 model Profile {
@@ -200,4 +201,71 @@ model UserActivity {
 
   @@index([userId, createdAt])
   @@index([userId, type])
+}
+
+model Assessment {
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  type           String   // APTITUDE | TECHNICAL | CODING | FULL_PLACEMENT | PRODUCT_COMPANY
+  duration       Int      // minutes
+  totalQuestions Int      @default(0)
+  totalMarks     Int      @default(0)
+  passingMarks   Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  questions AssessmentQuestion[]
+  attempts  AssessmentAttempt[]
+}
+
+model AssessmentQuestion {
+  id           String   @id @default(uuid())
+  assessmentId String
+  questionType String   // MCQ | CODING
+  questionData Json     // { text, options, correctAnswer, explanation } for MCQ
+                        // { title, description, constraints, sampleInput, sampleOutput, testCases, starterCode } for CODING
+  difficulty   String   // EASY | MEDIUM | HARD
+  topic        String
+  marks        Int      @default(1)
+  orderIndex   Int
+
+  assessment Assessment          @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  answers    AssessmentAnswer[]
+}
+
+model AssessmentAttempt {
+  id            String    @id @default(uuid())
+  userId        String
+  assessmentId  String
+  status        String    // IN_PROGRESS | SUBMITTED | EVALUATED
+  score         Int?
+  totalMarks    Int?
+  accuracy      Float?
+  startedAt     DateTime  @default(now())
+  submittedAt   DateTime?
+  timeTaken     Int?      // seconds
+  sectionScores Json?     // [{ section, score, total }]
+  strengths     String[]  @default([])
+  weaknesses    String[]  @default([])
+  suggestions   Json?     // [{ area, suggestion }]
+
+  assessment Assessment          @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers    AssessmentAnswer[]
+}
+
+model AssessmentAnswer {
+  id            String  @id @default(uuid())
+  attemptId     String
+  questionId    String
+  answer        String? // selected option label or submitted code
+  isCorrect     Boolean?
+  marksObtained Float?
+  reviewed      Boolean @default(false)
+  timeSpent     Int?    // seconds
+
+  attempt  AssessmentAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question AssessmentQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }

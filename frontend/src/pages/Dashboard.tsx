@@ -224,7 +224,7 @@ export default function Dashboard() {
               <EmptyState
                 title="No score calculated yet"
                 description="Complete assessments to get your placement readiness score."
-                action={{ label: 'Take Assessment', path: '/placement-twin' }}
+                action={{ label: 'Take Assessment', path: '/assessments' }}
               />
             )}
           </div>

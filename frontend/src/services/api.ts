@@ -431,3 +431,93 @@ export interface DashboardData {
 export function fetchDashboard() {
   return request<DashboardData>('/dashboard')
 }
+
+export interface AssessmentData {
+  id: string
+  title: string
+  description: string
+  type: string
+  duration: number
+  totalQuestions: number
+  totalMarks: number
+  passingMarks: number
+  isActive: boolean
+  createdAt: string
+  _count?: { questions: number }
+}
+
+export interface AssessmentQuestionData {
+  id: string
+  assessmentId: string
+  questionType: string
+  questionData: any
+  difficulty: string
+  topic: string
+  marks: number
+  orderIndex: number
+}
+
+export interface AssessmentDetailData extends AssessmentData {
+  questions: AssessmentQuestionData[]
+}
+
+export interface AssessmentAttemptData {
+  id: string
+  userId: string
+  assessmentId: string
+  status: string
+  score: number | null
+  totalMarks: number | null
+  accuracy: number | null
+  startedAt: string
+  submittedAt: string | null
+  timeTaken: number | null
+  sectionScores: any | null
+  strengths: string[]
+  weaknesses: string[]
+  suggestions: any | null
+  assessment?: { id: string; title: string; type: string }
+  answers?: AssessmentAnswerData[]
+}
+
+export interface AssessmentAnswerData {
+  id: string
+  attemptId: string
+  questionId: string
+  answer: string | null
+  isCorrect: boolean | null
+  marksObtained: number | null
+  reviewed: boolean
+  question?: AssessmentQuestionData
+}
+
+export function getAssessmentsApi() {
+  return request<AssessmentData[]>('/assessments')
+}
+
+export function getAssessmentApi(id: string) {
+  return request<AssessmentDetailData>(`/assessments/${id}`)
+}
+
+export function startAssessmentApi(id: string) {
+  return request<AssessmentAttemptData>(`/assessments/${id}/start`, { method: 'POST' })
+}
+
+export function submitAssessmentApi(id: string, data: { attemptId: string; answers: { questionId: string; answer: string }[]; timeTaken: number }) {
+  return request<AssessmentAttemptData>(`/assessments/${id}/submit`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function getAssessmentAttemptsApi(id: string) {
+  return request<AssessmentAttemptData[]>(`/assessments/${id}/attempts`)
+}
+
+export function getAttemptApi(attemptId: string) {
+  return request<AssessmentAttemptData>(`/assessments/attempt/${attemptId}`)
+}
+
+export function getAllAttemptsApi() {
+  return request<AssessmentAttemptData[]>('/assessments/attempts/all')
+}
