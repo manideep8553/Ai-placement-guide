@@ -47,6 +47,7 @@ import interviewRoutes from './routes/interview'
 import codingRoutes from './routes/coding'
 import roadmapRoutes from './routes/roadmap'
 import resumeRoutes from './routes/resume'
+import dashboardRoutes from './routes/dashboard'
 
 app.use('/api/auth', authRoutes)
 app.use('/api/score', scoreRoutes)
@@ -56,6 +57,7 @@ app.use('/api/interview', interviewRoutes)
 app.use('/api/problems', codingRoutes)
 app.use('/api/roadmap', roadmapRoutes)
 app.use('/api/resume', resumeRoutes)
+app.use('/api/dashboard', dashboardRoutes)
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(err)

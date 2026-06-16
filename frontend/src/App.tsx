@@ -11,6 +11,9 @@ import Settings from './pages/Settings'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Layout from './components/Layout'
+import InterviewReplay from './pages/InterviewReplay'
+import PlacementTwin from './pages/PlacementTwin'
+import PlacementCoach from './pages/PlacementCoach'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()

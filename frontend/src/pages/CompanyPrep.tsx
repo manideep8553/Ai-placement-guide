@@ -42,15 +42,6 @@ function getCategoryBadge(category: string) {
   }
 }
 
-function getDifficultyColor(difficulty: string) {
-  switch (difficulty) {
-    case 'Easy': return 'bg-emerald-500'
-    case 'Medium': return 'bg-amber-500'
-    case 'Hard': return 'bg-rose-500'
-    default: return 'bg-primary'
-  }
-}
-
 function generateRoadmap(topics: { name: string }[]) {
   const weekSize = Math.max(2, Math.ceil(topics.length / 4))
   const weeks: { week: number; topic: string; resources: number; hours: number }[] = []

@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { uploadResumeApi, analyzeResumeApi, rewriteBulletApi, type ResumeAnalysisData } from '@/services/api'
