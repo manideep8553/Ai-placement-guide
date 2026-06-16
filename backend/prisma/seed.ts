@@ -1,9 +1,11 @@
 import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL })
 const prisma = new PrismaClient({ adapter })
+const PASSWORD = bcrypt.hashSync('password123', 10)
 
 async function main() {
   await prisma.assessmentAnswer.deleteMany()
@@ -27,35 +29,35 @@ async function main() {
     prisma.user.create({
       data: {
         id: 'user-1', email: 'rahul@college.edu', name: 'Rahul Kumar',
-        passwordHash: '$2a$10$dummy', college: 'IIT Bombay', branch: 'CSE', graduationYear: 2025,
+        passwordHash: PASSWORD, college: 'IIT Bombay', branch: 'CSE', graduationYear: 2025,
         profile: { create: { currentLevel: 'Intermediate', targetCompany: 'Google', leetcodeUsername: 'rahul_k', githubUsername: 'rahulk' } }
       }
     }),
     prisma.user.create({
       data: {
         id: 'user-2', email: 'priya@college.edu', name: 'Priya Sharma',
-        passwordHash: '$2a$10$dummy', college: 'NIT Trichy', branch: 'IT', graduationYear: 2025,
+        passwordHash: PASSWORD, college: 'NIT Trichy', branch: 'IT', graduationYear: 2025,
         profile: { create: { currentLevel: 'Advanced', targetCompany: 'Microsoft', leetcodeUsername: 'priya_s', githubUsername: 'priyasharma' } }
       }
     }),
     prisma.user.create({
       data: {
         id: 'user-3', email: 'amit@college.edu', name: 'Amit Patel',
-        passwordHash: '$2a$10$dummy', college: 'BITS Pilani', branch: 'ECE', graduationYear: 2026,
+        passwordHash: PASSWORD, college: 'BITS Pilani', branch: 'ECE', graduationYear: 2026,
         profile: { create: { currentLevel: 'Beginner', targetCompany: 'TCS', leetcodeUsername: 'amit_p', githubUsername: 'amitpatel' } }
       }
     }),
     prisma.user.create({
       data: {
         id: 'user-4', email: 'sneha@college.edu', name: 'Sneha Reddy',
-        passwordHash: '$2a$10$dummy', college: 'IIIT Hyderabad', branch: 'CSE', graduationYear: 2025,
+        passwordHash: PASSWORD, college: 'IIIT Hyderabad', branch: 'CSE', graduationYear: 2025,
         profile: { create: { currentLevel: 'Advanced', targetCompany: 'Amazon', leetcodeUsername: 'sneha_r', githubUsername: 'snehareddy' } }
       }
     }),
     prisma.user.create({
       data: {
         id: 'user-5', email: 'vikram@college.edu', name: 'Vikram Singh',
-        passwordHash: '$2a$10$dummy', college: 'VIT Vellore', branch: 'CSE', graduationYear: 2026,
+        passwordHash: PASSWORD, college: 'VIT Vellore', branch: 'CSE', graduationYear: 2026,
         profile: { create: { currentLevel: 'Intermediate', targetCompany: 'Infosys', leetcodeUsername: 'vikram_s', githubUsername: 'vikramsingh' } }
       }
     }),

@@ -721,9 +721,11 @@ async function main() {
   console.log('Assessment seeding completed!')
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(() => prisma.$disconnect())
+if (require.main === module || process.argv[1]?.endsWith('seed-assessments.ts')) {
+  main()
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(() => prisma.$disconnect())
+}

@@ -186,7 +186,7 @@ export default function CodingInterview() {
 
   useEffect(() => {
     if (selectedProblem) {
-      const starter = selectedProblem.starterCode[language as keyof typeof selectedProblem.starterCode]
+      const starter = selectedProblem.starterCode?.[language as keyof typeof selectedProblem.starterCode]
       setCode(starter || '')
       setTestResults(null)
       setShowResults(false)
@@ -378,7 +378,7 @@ export default function CodingInterview() {
                 <div>
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Examples</h4>
                   <div className="space-y-3">
-                    {selectedProblem.examples.map((ex, i) => (
+                    {(selectedProblem.examples || []).map((ex, i) => (
                       <div key={i} className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 overflow-hidden">
                         <div className="p-3 space-y-2">
                           <div>

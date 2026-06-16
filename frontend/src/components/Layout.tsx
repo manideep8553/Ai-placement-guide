@@ -31,6 +31,12 @@ export default function Layout() {
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [showSearch, setShowSearch] = useState(false)
+
+  const filteredNavItems = navItems.filter(item =>
+    item.label.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
@@ -169,8 +175,26 @@ export default function Layout() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
               <Input
                 placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setShowSearch(true) }}
+                onFocus={() => setShowSearch(true)}
+                onBlur={() => setTimeout(() => setShowSearch(false), 200)}
                 className="w-64 lg:w-80 pl-9 h-9 text-sm rounded-xl bg-[#1E293B] border-0 text-gray-300 placeholder:text-gray-600 focus:ring-1 focus:ring-indigo-500/50"
               />
+              {showSearch && searchQuery && filteredNavItems.length > 0 && (
+                <div className="absolute top-full mt-2 left-0 right-0 bg-[#1E293B] border border-[#334155] rounded-xl shadow-xl overflow-hidden z-50">
+                  {filteredNavItems.map((item) => (
+                    <button
+                      key={item.to}
+                      onMouseDown={() => { navigate(item.to); setSearchQuery(''); setShowSearch(false) }}
+                      className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <item.icon className="w-4 h-4 text-gray-500" />
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2">
