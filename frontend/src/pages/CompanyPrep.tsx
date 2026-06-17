@@ -3,9 +3,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { getCompaniesApi, getCompanyApi, type CompanyData, type CompanyDetailData } from '@/services/api'
-import { mockCompanies } from '@/data/mockData'
 import { cn } from '@/lib/utils'
-import { X, Building2, Clock, ChevronDown, ChevronRight, CheckCircle, Circle, BarChart3, ExternalLink, Loader2 } from 'lucide-react'
+import { X, Building2, Clock, ChevronDown, ChevronRight, CheckCircle, Circle, BarChart3, Loader2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const companyColors = [

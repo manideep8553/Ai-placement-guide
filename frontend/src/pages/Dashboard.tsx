@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
@@ -206,18 +206,21 @@ export default function Dashboard() {
                   <CircularGauge value={placementScore.overall} />
                 </div>
                 <div className="space-y-3.5">
-                  {([
-                    ['Communication', placementScore.communication, 'up' as const],
-                    ['DSA', placementScore.dsa, 'down' as const],
-                    ['Core Subjects', placementScore.coreSubjects, 'up' as const],
-                    ['Resume', placementScore.resumeScore, 'stable' as const],
-                    ['Aptitude', placementScore.aptitude, 'up' as const],
-                  ]).map(([label, value, trend], i) => (
-                    <motion.div key={label} initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.2 + i * 0.08 }}>
-                      <SubScoreRow label={label} value={value} trend={trend} />
-                    </motion.div>
-                  ))}
+                  {(() => {
+                    const scoreRows: [string, number, 'up' | 'down' | 'stable'][] = [
+                      ['Communication', placementScore.communication, 'up'],
+                      ['DSA', placementScore.dsa, 'down'],
+                      ['Core Subjects', placementScore.coreSubjects, 'up'],
+                      ['Resume', placementScore.resumeScore, 'stable'],
+                      ['Aptitude', placementScore.aptitude, 'up'],
+                    ]
+                    return scoreRows.map(([label, value, trend], i) => (
+                      <motion.div key={label} initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: 0.2 + i * 0.08 }}>
+                        <SubScoreRow label={label} value={value} trend={trend} />
+                      </motion.div>
+                    ))
+                  })()}
                 </div>
               </div>
             ) : (

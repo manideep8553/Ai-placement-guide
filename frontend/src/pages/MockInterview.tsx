@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { useAuthStore } from '@/store/authStore'
 import { getCompaniesApi, startInterviewApi, endInterviewApi, type CompanyData } from '@/services/api'
-import { Loader2 } from 'lucide-react'
 
 const mockQuestions = {
   HR: ["Tell me about yourself", "Why do you want to work here?", "What are your strengths and weaknesses?"],
@@ -33,7 +32,7 @@ const interviewTypeConfig = {
 }
 
 export default function MockInterview() {
-  const { user } = useAuthStore()
+  useAuthStore()
   const navigate = useNavigate()
   const [sessionActive, setSessionActive] = useState(false)
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -46,7 +45,7 @@ export default function MockInterview() {
   const [transcript, setTranscript] = useState<string[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [companies, setCompanies] = useState<CompanyData[]>([])
-  const [loading, setLoading] = useState(true)
+
 
   const transcriptRef = useRef<HTMLDivElement>(null)
 
@@ -54,7 +53,6 @@ export default function MockInterview() {
     async function init() {
       const result = await getCompaniesApi()
       if (result.data) setCompanies(result.data)
-      setLoading(false)
     }
     init()
   }, [])

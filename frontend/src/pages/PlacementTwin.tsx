@@ -3,13 +3,13 @@ import { motion } from 'framer-motion'
 import {
   Brain, Code2, FileText, Mic, Target, TrendingUp, Rocket,
   Lightbulb, ChevronUp, ChevronDown, Zap, Award, CheckCircle, ArrowRight,
-  Server, MessageSquare, Clock, AlertCircle, Loader2, HelpCircle, BarChart3,
+  Server, MessageSquare, Clock, AlertCircle, Loader2, BarChart3,
   Star
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { getPlacementTwinApi, type PlacementTwinResponse } from '@/services/api'
+import { getPlacementTwinApi } from '@/services/api'
 import {
   mockSimulationScenarios,
   applyScenarioProfile,
@@ -102,21 +102,6 @@ function ScoreCard({ label, value, icon: Icon, color, trend, details }: {
   )
 }
 
-function ProbabilityBar({ label, value, color }: { label: string; value: number; color: string }) {
-  return (
-    <div className="space-y-1.5">
-      <div className="flex justify-between text-sm items-center">
-        <span className="text-gray-400">{label}</span>
-        <span className={cn('font-semibold', color)}>{value}%</span>
-      </div>
-      <div className="h-2.5 rounded-full bg-[#0F172A] overflow-hidden">
-        <div className={cn('h-full rounded-full transition-all duration-700', color.replace('text-', 'bg-'))}
-          style={{ width: `${value}%` }} />
-      </div>
-    </div>
-  )
-}
-
 function DummyCard({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
     <div className={cn("rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl", className)}>
@@ -126,11 +111,11 @@ function DummyCard({ className, children }: { className?: string; children: Reac
 }
 
 function Skeleton() {
-  return <div className="animate-pulse rounded-md bg-[#1E293B]/50" />
+  return <div className="animate-pulse rounded-md bg-[#1E293B]/50 h-24 w-full" />
 }
 
 function SkeletonCard() {
-  return <DummyCard><Skeleton className="h-24 w-full" /></DummyCard>
+  return <DummyCard><Skeleton /></DummyCard>
 }
 
 export default function PlacementTwin() {

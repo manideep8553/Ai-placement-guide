@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Award, CheckCircle, XCircle, AlertTriangle, ArrowRight,
-  Target, TrendingUp, Lightbulb, BarChart3, AlertCircle, FileText, Code2
+  Target, TrendingUp, Lightbulb, BarChart3, AlertCircle, FileText
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -216,7 +216,7 @@ export default function AssessmentResults() {
             <BarChart3 className="w-5 h-5 text-indigo-400" /> Section-wise Performance
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {sectionScores.map((section, i) => {
+            {sectionScores.map((section) => {
               const pct = section.total > 0 ? Math.round((section.score / section.total) * 100) : 0
               const barColor = pct >= 70 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-500' : 'bg-rose-500'
               return (

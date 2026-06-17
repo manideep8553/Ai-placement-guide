@@ -78,7 +78,7 @@ export default function Resume() {
   const [bullet, setBullet] = useState('')
   const [rewritten, setRewritten] = useState<string | null>(null)
   const [rewriting, setRewriting] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [, setUploading] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [analysis, setAnalysis] = useState<ResumeAnalysisData | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)

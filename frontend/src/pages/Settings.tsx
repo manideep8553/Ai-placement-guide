@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { motion } from 'framer-motion'
@@ -15,10 +14,9 @@ import {
   User, Lock, Bell, Palette, Shield, Save, Loader2, CheckCircle,
   AlertCircle, Eye, EyeOff, Moon, Sun, LogOut, Trash2
 } from 'lucide-react'
-import { cn } from '@/lib/utils'
 
 export default function Settings() {
-  const { user, updateUser, logout } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const { dark, toggleDark } = useThemeStore()
   const [loading, setLoading] = useState(false)
   const [profileLoading, setProfileLoading] = useState(true)

@@ -305,7 +305,7 @@ export default function Roadmap() {
                             <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" /> {w.resourceCount} resources</span>
                             <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {w.estimatedHours}h</span>
                           </div>
-                          {w.resources.slice(0, 3).map((r, ri) => (
+                          {(w.resources || []).slice(0, 3).map((r, ri) => (
                             <div key={ri} className="flex items-center gap-2 text-xs text-gray-400">
                               <div className={cn(
                                 'w-1.5 h-1.5 rounded-full shrink-0',

@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useAuthStore } from '@/store/authStore'
-import { uploadResumeApi, startGapAnalysisApi, getGapAnalysisResultApi } from '@/services/api'
-import { Upload, Search, Loader2, AlertTriangle, CheckCircle, XCircle, Download, ArrowRight, FileText, Code2, GitBranch, BookOpen } from 'lucide-react'
+import { uploadResumeApi, startGapAnalysisApi } from '@/services/api'
+import { Upload, Search, Loader2, AlertTriangle, CheckCircle, XCircle, Download, ArrowRight, FileText, Code2, GitBranch } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 interface LeetCodeData {
@@ -18,7 +18,7 @@ interface GitHubData {
 }
 
 export default function GapAnalysis() {
-  const { user } = useAuthStore()
+  useAuthStore()
   const [resumeId, setResumeId] = useState<string | null>(null)
   const [resumeUploaded, setResumeUploaded] = useState(false)
   const [parsedSkills, setParsedSkills] = useState<string[]>([])

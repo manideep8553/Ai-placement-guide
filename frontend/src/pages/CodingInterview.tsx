@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { getProblemsApi, getProblemApi, submitProblemApi, type CodingProblemData } from '@/services/api'
+import { getProblemsApi, submitProblemApi, type CodingProblemData } from '@/services/api'
 import { cn } from '@/lib/utils'
 import {
   Play, CheckCircle2, XCircle, Lightbulb, Bot, ChevronLeft, ChevronRight,
