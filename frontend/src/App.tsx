@@ -16,6 +16,7 @@ import PlacementCoach from './pages/PlacementCoach'
 import AssessmentList from './pages/AssessmentList'
 import AssessmentPlayer from './pages/AssessmentPlayer'
 import AssessmentResults from './pages/AssessmentResults'
+import AssessmentDashboard from './pages/AssessmentDashboard'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user } = useAuthStore()
@@ -42,6 +43,7 @@ function App() {
         <Route path="/assessments" element={<ProtectedRoute><AssessmentList /></ProtectedRoute>} />
         <Route path="/assessment/:id" element={<ProtectedRoute><AssessmentPlayer /></ProtectedRoute>} />
         <Route path="/assessment-results/:attemptId" element={<ProtectedRoute><AssessmentResults /></ProtectedRoute>} />
+        <Route path="/assessment-dashboard" element={<ProtectedRoute><AssessmentDashboard /></ProtectedRoute>} />
       </Route>
     </Routes>
   )
