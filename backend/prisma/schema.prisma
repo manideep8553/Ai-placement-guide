@@ -207,7 +207,7 @@ model Assessment {
   id             String   @id @default(uuid())
   title          String
   description    String
-  type           String   // APTITUDE | TECHNICAL | CODING | FULL_PLACEMENT | PRODUCT_COMPANY
+  type           String   // APTITUDE | DSA | CORE_CS | COMPANY_SPECIFIC | FULL_PLACEMENT
   duration       Int      // minutes
   totalQuestions Int      @default(0)
   totalMarks     Int      @default(0)

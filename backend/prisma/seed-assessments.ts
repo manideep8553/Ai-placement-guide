@@ -28,9 +28,9 @@ export async function seedAssessments() {
 
   const technicalAssessment = await prisma.assessment.create({
     data: {
-      title: 'Technical Assessment',
-      description: 'Comprehensive technical test covering DBMS, OOP, Operating Systems, Computer Networks, and SQL. Core subject knowledge evaluation.',
-      type: 'TECHNICAL',
+      title: 'Core CS Assessment',
+      description: 'Comprehensive test covering DBMS, OOP, Operating Systems, Computer Networks, and SQL. Core CS subject knowledge evaluation.',
+      type: 'CORE_CS',
       duration: 50,
       totalQuestions: 35,
       totalMarks: 35,
@@ -50,9 +50,9 @@ export async function seedAssessments() {
 
   const codingAssessment = await prisma.assessment.create({
     data: {
-      title: 'Coding Assessment',
+      title: 'DSA Assessment',
       description: 'Data Structures & Algorithms multiple choice questions followed by hands-on coding problems. Supports Java, Python, JavaScript, and C++.',
-      type: 'CODING',
+      type: 'DSA',
       duration: 90,
       totalQuestions: 35,
       totalMarks: 60,
@@ -87,9 +87,9 @@ export async function seedAssessments() {
 
   const productAssessment = await prisma.assessment.create({
     data: {
-      title: 'Product Company Assessment',
+      title: 'Company-Specific Assessment',
       description: 'Designed for top product-based companies. Covers System Design, advanced DSA, product sense, and problem-solving at scale.',
-      type: 'PRODUCT_COMPANY',
+      type: 'COMPANY_SPECIFIC',
       duration: 75,
       totalQuestions: 35,
       totalMarks: 35,
