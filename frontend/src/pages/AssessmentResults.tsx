@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   Award, CheckCircle, XCircle, AlertTriangle, ArrowRight,
   Target, TrendingUp, Lightbulb, BarChart3, AlertCircle, FileText, History,
-  Clock, Brain, Zap, Building2, Filter, ChevronDown, ChevronUp
+  Clock, Brain, Zap, Building2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 import { getAttemptApi, type AssessmentAttemptData } from '@/services/api'
 import { getAttemptById, getAttemptsForAssessment, calculateAnalytics } from '@/lib/assessmentEngine'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts'
+  BarChart, Bar } from 'recharts'
 
 function CircularGauge({ value, size = 140 }: { value: number; size?: number }) {
   const strokeWidth = 10
@@ -62,7 +62,7 @@ export default function AssessmentResults() {
   const [aiFeedback, setAiFeedback] = useState<string | null>(null)
   const [loadingAi, setLoadingAi] = useState(false)
   const [answerFilter, setAnswerFilter] = useState<'all' | 'correct' | 'incorrect' | 'unanswered'>('all')
-  const [showExplanations, setShowExplanations] = useState<Set<string>>(new Set())
+
 
   useEffect(() => {
     async function load() {
@@ -88,20 +88,20 @@ export default function AssessmentResults() {
     async function fetchFeedback() {
       setLoadingAi(true)
       try {
-        const answersPayload = (attempt.answers || []).map(a => ({
+        const answersPayload = (attempt!.answers || []).map(a => ({
           questionId: a.questionId,
-          answer: a.answer || a.userAnswer || '',
+          answer: a.answer || '',
           isCorrect: a.isCorrect
         }))
         const res = await fetch(`${import.meta.env.VITE_API_URL}/assessment/ai-feedback`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            assessmentTitle: attempt.assessment?.title || 'Assessment',
+            assessmentTitle: attempt!.assessment?.title || 'Assessment',
             answers: answersPayload,
-            score: attempt.score || 0,
-            totalMarks: attempt.totalMarks || 100,
-            accuracy: attempt.accuracy || 0
+            score: attempt!.score || 0,
+            totalMarks: attempt!.totalMarks || 100,
+            accuracy: attempt!.accuracy || 0
           })
         })
         const data = await res.json()

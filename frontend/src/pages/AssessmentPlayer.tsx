@@ -640,7 +640,7 @@ export default function AssessmentPlayer() {
 
             {/* Section Tabs */}
             {(() => {
-              const sections = [...new Set(questions.map(q => q.section || q.topic))]
+              const sections = [...new Set(questions.map(q => q.topic))]
               if (sections.length <= 1) return null
               return (
                 <div className="flex flex-wrap gap-1 mb-3">
