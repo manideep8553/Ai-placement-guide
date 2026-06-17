@@ -174,7 +174,6 @@ export function applyScenarioProfile(profile: PlacementTwinData, scenario: Simul
       s.projects.score * WEIGHTS.projects +
       s.communication.score * WEIGHTS.communication +
       s.consistency.score * WEIGHTS.consistency,
-      0, 100
     )
   )
 

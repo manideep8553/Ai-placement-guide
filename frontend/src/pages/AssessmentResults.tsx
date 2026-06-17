@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
-  Award, CheckCircle, XCircle, AlertTriangle, ArrowRight, Clock,
-  Target, TrendingUp, Lightbulb, BarChart3, Loader2, AlertCircle, FileText, Code2
+  Award, CheckCircle, XCircle, AlertTriangle, ArrowRight,
+  Target, TrendingUp, Lightbulb, BarChart3, AlertCircle, FileText, Code2
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import Editor from '@monaco-editor/react'
 import {
   Clock, ChevronLeft, ChevronRight, HelpCircle, CheckCircle, AlertCircle,
-  Loader2, Flag, Play, Send, X, AlertTriangle, BookOpen, Code2, FileText
+  Loader2, Flag, Send, X, AlertTriangle, Code2, FileText
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
