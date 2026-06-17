@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import Editor from '@monaco-editor/react'
 import {
   Clock, ChevronLeft, ChevronRight, HelpCircle, CheckCircle, AlertCircle,
-  Loader2, Flag, Send, X, AlertTriangle, Code2, FileText, Save,
-  Eye, EyeOff, Keyboard, Monitor
+  Loader2, Flag, Send, X,   AlertTriangle, Code2, FileText, Save,
+  Keyboard, Monitor
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -14,8 +14,8 @@ import {
   getAssessmentApi, startAssessmentApi, submitAssessmentApi,
   type AssessmentDetailData, type AssessmentQuestionData, type AssessmentAttemptData
 } from '@/services/api'
-import { scoreAssessment, saveAttempt, getAttemptHistoryQuestionIds } from '@/lib/assessmentEngine'
-import { MOCK_ASSESSMENTS, getRandomizedAssessment } from '@/lib/assessmentData'
+import { scoreAssessment, saveAttempt } from '@/lib/assessmentEngine'
+import { MOCK_ASSESSMENTS } from '@/lib/assessmentData'
 
 const SUPPORTED_LANGUAGES = [
   { id: 'python', label: 'Python' },
@@ -70,15 +70,11 @@ export default function AssessmentPlayer() {
   const [codeLanguage, setCodeLanguage] = useState('python')
   const [testResults, setTestResults] = useState<{ label: string; passed: boolean }[] | null>(null)
   const [runningCode, setRunningCode] = useState(false)
-  const [showTimerWarning, setShowTimerWarning] = useState(false)
-  const [timerWarningDismissed, setTimerWarningDismissed] = useState(false)
   const [autoSubmitCountdown, setAutoSubmitCountdown] = useState<number | null>(null)
   const [showShortcuts, setShowShortcuts] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
   const [activeSection, setActiveSection] = useState<string | null>(null)
-  const [showExplanations, setShowExplanations] = useState<Set<string>>(new Set())
   const [tabWarning, setTabWarning] = useState(false)
-  const lastSavedRef = useRef(lastSaved)
 
   const questions = assessment?.questions || []
   const currentQuestion = questions[currentIndex] as AssessmentQuestionData & { questionData?: any } | undefined
@@ -153,9 +149,6 @@ export default function AssessmentPlayer() {
           handleSubmit()
           return 0
         }
-        if (prev === 300 && !timerWarningDismissed) {
-          setShowTimerWarning(true)
-        }
         if (prev === 60) {
           setAutoSubmitCountdown(60)
         }
@@ -163,7 +156,7 @@ export default function AssessmentPlayer() {
       })
     }, 1000)
     return () => clearInterval(timer)
-  }, [timeLeft, attempt?.status, timerWarningDismissed])
+  }, [timeLeft, attempt?.status])
 
   useEffect(() => {
     if (autoSubmitCountdown === null) return

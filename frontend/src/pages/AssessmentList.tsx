@@ -190,7 +190,7 @@ export default function AssessmentList() {
                   if (mockData?.companies && mockData.companies.length > 0) {
                     return (
                       <div className="flex flex-wrap gap-1 mt-3">
-                        {mockData.companies.slice(0, 5).map(c => (
+                        {mockData.companies.slice(0, 5).map((c: string) => (
                           <Badge key={c} variant="outline" className="text-[10px] border-[#334155]/50 text-gray-500 bg-[#1E293B]/30">
                             {c}
                           </Badge>

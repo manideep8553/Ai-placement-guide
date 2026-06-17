@@ -23,6 +23,7 @@ export interface MockAssessment {
   questionPoolSize: number
   randomizeOnRetake: boolean
   companyPattern?: string
+  companies?: string[]
 }
 
 function mcq(
