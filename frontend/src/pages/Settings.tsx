@@ -17,7 +17,7 @@ import {
 
 export default function Settings() {
   const { user, logout } = useAuthStore()
-  const { dark, toggleDark } = useThemeStore()
+  const { dark, toggleDark, emailNotifications, setEmailNotifications, pushNotifications, setPushNotifications, interviewReminders, setInterviewReminders, weeklyReport, setWeeklyReport } = useThemeStore()
   const [loading, setLoading] = useState(false)
   const [profileLoading, setProfileLoading] = useState(true)
   const [saved, setSaved] = useState(false)
@@ -34,11 +34,6 @@ export default function Settings() {
   const [passwordError, setPasswordError] = useState('')
   const [passwordSuccess, setPasswordSuccess] = useState('')
   const [passwordLoading, setPasswordLoading] = useState(false)
-
-  const [emailNotifications, setEmailNotifications] = useState(true)
-  const [pushNotifications, setPushNotifications] = useState(true)
-  const [interviewReminders, setInterviewReminders] = useState(true)
-  const [weeklyReport, setWeeklyReport] = useState(false)
 
   useEffect(() => {
     async function loadProfile() {

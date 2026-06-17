@@ -43,13 +43,13 @@ export default function Layout() {
   }, [dark])
 
   return (
-    <div className="flex h-screen bg-[#0B1121] text-foreground overflow-hidden">
+    <div className="flex h-screen bg-[hsl(var(--background))] text-foreground overflow-hidden">
       {/* Sidebar */}
       <aside className={cn(
-        "hidden lg:flex flex-col border-r border-[#1E293B] bg-[#0F172A] transition-all duration-300 relative z-30",
+        "hidden lg:flex flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] transition-all duration-300 relative z-30",
         sidebarOpen ? "w-64" : "w-20"
       )}>
-        <div className={cn("flex items-center gap-3 h-16 px-4 border-b border-[#1E293B]", !sidebarOpen && "justify-center px-0")}>
+        <div className={cn("flex items-center gap-3 h-16 px-4 border-b border-[hsl(var(--border))]", !sidebarOpen && "justify-center px-0")}>
           <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-lg shadow-indigo-500/20">
             AI
           </div>
@@ -58,7 +58,7 @@ export default function Layout() {
 
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="hidden lg:flex absolute -right-3 top-[60px] w-6 h-6 rounded-full border border-[#1E293B] bg-[#0F172A] items-center justify-center text-gray-400 hover:text-white transition-colors z-20"
+          className="hidden lg:flex absolute -right-3 top-[60px] w-6 h-6 rounded-full border border-[hsl(var(--border))] bg-[hsl(var(--card))] items-center justify-center text-gray-400 hover:text-white transition-colors z-20"
         >
           <ChevronLeft className={cn("w-3 h-3 transition-transform", !sidebarOpen && "rotate-180")} />
         </button>
@@ -86,7 +86,7 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className={cn("p-3 border-t border-[#1E293B] mt-auto", !sidebarOpen && "flex justify-center")}>
+        <div className={cn("p-3 border-t border-[hsl(var(--border))] mt-auto", !sidebarOpen && "flex justify-center")}>
           <div className="relative">
             <button
               onClick={() => setShowProfile(!showProfile)}
@@ -131,8 +131,8 @@ export default function Layout() {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="fixed left-0 top-0 h-full w-72 bg-[#0F172A] border-r border-[#1E293B] z-50">
-            <div className="flex items-center justify-between h-16 px-4 border-b border-[#1E293B]">
+          <aside className="fixed left-0 top-0 h-full w-72 bg-[hsl(var(--card))] border-r border-[hsl(var(--border))] z-50">
+            <div className="flex items-center justify-between h-16 px-4 border-b border-[hsl(var(--border))]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
                   AI
@@ -166,7 +166,8 @@ export default function Layout() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-16 border-b border-[#1E293B] bg-[#0B1121]/80 backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 shrink-0 sticky top-0 z-20">
+        <header className="h-16 border-b border-[hsl(var(--border))] backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 shrink-0 sticky top-0 z-20"
+          style={{ backgroundColor: 'hsl(var(--background) / 0.8)' }}>
           <div className="flex items-center gap-4">
             <button className="lg:hidden text-gray-400 hover:text-white" onClick={() => setMobileOpen(true)}>
               <Menu className="w-5 h-5" />
@@ -208,7 +209,7 @@ export default function Layout() {
             >
               {dark ? <Moon className="w-5 h-5 text-gray-400" /> : <Sun className="w-5 h-5 text-gray-400" />}
             </button>
-            <div className="ml-2 pl-2 border-l border-[#1E293B] flex items-center gap-3">
+            <div className="ml-2 pl-2 border-l border-[hsl(var(--border))] flex items-center gap-3">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-gray-200">{user?.name || 'User'}</p>
                 <p className="text-xs text-gray-500">{user?.email || ''}</p>
