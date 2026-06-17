@@ -7,7 +7,6 @@ import {
   AlertTriangle, History, BookOpen, Flame, Zap, Star
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import {
   getAllAttempts, calculateAnalytics, type AssessmentResult
@@ -192,7 +191,7 @@ export default function AssessmentDashboard() {
               <Flame className="w-4 h-4 text-orange-400" />
               <span className="text-xs text-gray-500">Current Streak</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-orange-400">{analytics.streakDays || 0}</p>
+              <p className="text-2xl sm:text-3xl font-bold text-orange-400">{analytics.streak?.current || 0}</p>
             <p className="text-xs text-gray-500 mt-1">consecutive days</p>
           </motion.div>
 

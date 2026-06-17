@@ -248,14 +248,15 @@ export function scoreAssessment(
         unansweredCount++
       }
     } else {
-      difficultyMap[question.difficulty]?.total++
-      difficultyMap[question.difficulty].totalMarks += question.marks
+      const dMap = difficultyMap[question.difficulty]
+      dMap.total++
+      dMap.totalMarks += question.marks
       if (userAnswer && userAnswer.trim().length > 0) {
         isCorrect = true
         marksObtained = question.marks
         correctCount++
-        difficultyMap[question.difficulty].correct++
-        difficultyMap[question.difficulty].marksObtained += marksObtained
+        dMap.correct++
+        dMap.marksObtained += marksObtained
       } else {
         isCorrect = false
         unansweredCount++
@@ -362,9 +363,6 @@ export function scoreAssessment(
   const percentile = allAttempts.length > 0 ? Math.round((worseThan / allAttempts.length) * 100) : 50
 
   const recentAttempts = assessmentAttempts.slice(-5)
-  const avgAcc = recentAttempts.length > 0
-    ? Math.round(recentAttempts.reduce((s, a) => s + a.accuracy, 0) / recentAttempts.length)
-    : 0
   const bestAcc = recentAttempts.length > 0
     ? Math.max(...recentAttempts.map(a => a.accuracy))
     : accuracy
@@ -425,7 +423,7 @@ export function scoreAssessment(
     })
   }
 
-  const aiFeedback = generateDeterministicFeedback(accuracy, difficultyBreakdown, sectionScores, strongTopics, weakTopics, timeEfficiency)
+  const aiFeedback = generateDeterministicFeedback(accuracy, difficultyBreakdown, strongTopics, weakTopics, timeEfficiency)
 
   return {
     attemptId: `attempt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -463,7 +461,6 @@ export function scoreAssessment(
 function generateDeterministicFeedback(
   accuracy: number,
   difficultyBreakdown: AssessmentResult['difficultyBreakdown'],
-  sectionScores: AssessmentResult['sectionScores'],
   strongTopics: string[],
   weakTopics: string[],
   timeEfficiency: string
@@ -628,19 +625,18 @@ export function calculateAnalytics(assessmentId?: string): AssessmentAnalytics {
     suggestion: `Focus on improving ${area} through targeted practice and concept review`,
   }))
 
-  const companyReadiness: Record<string, number> = {}
+  const companyReadinessCollector: Record<string, number[]> = {}
   for (const attempt of submitted) {
     if (attempt.companyReadiness) {
       for (const [company, score] of Object.entries(attempt.companyReadiness)) {
-        if (!companyReadiness[company]) companyReadiness[company] = []
-        ;(companyReadiness[company] as any).push(score)
+        if (!companyReadinessCollector[company]) companyReadinessCollector[company] = []
+        companyReadinessCollector[company].push(score)
       }
     }
   }
   const avgCompanyReadiness: Record<string, number> = {}
-  for (const [company, scores] of Object.entries(companyReadiness)) {
-    const arr = scores as unknown as number[]
-    avgCompanyReadiness[company] = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length)
+  for (const [company, scores] of Object.entries(companyReadinessCollector)) {
+    avgCompanyReadiness[company] = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
   }
 
   const difficultyTrend = { easy: 0, medium: 0, hard: 0 }
