@@ -565,3 +565,22 @@ export interface PlacementTwinResponse {
 export function getPlacementTwinApi() {
   return request<PlacementTwinResponse>('/placement-twin')
 }
+
+export function getAIFeedbackApi(data: {
+  assessmentTitle: string
+  answers: { questionId: string; answer: string; isCorrect: boolean }[]
+  score: number
+  totalMarks: number
+  accuracy: number
+}) {
+  return request<{ feedback: string }>('/assessment/ai-feedback', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function getLeaderboardApi(assessmentId: string) {
+  return request<{ entries: { userId: string; name: string; score: number; accuracy: number; submittedAt: string }[] }>(
+    `/assessment/leaderboard/${assessmentId}`
+  )
+}

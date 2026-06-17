@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   Award, CheckCircle, XCircle, AlertTriangle, ArrowRight,
-  Target, TrendingUp, Lightbulb, BarChart3, AlertCircle, FileText, History
+  Target, TrendingUp, Lightbulb, BarChart3, AlertCircle, FileText, History,
+  Clock, Brain, Zap, Building2, Filter, ChevronDown, ChevronUp
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { getAttemptApi, type AssessmentAttemptData } from '@/services/api'
 import { getAttemptById, getAttemptsForAssessment, calculateAnalytics } from '@/lib/assessmentEngine'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts'
 
 function CircularGauge({ value, size = 140 }: { value: number; size?: number }) {
   const strokeWidth = 10
@@ -57,6 +59,10 @@ export default function AssessmentResults() {
   const [attempt, setAttempt] = useState<AssessmentAttemptData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [aiFeedback, setAiFeedback] = useState<string | null>(null)
+  const [loadingAi, setLoadingAi] = useState(false)
+  const [answerFilter, setAnswerFilter] = useState<'all' | 'correct' | 'incorrect' | 'unanswered'>('all')
+  const [showExplanations, setShowExplanations] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     async function load() {
@@ -74,6 +80,39 @@ export default function AssessmentResults() {
     }
     load()
   }, [attemptId])
+
+  useEffect(() => {
+    if (!attemptId || !attempt) return
+    const savedFeedback = localStorage.getItem(`ai-feedback-${attemptId}`)
+    if (savedFeedback) { setAiFeedback(savedFeedback); return }
+    async function fetchFeedback() {
+      setLoadingAi(true)
+      try {
+        const answersPayload = (attempt.answers || []).map(a => ({
+          questionId: a.questionId,
+          answer: a.answer || a.userAnswer || '',
+          isCorrect: a.isCorrect
+        }))
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/assessment/ai-feedback`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            assessmentTitle: attempt.assessment?.title || 'Assessment',
+            answers: answersPayload,
+            score: attempt.score || 0,
+            totalMarks: attempt.totalMarks || 100,
+            accuracy: attempt.accuracy || 0
+          })
+        })
+        const data = await res.json()
+        if (data.feedback) {
+          setAiFeedback(data.feedback)
+          localStorage.setItem(`ai-feedback-${attemptId}`, data.feedback)
+        }
+      } catch { /* silent */ } finally { setLoadingAi(false) }
+    }
+    fetchFeedback()
+  }, [attemptId, attempt])
 
   const localAttempt = attemptId ? getAttemptById(attemptId) : null
   const analytics = attempt?.assessmentId ? calculateAnalytics(attempt.assessmentId) : null
@@ -335,6 +374,139 @@ export default function AssessmentResults() {
         </motion.div>
       )}
 
+      {/* Difficulty Breakdown */}
+      {localAttempt && (() => {
+        const answers = localAttempt.answers
+        const difficultyStats = ['EASY', 'MEDIUM', 'HARD'].map(d => {
+          const qs = answers.filter(a => a.difficulty === d)
+          const correct = qs.filter(a => a.isCorrect).length
+          return { difficulty: d, total: qs.length, correct, accuracy: qs.length > 0 ? Math.round((correct / qs.length) * 100) : 0 }
+        }).filter(d => d.total > 0)
+        if (difficultyStats.length === 0) return null
+        return (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}
+            className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
+            <h2 className="text-base sm:text-lg font-semibold text-white mb-5 flex items-center gap-2">
+              <Zap className="w-5 h-5 text-amber-400" /> Difficulty Breakdown
+            </h2>
+            <div className="h-48 sm:h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={difficultyStats.map(d => ({ name: d.difficulty, Accuracy: d.accuracy, Questions: d.total }))}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
+                  <XAxis dataKey="name" tick={{ fill: '#9CA3AF', fontSize: 12 }} axisLine={{ stroke: '#334155' }} tickLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fill: '#9CA3AF', fontSize: 12 }} axisLine={{ stroke: '#334155' }} tickLine={false} />
+                  <Tooltip contentStyle={{ background: '#1E293B', border: '1px solid rgba(51,65,85,0.5)', borderRadius: '8px' }} />
+                  <Bar dataKey="Accuracy" fill="#6366F1" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              {difficultyStats.map(d => (
+                <div key={d.difficulty} className="text-center p-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
+                  <p className={cn('text-xs font-medium', d.difficulty === 'EASY' ? 'text-emerald-400' : d.difficulty === 'MEDIUM' ? 'text-amber-400' : 'text-rose-400')}>{d.difficulty}</p>
+                  <p className="text-lg font-bold text-white mt-1">{d.correct}/{d.total}</p>
+                  <p className="text-xs text-gray-500">{d.accuracy}%</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )
+      })()}
+
+      {/* Time Analysis */}
+      {timeTaken > 0 && localAttempt && (() => {
+        const totalQ = localAttempt.answers.length
+        const avgTimePerQ = Math.round(timeTaken / Math.max(totalQ, 1))
+        const timeMinutes = Math.floor(timeTaken / 60)
+        const correctQ = localAttempt.answers.filter(a => a.isCorrect).length
+        const accuracyRate = correctQ > 0 ? Math.round(timeTaken / correctQ) : 0
+        const speedRating = avgTimePerQ < 30 ? 'Fast' : avgTimePerQ < 60 ? 'Moderate' : 'Slow'
+        const speedColor = avgTimePerQ < 30 ? 'text-emerald-400' : avgTimePerQ < 60 ? 'text-amber-400' : 'text-rose-400'
+        return (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}
+            className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
+            <h2 className="text-base sm:text-lg font-semibold text-white mb-5 flex items-center gap-2">
+              <Clock className="w-5 h-5 text-cyan-400" /> Time Analysis
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="text-center p-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
+                <p className="text-xs text-gray-500">Total Time</p>
+                <p className="text-lg font-bold text-white">{timeMinutes}m</p>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
+                <p className="text-xs text-gray-500">Avg/Question</p>
+                <p className="text-lg font-bold text-white">{avgTimePerQ}s</p>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
+                <p className="text-xs text-gray-500">Speed Rating</p>
+                <p className={cn('text-lg font-bold', speedColor)}>{speedRating}</p>
+              </div>
+              <div className="text-center p-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
+                <p className="text-xs text-gray-500">Time/Correct</p>
+                <p className="text-lg font-bold text-white">{accuracyRate}s</p>
+              </div>
+            </div>
+          </motion.div>
+        )
+      })()}
+
+      {/* AI Feedback */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
+        className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
+        <h2 className="text-base sm:text-lg font-semibold text-white mb-5 flex items-center gap-2">
+          <Brain className="w-5 h-5 text-purple-400" /> AI Performance Analysis
+        </h2>
+        {loadingAi ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-6 h-6 border-2 border-purple-400 border-t-transparent rounded-full animate-spin mr-3" />
+            <span className="text-sm text-gray-400">Analyzing your performance...</span>
+          </div>
+        ) : aiFeedback ? (
+          <div className="prose prose-invert prose-sm max-w-none text-gray-300 whitespace-pre-wrap leading-relaxed">{aiFeedback}</div>
+        ) : (
+          <p className="text-sm text-gray-500 text-center py-4">AI feedback will appear here after submission.</p>
+        )}
+      </motion.div>
+
+      {/* Company Readiness */}
+      {localAttempt && (() => {
+        const companyScores: Record<string, { correct: number; total: number }> = {}
+        localAttempt.answers.forEach(a => {
+          const companies = (a as any).companyTags || []
+          companies.forEach((c: string) => {
+            if (!companyScores[c]) companyScores[c] = { correct: 0, total: 0 }
+            companyScores[c].total++
+            if (a.isCorrect) companyScores[c].correct++
+          })
+        })
+        const companies = Object.entries(companyScores).sort((a, b) => b[1].total - a[1].total).slice(0, 8)
+        if (companies.length === 0) return null
+        return (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.19 }}
+            className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
+            <h2 className="text-base sm:text-lg font-semibold text-white mb-5 flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-cyan-400" /> Company Readiness
+            </h2>
+            <div className="space-y-3">
+              {companies.map(([name, data]) => {
+                const pct = Math.round((data.correct / data.total) * 100)
+                return (
+                  <div key={name} className="flex items-center gap-3">
+                    <span className="text-sm text-gray-300 w-24 shrink-0 truncate">{name}</span>
+                    <div className="flex-1 h-2 rounded-full bg-[#0F172A] overflow-hidden">
+                      <div className={cn('h-full rounded-full transition-all duration-1000', pct >= 70 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-500' : 'bg-rose-500')}
+                        style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="text-xs text-gray-500 w-12 text-right">{data.correct}/{data.total}</span>
+                    <span className={cn('text-xs font-medium w-10 text-right', pct >= 70 ? 'text-emerald-400' : pct >= 40 ? 'text-amber-400' : 'text-rose-400')}>{pct}%</span>
+                  </div>
+                )
+              })}
+            </div>
+          </motion.div>
+        )
+      })()}
+
       {/* Strengths & Weaknesses */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {strengths.length > 0 && (
@@ -399,11 +571,30 @@ export default function AssessmentResults() {
       {answersList && answersList.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
           className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
-          <h2 className="text-base sm:text-lg font-semibold text-white mb-5 flex items-center gap-2">
-            <FileText className="w-5 h-5 text-indigo-400" /> Answer Review
-          </h2>
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+            <h2 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
+              <FileText className="w-5 h-5 text-indigo-400" /> Answer Review
+            </h2>
+            <div className="flex items-center gap-1 bg-[#0F172A] rounded-lg p-1 border border-[#334155]/30">
+              {(['all', 'correct', 'incorrect', 'unanswered'] as const).map(f => (
+                <button key={f}
+                  className={cn('px-2.5 py-1 rounded-md text-xs font-medium transition-all',
+                    answerFilter === f ? 'bg-indigo-500/20 text-indigo-400' : 'text-gray-500 hover:text-gray-300')}
+                  onClick={() => setAnswerFilter(f)}>
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="space-y-4">
-            {answersList.map((ans: any, i: number) => {
+            {answersList
+              .filter((ans: any) => {
+                if (answerFilter === 'all') return true
+                if (answerFilter === 'correct') return ans.isCorrect === true
+                if (answerFilter === 'incorrect') return ans.isCorrect === false
+                return !ans.answer && !ans.userAnswer
+              })
+              .map((ans: any, i: number) => {
               const q = ans.question
               const ansData = ans.questionData || (q?.questionData as any)
               const isCorrect = ans.isCorrect

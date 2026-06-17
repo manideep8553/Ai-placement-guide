@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import Editor from '@monaco-editor/react'
 import {
   Clock, ChevronLeft, ChevronRight, HelpCircle, CheckCircle, AlertCircle,
-  Loader2, Flag, Send, X, AlertTriangle, Code2, FileText
+  Loader2, Flag, Send, X, AlertTriangle, Code2, FileText, Save,
+  Eye, EyeOff, Keyboard, Monitor
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -13,8 +14,8 @@ import {
   getAssessmentApi, startAssessmentApi, submitAssessmentApi,
   type AssessmentDetailData, type AssessmentQuestionData, type AssessmentAttemptData
 } from '@/services/api'
-import { scoreAssessment, saveAttempt } from '@/lib/assessmentEngine'
-import { MOCK_ASSESSMENTS } from '@/lib/assessmentData'
+import { scoreAssessment, saveAttempt, getAttemptHistoryQuestionIds } from '@/lib/assessmentEngine'
+import { MOCK_ASSESSMENTS, getRandomizedAssessment } from '@/lib/assessmentData'
 
 const SUPPORTED_LANGUAGES = [
   { id: 'python', label: 'Python' },
@@ -69,6 +70,15 @@ export default function AssessmentPlayer() {
   const [codeLanguage, setCodeLanguage] = useState('python')
   const [testResults, setTestResults] = useState<{ label: string; passed: boolean }[] | null>(null)
   const [runningCode, setRunningCode] = useState(false)
+  const [showTimerWarning, setShowTimerWarning] = useState(false)
+  const [timerWarningDismissed, setTimerWarningDismissed] = useState(false)
+  const [autoSubmitCountdown, setAutoSubmitCountdown] = useState<number | null>(null)
+  const [showShortcuts, setShowShortcuts] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [activeSection, setActiveSection] = useState<string | null>(null)
+  const [showExplanations, setShowExplanations] = useState<Set<string>>(new Set())
+  const [tabWarning, setTabWarning] = useState(false)
+  const lastSavedRef = useRef(lastSaved)
 
   const questions = assessment?.questions || []
   const currentQuestion = questions[currentIndex] as AssessmentQuestionData & { questionData?: any } | undefined
@@ -103,7 +113,10 @@ export default function AssessmentPlayer() {
 
   useEffect(() => {
     if (id && Object.keys(answers).length > 0) {
-      const timer = setTimeout(() => saveProgress(id, answers), 500)
+      const timer = setTimeout(() => {
+        saveProgress(id, answers)
+        setLastSaved(new Date())
+      }, 500)
       return () => clearTimeout(timer)
     }
   }, [answers, id])
@@ -140,11 +153,64 @@ export default function AssessmentPlayer() {
           handleSubmit()
           return 0
         }
+        if (prev === 300 && !timerWarningDismissed) {
+          setShowTimerWarning(true)
+        }
+        if (prev === 60) {
+          setAutoSubmitCountdown(60)
+        }
         return prev - 1
       })
     }, 1000)
     return () => clearInterval(timer)
-  }, [timeLeft, attempt?.status])
+  }, [timeLeft, attempt?.status, timerWarningDismissed])
+
+  useEffect(() => {
+    if (autoSubmitCountdown === null) return
+    if (autoSubmitCountdown <= 0) {
+      handleSubmit()
+      return
+    }
+    const timer = setTimeout(() => setAutoSubmitCountdown(prev => prev !== null ? prev - 1 : null), 1000)
+    return () => clearTimeout(timer)
+  }, [autoSubmitCountdown])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (attempt?.status === 'SUBMITTED' || submitting) return
+      if ((e.target as HTMLElement).tagName === 'INPUT' || (e.target as HTMLElement).tagName === 'TEXTAREA') return
+
+      if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') {
+        e.preventDefault()
+        setCurrentIndex(prev => Math.min(questions.length - 1, prev + 1))
+      } else if (e.key === 'ArrowLeft' || e.key === 'p' || e.key === 'P') {
+        e.preventDefault()
+        setCurrentIndex(prev => Math.max(0, prev - 1))
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault()
+        if (currentQuestion) toggleMarkForReview(currentQuestion.id)
+      } else if (e.key >= '1' && e.key <= '4' && isMCQ) {
+        e.preventDefault()
+        const labels = ['A', 'B', 'C', 'D']
+        handleAnswer(currentQuestion.id, labels[parseInt(e.key) - 1])
+      } else if (e.key === 'F1') {
+        e.preventDefault()
+        setShowShortcuts(prev => !prev)
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [questions.length, currentIndex, currentQuestion, attempt?.status, submitting, isMCQ])
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden && attempt?.status !== 'SUBMITTED') {
+        setTabWarning(true)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [attempt?.status])
 
   const handleAnswer = useCallback((questionId: string, answer: string) => {
     setAnswers(prev => ({ ...prev, [questionId]: answer }))
@@ -435,6 +501,33 @@ export default function AssessmentPlayer() {
 
   return (
     <div className="max-w-7xl mx-auto px-2 sm:px-4">
+      {/* Auto-Submit Countdown */}
+      <AnimatePresence>
+        {autoSubmitCountdown !== null && autoSubmitCountdown > 0 && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="mb-3 bg-rose-500/10 border border-rose-500/30 rounded-xl px-4 py-3 flex items-center justify-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-rose-400 animate-pulse" />
+            <span className="text-sm font-medium text-rose-300">Auto-submitting in {autoSubmitCountdown}s</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Tab Switch Warning */}
+      <AnimatePresence>
+        {tabWarning && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="mb-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Monitor className="w-4 h-4 text-amber-400" />
+              <span className="text-sm text-amber-300">Tab switch detected. Stay focused on the assessment.</span>
+            </div>
+            <Button variant="ghost" size="sm" className="text-amber-400 h-6" onClick={() => setTabWarning(false)}>
+              <X className="w-3 h-3" />
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Top Bar */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4 bg-[#1E293B]/80 backdrop-blur-xl border border-[#334155]/50 rounded-2xl p-3 sm:p-4">
         <div className="flex items-center gap-2 sm:gap-4">
@@ -453,7 +546,18 @@ export default function AssessmentPlayer() {
             <span className="flex items-center gap-1"><Flag className="w-3 h-3 text-amber-400" /> {markedCount}</span>
             <span className="flex items-center gap-1"><HelpCircle className="w-3 h-3 text-gray-400" /> {questions.length - answeredCount}</span>
           </div>
-          <div className={cn('flex items-center gap-1 sm:gap-2 font-mono text-base sm:text-lg font-bold', timerColor)}>
+          {lastSaved && (
+            <div className="hidden lg:flex items-center gap-1 text-xs text-gray-600">
+              <Save className="w-3 h-3" />
+              <span>Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          )}
+          <button className="hidden sm:flex items-center gap-1 text-xs text-gray-600 hover:text-gray-400 transition-colors"
+            onClick={() => setShowShortcuts(true)} title="Keyboard shortcuts (F1)">
+            <Keyboard className="w-3 h-3" />
+          </button>
+          <div className={cn('flex items-center gap-1 sm:gap-2 font-mono text-base sm:text-lg font-bold', timerColor,
+            autoSubmitCountdown !== null && 'text-rose-400 animate-pulse')}>
             <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
             {formatTime(timeLeft)}
           </div>
@@ -541,6 +645,30 @@ export default function AssessmentPlayer() {
               </div>
             </div>
 
+            {/* Section Tabs */}
+            {(() => {
+              const sections = [...new Set(questions.map(q => q.section || q.topic))]
+              if (sections.length <= 1) return null
+              return (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  <button
+                    className={cn('px-2 py-1 rounded-md text-[10px] font-medium border transition-all',
+                      !activeSection ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'border-[#334155]/50 text-gray-500 hover:text-gray-300')}
+                    onClick={() => setActiveSection(null)}>
+                    All
+                  </button>
+                  {sections.map(s => (
+                    <button key={s}
+                      className={cn('px-2 py-1 rounded-md text-[10px] font-medium border transition-all',
+                        activeSection === s ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : 'border-[#334155]/50 text-gray-500 hover:text-gray-300')}
+                      onClick={() => setActiveSection(s)}>
+                      {s?.substring(0, 8)}
+                    </button>
+                  ))}
+                </div>
+              )
+            })()}
+
             {/* Question Grid */}
             <div className="grid grid-cols-5 gap-1.5 mb-4">
               {questions.map((q, i) => (
@@ -619,6 +747,40 @@ export default function AssessmentPlayer() {
           </motion.div>
         </div>
       )}
+
+      {/* Keyboard Shortcuts Modal */}
+      <AnimatePresence>
+        {showShortcuts && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowShortcuts(false)}>
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="rounded-2xl bg-[#1E293B] border border-[#334155]/50 p-6 max-w-md mx-4 shadow-2xl"
+              onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-white">Keyboard Shortcuts</h3>
+                <Button variant="ghost" size="sm" className="text-gray-400" onClick={() => setShowShortcuts(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+              <div className="space-y-2 text-sm">
+                {[
+                  ['→ / N', 'Next question'],
+                  ['← / P', 'Previous question'],
+                  ['M', 'Mark/unmark for review'],
+                  ['1-4', 'Select MCQ option (A-D)'],
+                  ['F1', 'Toggle this help'],
+                ].map(([key, desc]) => (
+                  <div key={key} className="flex items-center justify-between py-1.5 border-b border-[#334155]/30 last:border-0">
+                    <span className="text-gray-400">{desc}</span>
+                    <kbd className="px-2 py-0.5 rounded bg-[#0F172A] border border-[#334155] text-gray-300 text-xs font-mono">{key}</kbd>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

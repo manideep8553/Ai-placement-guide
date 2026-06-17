@@ -4,12 +4,13 @@ import { motion } from 'framer-motion'
 import {
   Brain, Code2, Server, LayoutDashboard, Building2, Clock,
   HelpCircle, ArrowRight, Award, Loader2, AlertCircle, BarChart3,
-  CheckCircle
+  CheckCircle, Database
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { getAssessmentsApi, getAllAttemptsApi, type AssessmentData, type AssessmentAttemptData } from '@/services/api'
+import { MOCK_ASSESSMENTS } from '@/lib/assessmentData'
 
 const assessmentIcons: Record<string, any> = {
   APTITUDE: Brain,
@@ -172,7 +173,38 @@ export default function AssessmentList() {
                   <Badge variant="outline" className="border-[#334155] text-gray-400 bg-[#1E293B]/50">
                     <Award className="w-3 h-3 mr-1" /> {assessment.passingMarks} pass
                   </Badge>
+                  {(() => {
+                    const mockData = MOCK_ASSESSMENTS.find(m => m.id === assessment.id)
+                    if (mockData) {
+                      return (
+                        <Badge variant="outline" className="border-cyan-500/20 text-cyan-400 bg-cyan-500/5">
+                          <Database className="w-3 h-3 mr-1" /> {mockData.questions.length} pool
+                        </Badge>
+                      )
+                    }
+                    return null
+                  })()}
                 </div>
+                {(() => {
+                  const mockData = MOCK_ASSESSMENTS.find(m => m.id === assessment.id)
+                  if (mockData?.companies && mockData.companies.length > 0) {
+                    return (
+                      <div className="flex flex-wrap gap-1 mt-3">
+                        {mockData.companies.slice(0, 5).map(c => (
+                          <Badge key={c} variant="outline" className="text-[10px] border-[#334155]/50 text-gray-500 bg-[#1E293B]/30">
+                            {c}
+                          </Badge>
+                        ))}
+                        {mockData.companies.length > 5 && (
+                          <Badge variant="outline" className="text-[10px] border-[#334155]/50 text-gray-500 bg-[#1E293B]/30">
+                            +{mockData.companies.length - 5} more
+                          </Badge>
+                        )}
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
                 {bestAttempt && (
                   <div className="mt-3 flex items-center gap-2 text-xs">
                     <CheckCircle className="w-3 h-3 text-emerald-400" />

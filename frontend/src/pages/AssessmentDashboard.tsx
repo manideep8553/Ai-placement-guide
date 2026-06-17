@@ -4,16 +4,18 @@ import { motion } from 'framer-motion'
 import {
   BarChart3, TrendingUp, Award, Brain, Code2, Server, Building2,
   LayoutDashboard, ArrowRight, Target, Lightbulb, CheckCircle,
-  AlertTriangle, History, BookOpen
+  AlertTriangle, History, BookOpen, Flame, Zap, Star
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import {
   getAllAttempts, calculateAnalytics, type AssessmentResult
 } from '@/lib/assessmentEngine'
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, Cell
+  Tooltip, ResponsiveContainer, Cell, RadarChart, Radar, PolarGrid,
+  PolarAngleAxis, PolarRadiusAxis
 } from 'recharts'
 
 const TYPE_CONFIG: Record<string, { icon: any; label: string; color: string }> = {
@@ -182,6 +184,39 @@ export default function AssessmentDashboard() {
           </motion.div>
         </div>
 
+        {/* Streak & Quick Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}
+            className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-5 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <Flame className="w-4 h-4 text-orange-400" />
+              <span className="text-xs text-gray-500">Current Streak</span>
+            </div>
+            <p className="text-2xl sm:text-3xl font-bold text-orange-400">{analytics.streakDays || 0}</p>
+            <p className="text-xs text-gray-500 mt-1">consecutive days</p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.17 }}
+            className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-5 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <Zap className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs text-gray-500">Best Score</span>
+            </div>
+            <p className="text-2xl sm:text-3xl font-bold text-cyan-400">{analytics.bestAccuracy}%</p>
+            <p className="text-xs text-gray-500 mt-1">all-time best accuracy</p>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}
+            className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-5 backdrop-blur-xl">
+            <div className="flex items-center gap-2 mb-2">
+              <Star className="w-4 h-4 text-amber-400" />
+              <span className="text-xs text-gray-500">Top Type</span>
+            </div>
+            <p className="text-lg sm:text-xl font-bold text-white truncate">{typeStats[0]?.label || 'None'}</p>
+            <p className="text-xs text-gray-500 mt-1">{typeStats[0]?.avgAccuracy || 0}% avg accuracy</p>
+          </motion.div>
+        </div>
+
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Performance Trend */}
@@ -231,6 +266,106 @@ export default function AssessmentDashboard() {
             </motion.div>
           )}
         </div>
+
+        {/* Skill Radar & Company Readiness */}
+        {allAttempts.length > 0 && (() => {
+          const radarData = typeStats.map(t => ({ subject: t.label, score: t.avgAccuracy, fullMark: 100 }))
+          const companyStats: Record<string, { correct: number; total: number }> = {}
+          allAttempts.forEach(a => {
+            const answers = (a as any).answers || []
+            answers.forEach((ans: any) => {
+              const companies = ans.companyTags || []
+              companies.forEach((c: string) => {
+                if (!companyStats[c]) companyStats[c] = { correct: 0, total: 0 }
+                companyStats[c].total++
+                if (ans.isCorrect) companyStats[c].correct++
+              })
+            })
+          })
+          const companyList = Object.entries(companyStats)
+            .sort((a, b) => b[1].total - a[1].total)
+            .slice(0, 8)
+            .map(([name, data]) => ({
+              name,
+              readiness: Math.round((data.correct / data.total) * 100),
+              questions: data.total
+            }))
+
+          return (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Skill Radar */}
+              {radarData.length >= 3 && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
+                  className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
+                  <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                    <Target className="w-4 h-4 text-indigo-400" /> Skill Radar
+                  </h3>
+                  <div className="h-64 sm:h-72">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={radarData}>
+                        <PolarGrid stroke="#334155" />
+                        <PolarAngleAxis dataKey="subject" tick={{ fill: '#9CA3AF', fontSize: 10 }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#6B7280', fontSize: 10 }} />
+                        <Radar name="Accuracy" dataKey="score" stroke="#6366F1" fill="#6366F1" fillOpacity={0.2} strokeWidth={2} />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Company Readiness */}
+              {companyList.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+                  className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
+                  <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-cyan-400" /> Company Readiness
+                  </h3>
+                  <div className="space-y-3">
+                    {companyList.map(c => (
+                      <div key={c.name} className="flex items-center gap-3">
+                        <span className="text-sm text-gray-300 w-24 shrink-0 truncate">{c.name}</span>
+                        <div className="flex-1 h-2 rounded-full bg-[#0F172A] overflow-hidden">
+                          <div className={cn('h-full rounded-full transition-all duration-1000',
+                            c.readiness >= 70 ? 'bg-emerald-500' : c.readiness >= 40 ? 'bg-amber-500' : 'bg-rose-500')}
+                            style={{ width: `${c.readiness}%` }} />
+                        </div>
+                        <span className={cn('text-xs font-medium w-10 text-right',
+                          c.readiness >= 70 ? 'text-emerald-400' : c.readiness >= 40 ? 'text-amber-400' : 'text-rose-400')}>
+                          {c.readiness}%
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          )
+        })()}
+
+        {/* Recommended Next Assessment */}
+        {allAttempts.length > 0 && (() => {
+          const weakest = typeStats.sort((a, b) => a.avgAccuracy - b.avgAccuracy)[0]
+          if (!weakest || weakest.avgAccuracy >= 70) return null
+          return (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
+              className="rounded-2xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 p-4 sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Lightbulb className="w-4 h-4 text-amber-400" /> Recommended Next
+                  </h3>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Your weakest area is <span className="text-white font-medium">{weakest.label}</span> ({weakest.avgAccuracy}%). Focus on this to improve overall readiness.
+                  </p>
+                </div>
+                <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600 text-white border-0 shrink-0"
+                  onClick={() => navigate(`/assessment/${weakest.type.toLowerCase()}-assessment`)}>
+                  Practice Now <ArrowRight className="w-3 h-3 ml-1" />
+                </Button>
+              </div>
+            </motion.div>
+          )
+        })()}
 
         {/* Strengths & Weaknesses + Improvement Plan */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
