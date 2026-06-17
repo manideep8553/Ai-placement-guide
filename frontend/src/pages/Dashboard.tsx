@@ -165,16 +165,16 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Greeting */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white">{greeting}, {data?.user.name.split(' ')[0] ?? 'there'} 👋</h1>
-          <p className="text-sm text-gray-400 mt-1">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="min-w-0">
+          <h1 className="text-xl md:text-2xl font-bold text-white">{greeting}, {data?.user.name.split(' ')[0] ?? 'there'} 👋</h1>
+          <p className="text-sm text-gray-400 mt-1 truncate">
             {data?.user.college && `${data.user.college}`}{data?.user.branch && ` • ${data.user.branch}`}
             {data?.user.graduationYear && ` • Class of ${data.user.graduationYear}`}
           </p>
         </div>
         {streak && (
-          <Badge className="gap-2 px-4 py-2 text-sm bg-[#1E293B] border-[#334155] text-gray-300">
+          <Badge className="gap-2 px-4 py-2 text-sm bg-[#1E293B] border-[#334155] text-gray-300 shrink-0">
             <Flame className="w-4 h-4 text-orange-400" />
             <span className="font-semibold">{streak.current} day streak</span>
           </Badge>

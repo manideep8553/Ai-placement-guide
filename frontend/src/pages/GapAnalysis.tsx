@@ -2,7 +2,6 @@ import { useState, useRef } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import { uploadResumeApi, startGapAnalysisApi } from '@/services/api'
 import { Upload, Search, Loader2, AlertTriangle, CheckCircle, XCircle, Download, ArrowRight, FileText, Code2, GitBranch } from 'lucide-react'
-import { motion } from 'framer-motion'
 
 interface LeetCodeData {
   solved: number
@@ -44,7 +43,6 @@ export default function GapAnalysis() {
   const handleLeetcodeFetch = async () => {
     if (!leetcodeUsername.trim()) return
     setLeetcodeLoading(true)
-    await new Promise(r => setTimeout(r, 800))
     setLeetcodeData({
       solved: 87,
       total: 150,
@@ -57,7 +55,6 @@ export default function GapAnalysis() {
   const handleGithubFetch = async () => {
     if (!githubUsername.trim()) return
     setGithubLoading(true)
-    await new Promise(r => setTimeout(r, 800))
     setGithubData({
       repos: 24,
       contributions: 876,
@@ -147,23 +144,23 @@ export default function GapAnalysis() {
     : 0
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 md:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">AI Gap Analysis</h1>
-          <p className="text-gray-400 mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">AI Gap Analysis</h1>
+          <p className="text-sm md:text-base text-gray-400 mt-1">
             Identify skill gaps between your profile and industry expectations
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 md:p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-[#1E293B]/50">
+            <div className="p-2 rounded-lg bg-[#1E293B]/50 shrink-0">
               <FileText className="h-5 w-5 text-indigo-400" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="text-base font-semibold text-white">Resume Upload</h3>
               <p className="text-sm text-gray-400">Upload your resume to parse skills</p>
             </div>
@@ -174,7 +171,7 @@ export default function GapAnalysis() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed border-[#334155] bg-[#1E293B]/50 rounded-xl p-8 text-center cursor-pointer transition-colors ${
+              className={`border-2 border-dashed border-[#334155] bg-[#1E293B]/50 rounded-xl p-6 md:p-8 text-center cursor-pointer transition-colors ${
                 isDragOver ? 'border-indigo-500 bg-indigo-500/10' : 'hover:border-indigo-500/50'
               }`}
             >
@@ -190,7 +187,7 @@ export default function GapAnalysis() {
           ) : (
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm text-emerald-400">
-                <CheckCircle className="h-4 w-4" />
+                <CheckCircle className="h-4 w-4 shrink-0" />
                 <span className="font-medium">Resume uploaded successfully</span>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -204,12 +201,12 @@ export default function GapAnalysis() {
           )}
         </div>
 
-        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 md:p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-[#1E293B]/50">
+            <div className="p-2 rounded-lg bg-[#1E293B]/50 shrink-0">
               <Code2 className="h-5 w-5 text-indigo-400" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="text-base font-semibold text-white">LeetCode Username</h3>
               <p className="text-sm text-gray-400">Fetch your coding stats</p>
             </div>
@@ -221,12 +218,12 @@ export default function GapAnalysis() {
                 value={leetcodeUsername}
                 onChange={(e) => setLeetcodeUsername(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleLeetcodeFetch()}
-                className="flex-1 h-10 px-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/50 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
+                className="flex-1 min-w-0 h-10 px-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/50 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
               />
               <button
                 onClick={handleLeetcodeFetch}
                 disabled={leetcodeLoading}
-                className="h-10 px-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
+                className="h-10 px-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50 shrink-0"
               >
                 {leetcodeLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               </button>
@@ -268,12 +265,12 @@ export default function GapAnalysis() {
           </div>
         </div>
 
-        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+        <div className="bg-[#0F172A]/80 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 md:p-6">
           <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 rounded-lg bg-[#1E293B]/50">
+            <div className="p-2 rounded-lg bg-[#1E293B]/50 shrink-0">
               <GitBranch className="h-5 w-5 text-indigo-400" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h3 className="text-base font-semibold text-white">GitHub Username</h3>
               <p className="text-sm text-gray-400">Fetch your coding activity</p>
             </div>
@@ -285,12 +282,12 @@ export default function GapAnalysis() {
                 value={githubUsername}
                 onChange={(e) => setGithubUsername(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleGithubFetch()}
-                className="flex-1 h-10 px-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/50 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
+                className="flex-1 min-w-0 h-10 px-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/50 text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50"
               />
               <button
                 onClick={handleGithubFetch}
                 disabled={githubLoading}
-                className="h-10 px-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
+                className="h-10 px-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50 shrink-0"
               >
                 {githubLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
               </button>
@@ -313,14 +310,14 @@ export default function GapAnalysis() {
                   <div className="space-y-1.5">
                     {githubData.languages.map((lang) => (
                       <div key={lang.name} className="flex items-center gap-2">
-                        <span className="text-xs text-gray-300 w-20 truncate">{lang.name}</span>
-                        <div className="flex-1 h-2 rounded-full bg-[#1E293B] overflow-hidden">
+                        <span className="text-xs text-gray-300 w-16 md:w-20 truncate">{lang.name}</span>
+                        <div className="flex-1 h-2 rounded-full bg-[#1E293B] overflow-hidden min-w-0">
                           <div
                             className="h-full rounded-full transition-all duration-500"
                             style={{ width: `${lang.percentage}%`, backgroundColor: lang.color }}
                           />
                         </div>
-                        <span className="text-xs text-gray-400 w-8 text-right">{lang.percentage}%</span>
+                        <span className="text-xs text-gray-400 w-8 text-right shrink-0">{lang.percentage}%</span>
                       </div>
                     ))}
                   </div>
@@ -335,7 +332,7 @@ export default function GapAnalysis() {
         <button
           onClick={handleAnalyze}
           disabled={analyzing || !resumeUploaded}
-          className="min-w-[200px] h-12 text-base gap-2 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center shadow-lg shadow-indigo-500/25"
+          className="w-full sm:w-auto min-w-[200px] h-12 text-base gap-2 rounded-xl font-semibold text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center shadow-lg shadow-indigo-500/25 px-6"
         >
           {analyzing ? (
             <>
@@ -351,7 +348,7 @@ export default function GapAnalysis() {
         </button>
 
         {analyzing && (
-          <div className="w-full max-w-md space-y-3">
+          <div className="w-full max-w-md space-y-3 px-4">
             {STEPS.map((step, index) => {
               const isActive = currentStep === index
               const isComplete = currentStep > index
@@ -395,65 +392,56 @@ export default function GapAnalysis() {
         )}
 
         {showResults && analysisResult && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-            className="w-full space-y-6"
-          >
-            <div className="flex items-center justify-center gap-3">
+          <div className="w-full space-y-6">
+            <div className="flex items-center justify-center gap-3 px-4">
               <div className="h-px flex-1 bg-[#334155]/50" />
-              <h2 className="text-xl font-semibold text-white">Analysis Results</h2>
+              <h2 className="text-lg md:text-xl font-semibold text-white whitespace-nowrap">Analysis Results</h2>
               <div className="h-px flex-1 bg-[#334155]/50" />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-[#0F172A]/80 border border-rose-500/30 rounded-2xl backdrop-blur-xl p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              <div className="bg-[#0F172A]/80 border border-rose-500/30 rounded-2xl backdrop-blur-xl p-4 md:p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <XCircle className="h-5 w-5 text-rose-400" />
+                  <XCircle className="h-5 w-5 text-rose-400 shrink-0" />
                   <h3 className="text-base font-semibold text-white">Missing Skills</h3>
                 </div>
                 <p className="text-sm text-gray-400 mb-4">Skills you should acquire</p>
                 <div className="flex flex-wrap gap-2">
                   {analysisResult.missingSkills.map((skill) => (
-                    <div key={skill} className="group relative">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                        <XCircle className="h-3 w-3" />
-                        {skill}
-                      </span>
-                    </div>
+                    <span key={skill} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                      <XCircle className="h-3 w-3 shrink-0" />
+                      {skill}
+                    </span>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-[#0F172A]/80 border border-amber-500/30 rounded-2xl backdrop-blur-xl p-6">
+              <div className="bg-[#0F172A]/80 border border-amber-500/30 rounded-2xl backdrop-blur-xl p-4 md:p-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <AlertTriangle className="h-5 w-5 text-amber-400" />
+                  <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0" />
                   <h3 className="text-base font-semibold text-white">Weak Areas</h3>
                 </div>
                 <p className="text-sm text-gray-400 mb-4">Topics needing improvement</p>
                 <div className="flex flex-wrap gap-2">
                   {analysisResult.weakAreas.map((area) => (
-                    <div key={area} className="group relative">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        <AlertTriangle className="h-3 w-3" />
-                        {area}
-                      </span>
-                    </div>
+                    <span key={area} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <AlertTriangle className="h-3 w-3 shrink-0" />
+                      {area}
+                    </span>
                   ))}
                 </div>
               </div>
 
-              <div className="bg-[#0F172A]/80 border border-emerald-500/30 rounded-2xl backdrop-blur-xl p-6">
+              <div className="bg-[#0F172A]/80 border border-emerald-500/30 rounded-2xl backdrop-blur-xl p-4 md:p-6 sm:col-span-2 lg:col-span-1">
                 <div className="flex items-center gap-2 mb-4">
-                  <CheckCircle className="h-5 w-5 text-emerald-400" />
+                  <CheckCircle className="h-5 w-5 text-emerald-400 shrink-0" />
                   <h3 className="text-base font-semibold text-white">Strengths</h3>
                 </div>
                 <p className="text-sm text-gray-400 mb-4">Your strong skill areas</p>
                 <div className="flex flex-wrap gap-2">
                   {analysisResult.strengths.map((skill) => (
                     <span key={skill} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                      <CheckCircle className="h-3 w-3" />
+                      <CheckCircle className="h-3 w-3 shrink-0" />
                       {skill}
                     </span>
                   ))}
@@ -461,8 +449,8 @@ export default function GapAnalysis() {
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 px-4">
+              <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-400">
                 <span>Overall Match:</span>
                 <span className="font-bold text-white">{analysisResult.overallMatch}%</span>
                 <div className="w-24 h-2 bg-[#1E293B] rounded-full overflow-hidden">
@@ -472,12 +460,12 @@ export default function GapAnalysis() {
                   />
                 </div>
               </div>
-              <button className="h-9 px-4 rounded-xl text-sm font-medium text-gray-300 bg-[#1E293B]/50 border border-[#334155]/50 hover:bg-[#1E293B] transition-colors flex items-center gap-2">
+              <button className="h-9 px-4 rounded-xl text-sm font-medium text-gray-300 bg-[#1E293B]/50 border border-[#334155]/50 hover:bg-[#1E293B] transition-colors flex items-center gap-2 shrink-0">
                 <Download className="h-4 w-4" />
                 Export PDF
               </button>
             </div>
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

@@ -103,17 +103,17 @@ export default function Settings() {
       </motion.div>
 
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="bg-[#1E293B]/50 border border-[#334155]/50 p-1 rounded-xl">
-          <TabsTrigger value="profile" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300 rounded-lg">
+        <TabsList className="bg-[#1E293B]/50 border border-[#334155]/50 p-1 rounded-xl overflow-x-auto flex-nowrap">
+          <TabsTrigger value="profile" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300 rounded-lg shrink-0">
             <User className="w-4 h-4 mr-2" /> Profile
           </TabsTrigger>
-          <TabsTrigger value="password" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300 rounded-lg">
+          <TabsTrigger value="password" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300 rounded-lg shrink-0">
             <Lock className="w-4 h-4 mr-2" /> Password
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300 rounded-lg">
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300 rounded-lg shrink-0">
             <Bell className="w-4 h-4 mr-2" /> Notifications
           </TabsTrigger>
-          <TabsTrigger value="appearance" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300 rounded-lg">
+          <TabsTrigger value="appearance" className="data-[state=active]:bg-indigo-500/20 data-[state=active]:text-indigo-300 rounded-lg shrink-0">
             <Palette className="w-4 h-4 mr-2" /> Appearance
           </TabsTrigger>
         </TabsList>
@@ -132,14 +132,14 @@ export default function Settings() {
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0F172A]/60 border border-[#334155]/30">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
                     {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{user?.name}</p>
-                    <p className="text-xs text-gray-400">{user?.email}</p>
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+                    <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                   </div>
-                  <Badge className="ml-auto bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Active</Badge>
+                  <Badge className="ml-auto shrink-0 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Active</Badge>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
