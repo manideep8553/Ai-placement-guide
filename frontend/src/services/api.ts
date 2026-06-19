@@ -287,20 +287,53 @@ export interface RoadmapData {
   }[]
 }
 
+export interface RoadmapMessageData {
+  id: string
+  conversationId: string
+  role: 'USER' | 'ASSISTANT'
+  content: string
+  model?: string | null
+  createdAt: string
+}
+
+export interface RoadmapConversationData {
+  id: string
+  userId: string
+  roadmapId?: string | null
+  title: string
+  goal?: string | null
+  skills: string[]
+  targetCompany?: string | null
+  createdAt: string
+  updatedAt: string
+  messages: RoadmapMessageData[]
+  roadmap?: RoadmapData | null
+  _count?: { messages: number }
+}
+
+export interface GenerateRoadmapResponse {
+  roadmap: RoadmapData
+  conversationId: string
+  summary: string
+}
+
 export function generateRoadmapApi(data: {
   target_company: string
   current_level: string
   daily_hours: number
   target_date?: string
+  goal?: string
+  skills?: string[]
+  conversation_id?: string
 }) {
-  return request<RoadmapData>('/roadmap/generate', {
+  return request<GenerateRoadmapResponse>('/roadmap/generate', {
     method: 'POST',
     body: JSON.stringify(data),
   })
 }
 
-export function getActiveRoadmapApi(userId: string) {
-  return request<RoadmapData>(`/roadmap/${userId}/active`)
+export function getActiveRoadmapApi() {
+  return request<RoadmapData>('/roadmap/active')
 }
 
 export function completeWeekApi(weekId: string, completed: boolean = true) {
@@ -308,6 +341,75 @@ export function completeWeekApi(weekId: string, completed: boolean = true) {
     method: 'PATCH',
     body: JSON.stringify({ completed }),
   })
+}
+
+export function getRoadmapConversationsApi() {
+  return request<RoadmapConversationData[]>('/roadmap/conversations')
+}
+
+export function createRoadmapConversationApi(data: { title?: string; roadmapId?: string }) {
+  return request<RoadmapConversationData>('/roadmap/conversations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function getRoadmapConversationApi(conversationId: string) {
+  return request<RoadmapConversationData>(`/roadmap/conversations/${conversationId}`)
+}
+
+export async function streamRoadmapMessageApi(
+  conversationId: string,
+  content: string,
+  handlers: {
+    onDelta: (delta: string) => void
+    onDone: (message: RoadmapMessageData) => void
+    onError: (error: string) => void
+  },
+  signal?: AbortSignal,
+) {
+  const token = localStorage.getItem('token')
+  const response = await fetch(`${API_BASE}/roadmap/conversations/${conversationId}/messages/stream`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ content }),
+    signal,
+  })
+
+  if (!response.ok || !response.body) {
+    const payload = await response.json().catch(() => null)
+    throw new Error(payload?.error || 'Unable to start the AI response.')
+  }
+
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { value, done } = await reader.read()
+    buffer += decoder.decode(value, { stream: !done })
+    const blocks = buffer.split('\n\n')
+    buffer = blocks.pop() || ''
+
+    for (const block of blocks) {
+      let eventName = 'message'
+      let data = ''
+      for (const line of block.split('\n')) {
+        if (line.startsWith('event:')) eventName = line.slice(6).trim()
+        if (line.startsWith('data:')) data += line.slice(5).trim()
+      }
+      if (!data) continue
+      const payload = JSON.parse(data)
+      if (eventName === 'delta') handlers.onDelta(payload.delta)
+      if (eventName === 'done') handlers.onDone(payload.message)
+      if (eventName === 'error') handlers.onError(payload.error)
+    }
+
+    if (done) break
+  }
 }
 
 export interface ResumeUploadResponse {

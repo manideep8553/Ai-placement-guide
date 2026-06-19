@@ -113,6 +113,7 @@ export interface Resource {
 }
 
 export interface Week {
+  id: string;
   weekNumber: number;
   phase: "Foundation" | "Core DSA" | "Advanced" | "Mock";
   topic: string;
@@ -1186,6 +1187,7 @@ export const mockRoadmap: Roadmap = {
   endDate: "2026-09-28",
   weeks: [
     {
+      id: "mock-week-1",
       weekNumber: 1,
       phase: "Foundation",
       topic: "Arrays & Strings Review",
@@ -1201,6 +1203,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-2",
       weekNumber: 2,
       phase: "Foundation",
       topic: "Hash Maps & Stacks",
@@ -1215,6 +1218,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-3",
       weekNumber: 3,
       phase: "Foundation",
       topic: "Linked Lists",
@@ -1230,6 +1234,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-4",
       weekNumber: 4,
       phase: "Foundation",
       topic: "Recursion & Backtracking",
@@ -1244,6 +1249,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-5",
       weekNumber: 5,
       phase: "Core DSA",
       topic: "Trees - Part 1 (Binary Trees & BST)",
@@ -1259,6 +1265,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-6",
       weekNumber: 6,
       phase: "Core DSA",
       topic: "Trees - Part 2 (Advanced Trees)",
@@ -1273,6 +1280,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-7",
       weekNumber: 7,
       phase: "Core DSA",
       topic: "Graphs - Part 1",
@@ -1288,6 +1296,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-8",
       weekNumber: 8,
       phase: "Core DSA",
       topic: "Graphs - Part 2 & Heaps",
@@ -1302,6 +1311,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-9",
       weekNumber: 9,
       phase: "Core DSA",
       topic: "Dynamic Programming - Part 1",
@@ -1317,6 +1327,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-10",
       weekNumber: 10,
       phase: "Core DSA",
       topic: "Dynamic Programming - Part 2",
@@ -1331,6 +1342,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-11",
       weekNumber: 11,
       phase: "Advanced",
       topic: "System Design Fundamentals",
@@ -1346,6 +1358,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-12",
       weekNumber: 12,
       phase: "Advanced",
       topic: "System Design for Amazon",
@@ -1360,6 +1373,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-13",
       weekNumber: 13,
       phase: "Advanced",
       topic: "Amazon Leadership Principles (LP)",
@@ -1374,6 +1388,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-14",
       weekNumber: 14,
       phase: "Advanced",
       topic: "Core CS Subjects Review",
@@ -1389,6 +1404,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-15",
       weekNumber: 15,
       phase: "Mock",
       topic: "Mock Interview Week 1",
@@ -1404,6 +1420,7 @@ export const mockRoadmap: Roadmap = {
       ],
     },
     {
+      id: "mock-week-16",
       weekNumber: 16,
       phase: "Mock",
       topic: "Mock Interview Week 2 & Final Revision",
