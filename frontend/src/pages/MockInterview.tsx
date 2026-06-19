@@ -151,7 +151,7 @@ export default function MockInterview() {
 
   if (showFeedback) {
     return (
-      <div className="max-w-5xl mx-auto p-6 space-y-8">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -207,7 +207,7 @@ export default function MockInterview() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+            <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-indigo-400 text-lg">🧠</span>
                 <h3 className="text-white font-semibold">Confidence Score</h3>
@@ -228,7 +228,7 @@ export default function MockInterview() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-            <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+            <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-indigo-400 text-lg">🎯</span>
                 <h3 className="text-white font-semibold">Keyword Coverage</h3>
@@ -256,7 +256,7 @@ export default function MockInterview() {
         </div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-          <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+          <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-rose-400 text-lg">⚠️</span>
               <h3 className="text-white font-semibold">Filler Word Heatmap</h3>
@@ -286,7 +286,7 @@ export default function MockInterview() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-            <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+            <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-indigo-400 text-lg">📊</span>
                 <h3 className="text-white font-semibold">Pace Analysis</h3>
@@ -318,7 +318,7 @@ export default function MockInterview() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
-            <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+            <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-emerald-400 text-lg">✅</span>
                 <h3 className="text-white font-semibold">Suggested Improvements</h3>
@@ -348,18 +348,18 @@ export default function MockInterview() {
 
   if (sessionActive) {
     return (
-      <div className="max-w-7xl mx-auto p-6 space-y-4">
+      <div className="max-w-7xl mx-auto space-y-4">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl px-6 py-3"
+          className="flex flex-col gap-3 bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6"
         >
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-2">
               <span className="text-gray-400">⏱️</span>
               <span className="text-xl font-mono font-bold tabular-nums text-white">{formatTime(elapsed)}</span>
             </div>
-            <div className="h-6 w-px bg-[#334155]/50" />
+            <div className="hidden h-6 w-px bg-[#334155]/50 sm:block" />
             <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
               {typeConfig?.label || interviewType} Round
             </span>
@@ -367,7 +367,7 @@ export default function MockInterview() {
               {selectedCompany}
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
             <div className="flex items-center gap-1.5 text-xs text-gray-400">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
@@ -385,15 +385,15 @@ export default function MockInterview() {
           </div>
         </motion.div>
 
-        <div className="flex gap-6">
-          <div className="w-[70%] space-y-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
+          <div className="w-full space-y-4 lg:w-[70%]">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               className="relative"
             >
               <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl overflow-hidden">
-                <div className="relative flex items-center gap-5 p-6 bg-gradient-to-br from-indigo-900/20 via-transparent to-purple-900/20">
+                <div className="relative flex flex-col items-start gap-4 p-4 bg-gradient-to-br from-indigo-900/20 via-transparent to-purple-900/20 sm:flex-row sm:items-center sm:gap-5 sm:p-6">
                   <div className="relative shrink-0">
                     <motion.div
                       className="absolute -inset-1 rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"
@@ -412,14 +412,14 @@ export default function MockInterview() {
                         <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
                       </motion.div>
                     </div>
-                    <p className="text-sm text-gray-300 truncate">
+                    <p className="text-sm text-gray-300 sm:truncate">
                       {currentQuestionIndex < questions.length
                         ? `"${questions[currentQuestionIndex]}"`
                         : "That concludes the interview. Thank you!"}
                     </p>
                   </div>
                   <motion.div
-                    className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20"
+                    className="flex shrink-0 items-center gap-1.5 self-start rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 sm:self-auto"
                     animate={{ opacity: [1, 0.6, 1] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
@@ -434,15 +434,15 @@ export default function MockInterview() {
             </motion.div>
 
             <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl">
-              <div className="flex items-center gap-2 px-6 pt-4 pb-2">
+              <div className="flex items-center gap-2 px-4 pt-4 pb-2 sm:px-6">
                 <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
                 <h3 className="text-sm font-medium text-white">Live Transcript</h3>
                 <span className="text-xs text-gray-400 font-normal ml-auto">{transcript.length} lines</span>
               </div>
-              <div className="px-6 pb-4">
+              <div className="px-4 pb-4 sm:px-6">
                 <div
                   ref={transcriptRef}
-                  className="bg-[#0F172A]/80 rounded-xl p-4 h-64 overflow-y-auto space-y-2"
+                  className="bg-[#0F172A]/80 rounded-xl p-3 sm:p-4 h-56 sm:h-64 overflow-y-auto space-y-2"
                 >
                   {transcript.length === 0 ? (
                     <div className="flex items-center justify-center h-full text-gray-400 text-sm">
@@ -467,7 +467,7 @@ export default function MockInterview() {
             </div>
           </div>
 
-          <div className="w-[30%] space-y-4">
+          <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:block lg:w-[30%] lg:space-y-4">
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
               <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl overflow-hidden">
                 <div className="relative aspect-[4/3] bg-[#0F172A] flex items-center justify-center">
@@ -487,7 +487,7 @@ export default function MockInterview() {
                 <h3 className="text-sm font-medium text-white flex items-center gap-2 mb-3">
                   <span className="text-rose-400">⚠️</span> Filler Word Counter
                 </h3>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   <span className="px-2.5 py-1 rounded-full text-xs bg-rose-500/20 text-rose-400 border border-rose-500/30">umm: {fillerWords.umm}</span>
                   <span className="px-2.5 py-1 rounded-full text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30">ah: {fillerWords.ah}</span>
                   <span className="px-2.5 py-1 rounded-full text-xs bg-amber-500/20 text-amber-400 border border-amber-500/30">like: {fillerWords.like}</span>
@@ -555,32 +555,32 @@ export default function MockInterview() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4">
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-indigo-500/10 mb-2">
           <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
         </div>
-        <h1 className="text-4xl font-bold text-white">Voice Mock Interview</h1>
-        <p className="text-gray-400 text-lg max-w-xl mx-auto">
+        <h1 className="text-2xl font-bold text-white sm:text-4xl">Voice Mock Interview</h1>
+        <p className="text-sm text-gray-400 sm:text-lg max-w-xl mx-auto">
           Practice with AI-powered voice interviews. Choose your round type and company to get started.
         </p>
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+        <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-indigo-400 text-lg">🧠</span>
             <h2 className="text-white font-semibold">Select Interview Round</h2>
           </div>
           <p className="text-gray-400 text-sm mb-4">Choose the type of interview round you want to practice</p>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
             {Object.entries(interviewTypeConfig).map(([type, config]) => {
               const isHR = type === "HR"
               return (
                 <button
                   key={type}
                   onClick={() => setInterviewType(type)}
-                  className={`relative rounded-2xl border-2 p-5 text-left transition-all duration-200 bg-gradient-to-br ${config.gradient} ${
+                  className={`relative rounded-2xl border-2 p-4 sm:p-5 text-left transition-all duration-200 bg-gradient-to-br ${config.gradient} ${
                     interviewType === type
                       ? isHR
                         ? 'border-transparent shadow-[0_0_15px_rgba(99,102,241,0.3)] before:absolute before:inset-0 before:rounded-2xl before:p-[2px] before:bg-gradient-to-r before:from-blue-500 before:via-indigo-500 before:to-purple-500 before:-z-10 before:content-[""] before:[mask:linear-gradient(#fff_0_0)_content-box,linear-gradient(#fff_0_0)]'
@@ -599,7 +599,7 @@ export default function MockInterview() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-        <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-6">
+        <div className="bg-[#1E293B]/50 border border-[#334155]/50 rounded-2xl backdrop-blur-xl p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-indigo-400 text-lg">🎯</span>
             <h2 className="text-white font-semibold">Select Company</h2>
@@ -638,7 +638,7 @@ export default function MockInterview() {
         <button
           disabled={!interviewType || !selectedCompany}
           onClick={handleStart}
-          className="h-14 px-10 text-base font-semibold rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-3"
+          className="h-14 w-full justify-center px-6 text-base font-semibold rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg hover:shadow-xl flex items-center gap-3 sm:w-auto sm:px-10"
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
           Start Interview

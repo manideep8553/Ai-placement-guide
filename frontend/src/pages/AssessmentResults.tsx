@@ -400,7 +400,7 @@ export default function AssessmentResults() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            <div className="grid grid-cols-3 gap-3 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
               {difficultyStats.map(d => (
                 <div key={d.difficulty} className="text-center p-3 rounded-xl bg-[#1E293B]/50 border border-[#334155]/30">
                   <p className={cn('text-xs font-medium', d.difficulty === 'EASY' ? 'text-emerald-400' : d.difficulty === 'MEDIUM' ? 'text-amber-400' : 'text-rose-400')}>{d.difficulty}</p>

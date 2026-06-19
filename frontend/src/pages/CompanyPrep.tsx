@@ -174,14 +174,14 @@ export default function CompanyPrep() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4"
           onClick={(e) => { if (e.target === e.currentTarget) setSelectedCompany(null) }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-2xl bg-[#0F172A] border border-[#334155] shadow-2xl"
+            className="w-full max-w-3xl max-h-[94dvh] sm:max-h-[90dvh] overflow-hidden rounded-t-2xl sm:rounded-2xl bg-[#0F172A] border border-[#334155] shadow-2xl"
           >
             {detailLoading ? (
               <div className="flex items-center justify-center p-20">
@@ -190,17 +190,17 @@ export default function CompanyPrep() {
             ) : (
             <>
             {/* Detail Header */}
-            <div className="flex items-start justify-between p-6 pb-4 border-b border-[#334155]/50">
-              <div className="flex items-center gap-4">
+            <div className="flex items-start justify-between p-4 sm:p-6 sm:pb-4 border-b border-[#334155]/50">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                 <div className={cn(
                   'w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold shrink-0',
                   companyColors[companies.indexOf(selectedCompany as any) % companyColors.length]
                 )}>
                   {selectedCompany.name[0]}
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">{selectedCompany.name}</h2>
-                  <div className="flex items-center gap-2 mt-1">
+                <div className="min-w-0">
+                  <h2 className="truncate text-lg sm:text-xl font-bold text-white">{selectedCompany.name}</h2>
+                  <div className="flex flex-wrap items-center gap-2 mt-1">
                     <span className="text-sm font-semibold text-gray-300">{selectedCompany.avgPackage}</span>
                     <span className="text-gray-600">·</span>
                     <Badge className={cn('capitalize border text-xs px-2 py-0.5', getDifficultyBadge(selectedCompany.difficulty))}>
@@ -224,13 +224,13 @@ export default function CompanyPrep() {
             </div>
 
             {/* Custom Tabs */}
-            <div className="flex border-b border-[#334155]/50 px-6 pt-4">
+            <div className="flex overflow-x-auto border-b border-[#334155]/50 px-2 pt-2 sm:px-6 sm:pt-4">
               {tabItems.map(tab => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={cn(
-                    'px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px',
+                    'shrink-0 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px',
                     activeTab === tab
                       ? 'text-indigo-400 border-indigo-400'
                       : 'text-gray-400 border-transparent hover:text-gray-300 hover:border-gray-600'
@@ -242,7 +242,7 @@ export default function CompanyPrep() {
             </div>
 
             {/* Tab Content */}
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
+            <div className="p-4 sm:p-6 overflow-y-auto max-h-[68dvh] sm:max-h-[60dvh]">
               {/* Process Tab */}
               {activeTab === 'Process' && (
                 <div className="relative">
@@ -260,9 +260,9 @@ export default function CompanyPrep() {
                         {idx + 1}
                       </div>
                       <div className="flex-1 pt-1">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
                           <h4 className="font-medium text-sm text-white">{round.name}</h4>
-                          <span className="text-xs text-gray-400 flex items-center gap-1 ml-auto">
+                          <span className="text-xs text-gray-400 flex items-center gap-1 sm:ml-auto">
                             <Clock className="w-3 h-3" />
                             {round.duration}
                           </span>
@@ -381,7 +381,7 @@ export default function CompanyPrep() {
                         {isExpanded && (
                           <div className="border-t border-[#334155]/30 bg-[#0F172A]/50">
                             <div className="p-4 pt-3">
-                              <div className="ml-12">
+                              <div className="sm:ml-12">
                                 <h5 className="text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
                                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
                                   Topics to cover

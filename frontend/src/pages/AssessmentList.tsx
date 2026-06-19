@@ -30,7 +30,7 @@ const assessmentColors: Record<string, { bg: string; border: string; icon: strin
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl bg-[#1E293B]/50 border border-[#334155]/30 p-6 animate-pulse">
+    <div className="rounded-2xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 sm:p-6 animate-pulse">
       <div className="w-12 h-12 rounded-xl bg-[#334155]/50 mb-4" />
       <div className="h-5 w-3/4 bg-[#334155]/50 rounded mb-2" />
       <div className="h-3 w-full bg-[#334155]/50 rounded mb-3" />
@@ -110,7 +110,7 @@ export default function AssessmentList() {
 
       {attempts.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl">
+          className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-5 h-5 text-indigo-400" />
             <h2 className="text-lg font-semibold text-white">Your Recent Results</h2>
@@ -156,7 +156,7 @@ export default function AssessmentList() {
           return (
             <motion.div key={assessment.id} initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-              <div className={cn("rounded-2xl bg-gradient-to-br border p-6 backdrop-blur-xl hover:shadow-lg transition-all duration-300 h-full flex flex-col",
+              <div className={cn("rounded-2xl bg-gradient-to-br border p-4 sm:p-6 backdrop-blur-xl hover:shadow-lg transition-all duration-300 h-full flex flex-col",
                 colors.bg, colors.border)}>
                 <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4", colors.icon)}>
                   <Icon className="w-6 h-6" />

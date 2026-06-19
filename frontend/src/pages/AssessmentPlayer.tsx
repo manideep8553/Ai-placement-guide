@@ -509,8 +509,8 @@ export default function AssessmentPlayer() {
       <AnimatePresence>
         {tabWarning && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            className="mb-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+            className="mb-3 bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 sm:px-4 py-3 flex items-start justify-between gap-2">
+            <div className="flex min-w-0 items-start gap-2">
               <Monitor className="w-4 h-4 text-amber-400" />
               <span className="text-sm text-amber-300">Tab switch detected. Stay focused on the assessment.</span>
             </div>
@@ -691,9 +691,9 @@ export default function AssessmentPlayer() {
 
       {/* Quit Confirmation */}
       {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-            className="rounded-2xl bg-[#1E293B] border border-[#334155]/50 p-6 max-w-sm mx-4 shadow-2xl">
+            className="w-full rounded-t-2xl bg-[#1E293B] border border-[#334155]/50 p-5 sm:max-w-sm sm:rounded-2xl sm:p-6 shadow-2xl">
             <AlertTriangle className="w-10 h-10 text-amber-400 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-white text-center mb-2">Quit Assessment?</h3>
             <p className="text-sm text-gray-400 text-center mb-6">Your progress will be saved. You can resume later.</p>
@@ -712,9 +712,9 @@ export default function AssessmentPlayer() {
 
       {/* Submit Confirmation */}
       {showSubmitConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4">
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-            className="rounded-2xl bg-[#1E293B] border border-[#334155]/50 p-6 max-w-sm mx-4 shadow-2xl">
+            className="w-full rounded-t-2xl bg-[#1E293B] border border-[#334155]/50 p-5 sm:max-w-sm sm:rounded-2xl sm:p-6 shadow-2xl">
             <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-white text-center mb-2">Submit Assessment?</h3>
             <div className="bg-[#0F172A] rounded-xl p-4 mb-4 space-y-2 text-sm">
@@ -745,10 +745,10 @@ export default function AssessmentPlayer() {
       <AnimatePresence>
         {showShortcuts && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4"
             onClick={() => setShowShortcuts(false)}>
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="rounded-2xl bg-[#1E293B] border border-[#334155]/50 p-6 max-w-md mx-4 shadow-2xl"
+              className="w-full max-h-[90dvh] overflow-y-auto rounded-t-2xl bg-[#1E293B] border border-[#334155]/50 p-5 sm:max-w-md sm:rounded-2xl sm:p-6 shadow-2xl"
               onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-white">Keyboard Shortcuts</h3>

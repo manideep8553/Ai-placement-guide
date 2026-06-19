@@ -104,7 +104,7 @@ function ScoreCard({ label, value, icon: Icon, color, trend, details }: {
 
 function DummyCard({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
-    <div className={cn("rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl", className)}>
+    <div className={cn("rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl", className)}>
       {children}
     </div>
   )
@@ -181,7 +181,7 @@ export default function PlacementTwin() {
 
   if (loading) {
     return (
-      <div className="space-y-6 max-w-7xl mx-auto p-6">
+      <div className="space-y-6 max-w-7xl mx-auto">
         <div className="animate-pulse"><div className="h-8 w-64 bg-[#1E293B]/50 rounded" /><div className="h-4 w-48 bg-[#1E293B]/50 rounded mt-2" /></div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2"><SkeletonCard /></div>
@@ -217,7 +217,7 @@ export default function PlacementTwin() {
   const productCompanies = profile.companyEligibility.filter(c => c.category === 'Product')
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex items-center justify-between flex-wrap gap-4">

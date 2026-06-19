@@ -43,7 +43,7 @@ export default function Layout() {
   }, [dark])
 
   return (
-    <div className="flex h-screen bg-[hsl(var(--background))] text-foreground overflow-hidden">
+    <div className="flex h-dvh bg-[hsl(var(--background))] text-foreground overflow-hidden">
       {/* Sidebar */}
       <aside className={cn(
         "hidden lg:flex flex-col border-r border-[hsl(var(--border))] bg-[hsl(var(--card))] transition-all duration-300 relative z-30",
@@ -131,7 +131,7 @@ export default function Layout() {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setMobileOpen(false)} />
-          <aside className="fixed left-0 top-0 h-full w-72 bg-[hsl(var(--card))] border-r border-[hsl(var(--border))] z-50">
+          <aside className="fixed left-0 top-0 flex h-full w-[min(18rem,88vw)] flex-col bg-[hsl(var(--card))] border-r border-[hsl(var(--border))] z-50">
             <div className="flex items-center justify-between h-16 px-4 border-b border-[hsl(var(--border))]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
@@ -143,7 +143,7 @@ export default function Layout() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <nav className="p-3 space-y-1 mt-2">
+            <nav className="flex-1 overflow-y-auto p-3 space-y-1 mt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               {navItems.map((item) => (
                 <NavLink
                   key={item.to}
@@ -166,10 +166,10 @@ export default function Layout() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header */}
-        <header className="h-16 border-b border-[hsl(var(--border))] backdrop-blur-xl flex items-center justify-between px-4 lg:px-6 shrink-0 sticky top-0 z-20"
+        <header className="h-14 sm:h-16 border-b border-[hsl(var(--border))] backdrop-blur-xl flex items-center justify-between px-3 sm:px-4 lg:px-6 shrink-0 sticky top-0 z-20"
           style={{ backgroundColor: 'hsl(var(--background) / 0.8)' }}>
-          <div className="flex items-center gap-4">
-            <button className="lg:hidden text-gray-400 hover:text-white" onClick={() => setMobileOpen(true)}>
+          <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+            <button className="lg:hidden inline-flex h-11 w-11 items-center justify-center rounded-xl text-gray-400 hover:text-white hover:bg-white/5" onClick={() => setMobileOpen(true)}>
               <Menu className="w-5 h-5" />
             </button>
             <div className="relative hidden sm:block">
@@ -198,18 +198,18 @@ export default function Layout() {
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <button className="relative p-2 rounded-xl hover:bg-white/5 transition-colors">
+          <div className="flex items-center gap-0.5 sm:gap-2">
+            <button className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl hover:bg-white/5 transition-colors">
               <Bell className="w-5 h-5 text-gray-400" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-[#0B1121]" />
             </button>
             <button
               onClick={toggleDark}
-              className="p-2 rounded-xl hover:bg-white/5 transition-colors"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-xl hover:bg-white/5 transition-colors"
             >
               {dark ? <Moon className="w-5 h-5 text-gray-400" /> : <Sun className="w-5 h-5 text-gray-400" />}
             </button>
-            <div className="ml-2 pl-2 border-l border-[hsl(var(--border))] flex items-center gap-3">
+            <div className="sm:ml-2 sm:pl-2 sm:border-l border-[hsl(var(--border))] flex items-center gap-3">
               <div className="text-right hidden sm:block">
                 <p className="text-sm font-medium text-gray-200">{user?.name || 'User'}</p>
                 <p className="text-xs text-gray-500">{user?.email || ''}</p>
@@ -224,7 +224,7 @@ export default function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-3 sm:p-4 lg:p-6 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <Outlet />
         </main>
       </div>

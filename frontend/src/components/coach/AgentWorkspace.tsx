@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Download, Save, Trash2, MessageSquare, Bot, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -49,7 +49,7 @@ const mockResponses: Record<string, string[]> = {
   ],
 }
 
-let responseIndex: Record<string, number> = {}
+const responseIndex: Record<string, number> = {}
 
 function getNextResponse(agentId: string): string {
   if (!responseIndex[agentId]) responseIndex[agentId] = 0
@@ -64,13 +64,7 @@ export default function AgentWorkspace({ agent, onBack }: AgentWorkspaceProps) {
   const [isStreaming, setIsStreaming] = useState(false)
   const [saved, setSaved] = useState(false)
   const [showInfo, setShowInfo] = useState(true)
-  const [conversationId, setConversationId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!conversationId) {
-      setConversationId(`conv-${Date.now()}`)
-    }
-  }, [conversationId])
+  const [conversationId] = useState(() => `conv-${Date.now()}`)
 
   const handleSendMessage = useCallback((content: string) => {
     const userMsg: Message = {
@@ -156,8 +150,8 @@ export default function AgentWorkspace({ agent, onBack }: AgentWorkspaceProps) {
       animate={{ opacity: 1 }}
       className="space-y-4"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             onClick={onBack}
             className="text-gray-400 hover:text-white transition-colors"
@@ -167,12 +161,12 @@ export default function AgentWorkspace({ agent, onBack }: AgentWorkspaceProps) {
           <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", agentColors.bg)}>
             <Bot className={cn("w-5 h-5", agentColors.text)} />
           </div>
-          <div>
-            <h2 className="text-lg font-semibold text-white">{agent.name}</h2>
-            <p className="text-xs text-gray-400">{agent.title}</p>
+          <div className="min-w-0">
+            <h2 className="truncate text-lg font-semibold text-white">{agent.name}</h2>
+            <p className="truncate text-xs text-gray-400">{agent.title}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:justify-end sm:pb-0">
           <button
             onClick={() => setShowInfo(!showInfo)}
             className={cn(
@@ -186,35 +180,35 @@ export default function AgentWorkspace({ agent, onBack }: AgentWorkspaceProps) {
             variant="ghost"
             size="sm"
             onClick={handleSave}
-            className="text-gray-400 hover:text-white"
+            className="shrink-0 text-gray-400 hover:text-white"
           >
-            <Save className="w-4 h-4 mr-1.5" />
-            {saved ? 'Saved!' : 'Save'}
+            <Save className="w-4 h-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">{saved ? 'Saved!' : 'Save'}</span>
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleExport}
             disabled={messages.length === 0}
-            className="text-gray-400 hover:text-white"
+            className="shrink-0 text-gray-400 hover:text-white"
           >
-            <Download className="w-4 h-4 mr-1.5" />
-            Export
+            <Download className="w-4 h-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">Export</span>
           </Button>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleClear}
             disabled={messages.length === 0}
-            className="text-gray-400 hover:text-rose-400"
+            className="shrink-0 text-gray-400 hover:text-rose-400"
           >
-            <Trash2 className="w-4 h-4 mr-1.5" />
-            Clear
+            <Trash2 className="w-4 h-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">Clear</span>
           </Button>
         </div>
       </div>
 
-      <div className="flex gap-4 h-[calc(100vh-260px)]">
+      <div className="flex min-h-[32rem] gap-4 h-[calc(100dvh-15rem)] sm:h-[calc(100dvh-13rem)]">
         <div className={cn(
           "hidden lg:flex flex-col w-64 shrink-0 rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 overflow-y-auto",
           showInfo ? '' : 'hidden'

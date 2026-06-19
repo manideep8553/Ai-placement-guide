@@ -131,7 +131,7 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-[#0F172A]/60 border border-[#334155]/30">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 p-4 rounded-xl bg-[#0F172A]/60 border border-[#334155]/30">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
                     {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
                   </div>
@@ -139,7 +139,7 @@ export default function Settings() {
                     <p className="text-sm font-medium text-white truncate">{user?.name}</p>
                     <p className="text-xs text-gray-400 truncate">{user?.email}</p>
                   </div>
-                  <Badge className="ml-auto shrink-0 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Active</Badge>
+                  <Badge className="sm:ml-auto shrink-0 bg-emerald-500/10 text-emerald-400 border-emerald-500/20">Active</Badge>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -195,7 +195,7 @@ export default function Settings() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-2">
+                <div className="flex flex-col items-start gap-3 pt-2 sm:flex-row sm:items-center">
                   <Button
                     onClick={handleSaveProfile}
                     disabled={loading}
@@ -319,15 +319,15 @@ export default function Settings() {
                   { label: 'Interview Reminders', desc: 'Get reminded before scheduled mock interviews', value: interviewReminders, set: setInterviewReminders },
                   { label: 'Weekly Progress Report', desc: 'Receive a weekly summary of your progress', value: weeklyReport, set: setWeeklyReport },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center justify-between p-4 rounded-xl bg-[#0F172A]/60 border border-[#334155]/30">
-                    <div>
+                  <div key={item.label} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-[#0F172A]/60 border border-[#334155]/30">
+                    <div className="min-w-0">
                       <p className="text-sm font-medium text-white">{item.label}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
                     </div>
                     <Switch
                       checked={item.value}
                       onCheckedChange={item.set}
-                      className="data-[state=checked]:bg-indigo-500"
+                      className="shrink-0 data-[state=checked]:bg-indigo-500"
                     />
                   </div>
                 ))}
@@ -349,8 +349,8 @@ export default function Settings() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-[#0F172A]/60 border border-[#334155]/30">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-start justify-between gap-4 p-4 rounded-xl bg-[#0F172A]/60 border border-[#334155]/30">
+                  <div className="flex min-w-0 items-start gap-3">
                     {dark ? <Moon className="w-5 h-5 text-indigo-400" /> : <Sun className="w-5 h-5 text-amber-400" />}
                     <div>
                       <p className="text-sm font-medium text-white">Dark Mode</p>
@@ -360,7 +360,7 @@ export default function Settings() {
                   <Switch
                     checked={dark}
                     onCheckedChange={toggleDark}
-                    className="data-[state=checked]:bg-indigo-500"
+                    className="shrink-0 data-[state=checked]:bg-indigo-500"
                   />
                 </div>
               </CardContent>
@@ -378,27 +378,27 @@ export default function Settings() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-rose-500/5 border border-rose-500/10">
-                    <div>
+                  <div className="flex flex-col items-start gap-3 p-4 rounded-xl bg-rose-500/5 border border-rose-500/10 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
                       <p className="text-sm font-medium text-white">Sign Out</p>
                       <p className="text-xs text-gray-400 mt-0.5">Sign out from all devices</p>
                     </div>
                     <Button
                       variant="outline"
-                      className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
+                      className="w-full border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 sm:w-auto"
                       onClick={() => { logout() }}
                     >
                       <LogOut className="w-4 h-4 mr-2" /> Sign Out
                     </Button>
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-rose-500/5 border border-rose-500/10">
-                    <div>
+                  <div className="flex flex-col items-start gap-3 p-4 rounded-xl bg-rose-500/5 border border-rose-500/10 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
                       <p className="text-sm font-medium text-white">Delete Account</p>
                       <p className="text-xs text-gray-400 mt-0.5">Permanently delete your account and all data</p>
                     </div>
                     <Button
                       variant="outline"
-                      className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300"
+                      className="w-full border-rose-500/30 text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 sm:w-auto"
                       disabled
                     >
                       <Trash2 className="w-4 h-4 mr-2" /> Delete

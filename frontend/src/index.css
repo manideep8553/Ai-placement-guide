@@ -16,6 +16,10 @@
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
+  min-width: 320px;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 @layer base {
@@ -71,6 +75,31 @@ body {
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+  }
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+  img,
+  svg,
+  canvas {
+    max-width: 100%;
+  }
+  pre,
+  code {
+    overflow-wrap: normal;
+  }
+}
+
+@media (max-width: 639px) {
+  button,
+  [role="button"],
+  input,
+  select {
+    min-height: 2.75rem;
   }
 }
 

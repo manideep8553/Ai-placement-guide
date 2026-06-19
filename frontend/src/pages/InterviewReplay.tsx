@@ -107,7 +107,7 @@ export default function InterviewReplay() {
 
   if (showAggregate) {
     return (
-      <div className="max-w-5xl mx-auto p-6 space-y-8">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -243,7 +243,7 @@ export default function InterviewReplay() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-3">
@@ -322,7 +322,7 @@ export default function InterviewReplay() {
 
       <ReplayFilters search={search} onSearchChange={setSearch} filter={filter} onFilterChange={setFilter} />
 
-      <div className="flex gap-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:gap-6">
         <div className="flex-1 space-y-3" ref={contentRef}>
           {filteredQuestions.length === 0 ? (
             <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-12 text-center">
@@ -359,5 +359,4 @@ export default function InterviewReplay() {
     </div>
   )
 }
-
 

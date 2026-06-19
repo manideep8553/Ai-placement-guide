@@ -247,7 +247,7 @@ export default function CodingInterview() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-3.5rem)] bg-[#0F172A]">
+      <div className="flex items-center justify-center min-h-[60dvh] bg-[#0F172A]">
         <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
       </div>
     )
@@ -255,19 +255,22 @@ export default function CodingInterview() {
 
   if (!selectedProblem) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-3.5rem)] bg-[#0F172A]">
+      <div className="flex items-center justify-center min-h-[60dvh] bg-[#0F172A]">
         <p className="text-gray-400">No problems available</p>
       </div>
     )
   }
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] bg-[#0F172A]">
+    <div className="relative -m-3 flex min-h-[calc(100dvh-3.5rem)] bg-[#0F172A] sm:-m-4 lg:-m-6 lg:h-[calc(100dvh-4rem)] lg:min-h-0">
       {/* Problem Selector Sidebar */}
       <motion.div
         animate={{ width: sidebarOpen ? 260 : 0 }}
         transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="flex-shrink-0 overflow-hidden border-r border-[#334155]/50 bg-[#0F172A]/80"
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 flex-shrink-0 overflow-hidden border-r border-[#334155]/50 bg-[#0F172A] shadow-2xl lg:static lg:z-auto lg:bg-[#0F172A]/80 lg:shadow-none",
+          !sidebarOpen && "pointer-events-none lg:pointer-events-auto"
+        )}
       >
         <div className={cn("w-[260px] h-full flex flex-col", !sidebarOpen && "hidden")}>
           <div className="flex items-center justify-between p-4 border-b border-[#334155]/50">
@@ -318,7 +321,7 @@ export default function CodingInterview() {
       {/* Sidebar toggle */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="flex-shrink-0 w-8 border-r border-[#334155]/50 flex items-center justify-center hover:bg-[#1E293B]/50 transition-colors"
+        className="hidden flex-shrink-0 w-8 border-r border-[#334155]/50 lg:flex items-center justify-center hover:bg-[#1E293B]/50 transition-colors"
       >
         {sidebarOpen
           ? <ChevronLeft className="h-4 w-4 text-gray-400" />
@@ -329,16 +332,23 @@ export default function CodingInterview() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Bar */}
-        <div className="flex items-center gap-3 px-6 py-3 border-b border-[#334155]/50 bg-[#0F172A]/80 backdrop-blur-xl">
+        <div className="flex min-w-0 items-center gap-2 overflow-x-auto px-3 py-2.5 sm:px-4 lg:px-6 lg:py-3 border-b border-[#334155]/50 bg-[#0F172A]/80 backdrop-blur-xl">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-400 hover:bg-[#1E293B] lg:hidden"
+            aria-label="Open problem list"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
           <Code2 className="h-5 w-5 text-indigo-400" />
           <h1 className="font-semibold text-base truncate text-white">{selectedProblem.title}</h1>
           <span className={cn(
-            "px-2.5 py-0.5 rounded-full text-xs font-medium border",
+            "shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium border",
             DIFFICULTY_COLORS[selectedProblem.difficulty] || ''
           )}>
             {selectedProblem.difficulty}
           </span>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-medium text-indigo-300 bg-indigo-500/10 border border-indigo-500/20">
+          <span className="hidden shrink-0 px-2.5 py-0.5 rounded-full text-xs font-medium text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 sm:inline-flex">
             {selectedProblem.topic}
           </span>
           <div className="hidden md:flex items-center gap-1.5 ml-2">
@@ -354,11 +364,11 @@ export default function CodingInterview() {
         </div>
 
         {/* Body: Left Panel + Right Panel */}
-        <div className="flex-1 flex min-h-0">
+        <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
           {/* Left Panel - Problem Statement */}
-          <div className="w-[40%] flex-shrink-0 border-r border-[#334155]/50 flex flex-col min-w-0">
+          <div className="flex max-h-[45dvh] w-full flex-shrink-0 flex-col border-b border-[#334155]/50 lg:max-h-none lg:w-[40%] lg:border-b-0 lg:border-r">
             <ScrollArea className="flex-1">
-              <div className="p-5 space-y-5">
+              <div className="p-4 sm:p-5 space-y-5">
                 <div>
                   <p className="text-sm leading-relaxed text-gray-300">{selectedProblem.description}</p>
                 </div>
@@ -401,11 +411,11 @@ export default function CodingInterview() {
             </ScrollArea>
 
             {/* Bottom toolbar */}
-            <div className="flex items-center gap-2 p-3 border-t border-[#334155]/50 bg-[#0F172A]/80">
+            <div className="flex items-center gap-2 overflow-x-auto p-3 border-t border-[#334155]/50 bg-[#0F172A]/80">
               <button
                 onClick={handleRun}
                 disabled={submitting}
-                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
+                className="inline-flex shrink-0 items-center justify-center h-11 sm:h-9 px-4 rounded-xl text-sm font-medium bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition-colors disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <Play className="h-3.5 w-3.5 mr-1.5" />}
                 Run
@@ -413,20 +423,20 @@ export default function CodingInterview() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
+                className="inline-flex shrink-0 items-center justify-center h-11 sm:h-9 px-4 rounded-xl text-sm font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/30 transition-colors disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />}
                 Submit
               </button>
               <button
                 onClick={() => setShowHint(!showHint)}
-                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-colors"
+                className="inline-flex shrink-0 items-center justify-center h-11 sm:h-9 px-4 rounded-xl text-sm font-medium bg-amber-500/20 text-amber-400 border border-amber-500/30 hover:bg-amber-500/30 transition-colors"
               >
                 <Lightbulb className="h-3.5 w-3.5 mr-1.5" /> Hint
               </button>
               <button
                 onClick={() => setShowAiChat(!showAiChat)}
-                className="inline-flex items-center justify-center h-9 px-4 rounded-xl text-sm font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors"
+                className="inline-flex shrink-0 items-center justify-center h-11 sm:h-9 px-4 rounded-xl text-sm font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30 transition-colors"
               >
                 <Bot className="h-3.5 w-3.5 mr-1.5" /> Ask AI
               </button>
@@ -434,18 +444,18 @@ export default function CodingInterview() {
           </div>
 
           {/* Right Panel - Code Editor */}
-          <div className="flex-1 flex flex-col min-w-0 bg-[#0B1121]">
+          <div className="flex min-h-[32rem] flex-1 flex-col min-w-0 bg-[#0B1121] lg:min-h-0">
             {/* Language selector */}
             <div className="flex items-center justify-between px-4 py-2 bg-[#0F172A]/80 border-b border-[#334155]/50">
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <Code2 className="h-4 w-4 text-gray-400" />
-                <span className="text-xs text-gray-300 font-medium">{selectedProblem.id} · {selectedProblem.title}</span>
+                <span className="truncate text-xs text-gray-300 font-medium">{selectedProblem.id} · {selectedProblem.title}</span>
               </div>
               <div className="relative">
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-36 h-8 text-xs rounded-lg bg-[#1E293B]/50 border border-[#334155]/50 text-gray-200 px-3 appearance-none cursor-pointer focus:outline-none focus:border-indigo-500/50"
+                  className="w-32 sm:w-36 h-11 sm:h-8 text-xs rounded-lg bg-[#1E293B]/50 border border-[#334155]/50 text-gray-200 px-3 appearance-none cursor-pointer focus:outline-none focus:border-indigo-500/50"
                 >
                   {LANGUAGES.map((l) => (
                     <option key={l.id} value={l.id} className="bg-[#0F172A]">{l.label}</option>
@@ -487,11 +497,11 @@ export default function CodingInterview() {
       {/* Hint Side Panel */}
       <motion.div
         initial={false}
-        animate={{ width: showHint ? 320 : 0 }}
+        animate={{ width: showHint ? 'min(320px, 100vw)' : 0 }}
         transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="flex-shrink-0 overflow-hidden border-l border-[#334155]/50 bg-[#0F172A]/80 backdrop-blur-xl"
+        className="fixed inset-y-0 right-0 z-50 flex-shrink-0 overflow-hidden border-l border-[#334155]/50 bg-[#0F172A] shadow-2xl backdrop-blur-xl lg:static lg:z-auto lg:bg-[#0F172A]/80 lg:shadow-none"
       >
-        <div className={cn("w-[320px] h-full flex flex-col", !showHint && "hidden")}>
+        <div className={cn("w-[min(320px,100vw)] h-full flex flex-col", !showHint && "hidden")}>
           <div className="flex items-center justify-between p-4 border-b border-[#334155]/50">
             <div className="flex items-center gap-2">
               <Lightbulb className="h-4 w-4 text-amber-400" />
@@ -514,11 +524,11 @@ export default function CodingInterview() {
       {/* AI Chat Side Panel */}
       <motion.div
         initial={false}
-        animate={{ width: showAiChat ? 360 : 0 }}
+        animate={{ width: showAiChat ? 'min(360px, 100vw)' : 0 }}
         transition={{ duration: 0.2, ease: 'easeInOut' }}
-        className="flex-shrink-0 overflow-hidden border-l border-[#334155]/50 bg-[#0F172A]/80 backdrop-blur-xl"
+        className="fixed inset-y-0 right-0 z-50 flex-shrink-0 overflow-hidden border-l border-[#334155]/50 bg-[#0F172A] shadow-2xl backdrop-blur-xl lg:static lg:z-auto lg:bg-[#0F172A]/80 lg:shadow-none"
       >
-        <div className={cn("w-[360px] h-full flex flex-col", !showAiChat && "hidden")}>
+        <div className={cn("w-[min(360px,100vw)] h-full flex flex-col", !showAiChat && "hidden")}>
           <div className="flex items-center justify-between p-4 border-b border-[#334155]/50">
             <div className="flex items-center gap-2">
               <Bot className="h-4 w-4 text-purple-400" />
@@ -570,16 +580,16 @@ export default function CodingInterview() {
 
       {/* Submission Results Modal */}
       {showResults && testResults && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowResults(false)}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4" onClick={() => setShowResults(false)}>
           <motion.div
             ref={resultsRef}
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-[#0F172A] border border-[#334155]/50 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-y-auto mx-4"
+            className="bg-[#0F172A] border border-[#334155]/50 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92dvh] sm:max-h-[85dvh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6 space-y-6">
-              <div className="flex items-center justify-between">
+            <div className="p-4 sm:p-6 space-y-5 sm:space-y-6">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <h2 className="text-lg font-semibold text-white">Submission Results</h2>
                 <span className={cn(
                   "px-3 py-1 rounded-full text-xs font-medium border",
@@ -598,7 +608,7 @@ export default function CodingInterview() {
               </div>
 
               {/* Complexity & Quality */}
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4">
                 <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-4 flex flex-col items-center gap-2">
                   <Clock className="h-4 w-4 text-gray-400" />
                   <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Time</span>

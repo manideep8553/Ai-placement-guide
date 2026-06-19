@@ -71,7 +71,7 @@ function Skeleton({ className }: { className?: string }) {
 
 function SkeletonCard({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl", className)}>
+    <div className={cn("rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl", className)}>
       {children}
     </div>
   )
@@ -185,7 +185,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Section 1: Placement Readiness Score */}
         <motion.div className="lg:col-span-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl neon-glow">
+          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl neon-glow">
             <div className="flex items-center gap-2 mb-6">
               <Target className="w-5 h-5 text-indigo-400" />
               <h2 className="text-lg font-semibold text-white">Placement Readiness Score</h2>
@@ -235,7 +235,7 @@ export default function Dashboard() {
 
         {/* Section 2: Placement Chances */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl h-full">
+          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl h-full">
             <div className="flex items-center gap-2 mb-5">
               <TrendingUp className="w-5 h-5 text-indigo-400" />
               <h2 className="text-lg font-semibold text-white">Placement Chances</h2>
@@ -282,7 +282,7 @@ export default function Dashboard() {
 
       {/* Section 3: Quick Action Modules */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
           {[
             { icon: Mic, title: 'Voice Mock Interview', desc: 'Practice HR and Technical Interviews', color: 'from-indigo-500/20 to-purple-500/10', border: 'border-indigo-500/20', iconBg: 'bg-indigo-500/20 text-indigo-400', path: '/mock-interview', btn: 'Start Interview' },
             { icon: FileText, title: 'Resume Analyzer', desc: 'Analyze ATS score and resume quality', color: 'from-emerald-500/20 to-teal-500/10', border: 'border-emerald-500/20', iconBg: 'bg-emerald-500/20 text-emerald-400', path: '/resume', btn: 'Upload Resume' },
@@ -311,7 +311,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Section 4: AI Gap Analysis */}
         <motion.div className="lg:col-span-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl">
+          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-5">
               <BarChart3 className="w-5 h-5 text-indigo-400" />
               <h2 className="text-lg font-semibold text-white">AI Gap Analysis</h2>
@@ -383,7 +383,7 @@ export default function Dashboard() {
 
         {/* Section 5: Progress Tracking */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl h-full">
+          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl h-full">
             <div className="flex items-center gap-2 mb-5">
               <Award className="w-5 h-5 text-indigo-400" />
               <h2 className="text-lg font-semibold text-white">Progress</h2>
@@ -447,7 +447,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Section 6: AI Career Insights */}
         <motion.div className="lg:col-span-2" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl">
+          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl">
             <div className="flex items-center gap-2 mb-5">
               <Lightbulb className="w-5 h-5 text-amber-400" />
               <h2 className="text-lg font-semibold text-white">AI Career Insights</h2>
@@ -471,7 +471,7 @@ export default function Dashboard() {
 
         {/* Section 7: Today's Tasks */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
-          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-6 backdrop-blur-xl h-full">
+          <div className="rounded-2xl bg-gradient-to-br from-[#1E293B]/80 to-[#0F172A]/80 border border-[#334155]/50 p-4 sm:p-6 backdrop-blur-xl h-full">
             <div className="flex items-center gap-2 mb-5">
               <Clock className="w-5 h-5 text-indigo-400" />
               <h2 className="text-lg font-semibold text-white">Today's Tasks</h2>
@@ -515,7 +515,7 @@ export default function Dashboard() {
 
       {/* Section 8: Placement Twin */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-        <div className="rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-[#0F172A]/80 border border-indigo-500/20 p-6 backdrop-blur-xl relative overflow-hidden">
+        <div className="rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-[#0F172A]/80 border border-indigo-500/20 p-4 sm:p-6 backdrop-blur-xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
           <div className="flex items-center gap-2 mb-6">
             <Rocket className="w-5 h-5 text-indigo-400" />

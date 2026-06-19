@@ -48,7 +48,7 @@ export default function AgentChat({ agent, messages, onSendMessage, isStreaming 
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className={cn(
@@ -109,7 +109,7 @@ export default function AgentChat({ agent, messages, onSendMessage, isStreaming 
                 </div>
               )}
               <div className={cn(
-                "max-w-[80%] rounded-xl p-3",
+                "max-w-[88%] sm:max-w-[80%] rounded-xl p-3",
                 msg.role === 'user'
                   ? 'bg-indigo-500/20 border border-indigo-500/20'
                   : 'bg-[#1E293B] border border-[#334155]'
@@ -158,7 +158,7 @@ export default function AgentChat({ agent, messages, onSendMessage, isStreaming 
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-[#334155]/50 p-4">
+      <div className="border-t border-[#334155]/50 p-3 sm:p-4">
         {messages.length === 0 && (
           <div className="flex flex-wrap gap-1.5 mb-3">
             {agent.suggestedPrompts.map((prompt, i) => (
@@ -186,7 +186,7 @@ export default function AgentChat({ agent, messages, onSendMessage, isStreaming 
             onClick={handleSend}
             disabled={!input.trim() || isStreaming}
             className={cn(
-              "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+              "w-11 h-11 sm:w-9 sm:h-9 rounded-lg flex shrink-0 items-center justify-center transition-all",
               input.trim() && !isStreaming
                 ? 'bg-indigo-500 text-white hover:bg-indigo-600'
                 : 'bg-[#1E293B] text-gray-500'

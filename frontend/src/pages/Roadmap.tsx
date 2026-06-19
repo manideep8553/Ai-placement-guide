@@ -164,7 +164,7 @@ export default function Roadmap() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0F172A]/80 p-6 space-y-6">
+    <div className="min-h-full bg-[#0F172A]/80 space-y-6">
       <div className="flex items-center gap-3 mb-2">
         <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">
           <Map className="h-6 w-6" />
@@ -177,7 +177,7 @@ export default function Roadmap() {
 
       {!generated && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <div className="rounded-2xl backdrop-blur-xl bg-[#1E293B]/50 border border-[#334155]/50 p-6">
+          <div className="rounded-2xl backdrop-blur-xl bg-[#1E293B]/50 border border-[#334155]/50 p-4 sm:p-6">
             <div className="flex items-center gap-2 mb-1">
               <Target className="h-5 w-5 text-indigo-400" />
               <h2 className="text-lg font-semibold text-white">Build Your Roadmap</h2>
