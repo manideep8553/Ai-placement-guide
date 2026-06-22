@@ -345,6 +345,7 @@ export function submitProblemApi(id: string, data: { code: string; language: str
     score: number
     status: string
     executionTime: number | null
+    memoryUsage: number | null
     error: string | null
     testResults: { testCaseId: string; passed: boolean; actualOutput: string | null; error: string | null; executionTime: number | null; index: number; isHidden: boolean }[]
     feedback: CodingSubmissionData['aiFeedback']
@@ -393,6 +394,13 @@ export function getCodingSessionApi(id: string) {
 
 export function getCompanyRoundsApi(company: string) {
   return request<{ company: string; rounds: { name: string; description: string; duration: string; difficulty: string; problemCount: number; problems: any[] }[]; totalProblems: number }>(`/problems/company-rounds/${company}`)
+}
+
+export function chatWithAiApi(problemId: string, message: string) {
+  return request<{ reply: string }>(`/problems/${problemId}/chat`, {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  })
 }
 
 export interface RoadmapData {

@@ -1,48 +1,47 @@
-const JUDGE0_URL = process.env.JUDGE0_URL || 'http://localhost:2358'
-const JUDGE0_TIMEOUT = 30000
-const JUDGE0_RAPIDAPI_KEY = process.env.JUDGE0_RAPIDAPI_KEY || ''
-const JUDGE0_AUTH_TOKEN = process.env.JUDGE0_AUTH_TOKEN || ''
+const SANDBOXAPI_URL = process.env.SANDBOXAPI_URL || 'https://sandboxapi.p.rapidapi.com'
+const SANDBOXAPI_KEY = process.env.SANDBOXAPI_KEY || process.env.JUDGE0_RAPIDAPI_KEY || ''
+const SANDBOXAPI_TIMEOUT = 30000
+
+const LANGUAGE_MAP: Record<string, string> = {
+  python: 'python3',
+  java: 'java',
+  cpp: 'cpp',
+  javascript: 'javascript',
+  c: 'c',
+}
+
+const LANGUAGE_NAMES: Record<string, string> = {
+  python: 'Python 3.12',
+  java: 'Java 21',
+  cpp: 'C++ (GCC 14)',
+  javascript: 'Node.js 22',
+  c: 'C (GCC 14)',
+}
 
 function buildHeaders(): Record<string, string> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  if (JUDGE0_RAPIDAPI_KEY) {
-    headers['X-RapidAPI-Key'] = JUDGE0_RAPIDAPI_KEY
+  if (SANDBOXAPI_KEY) {
+    headers['X-RapidAPI-Key'] = SANDBOXAPI_KEY
     try {
-      const host = new URL(JUDGE0_URL).host
+      const host = new URL(SANDBOXAPI_URL).host
       headers['X-RapidAPI-Host'] = host
     } catch { /* ignore */ }
-  }
-  if (JUDGE0_AUTH_TOKEN) {
-    headers['X-Auth-Token'] = JUDGE0_AUTH_TOKEN
   }
   return headers
 }
 
-const LANGUAGE_IDS: Record<string, number> = {
-  python: 71,
-  java: 62,
-  cpp: 54,
-  javascript: 63,
-  c: 50,
-}
-
-const LANGUAGE_NAMES: Record<string, string> = {
-  python: 'Python (3.8.1)',
-  java: 'Java (OpenJDK 13.0.1)',
-  cpp: 'C++ (GCC 9.2.0)',
-  javascript: 'JavaScript (Node.js 12.14.0)',
-  c: 'C (GCC 9.2.0)',
-}
-
-export interface Judge0Result {
-  stdout: string | null
-  stderr: string | null
-  compile_output: string | null
-  status: { id: number; description: string }
-  time: string | null
-  memory: number | null
-  exit_code: number | null
-  token: string
+export interface SandboxAPIResult {
+  id: string
+  status: string
+  language: string
+  stdout: string
+  stderr: string
+  compile_output: string
+  exit_code: number
+  exit_signal: number
+  execution_time_ms: number
+  wall_time_ms: number
+  memory_used_kb: number
 }
 
 export async function executeCode(
@@ -51,64 +50,61 @@ export async function executeCode(
   input: string,
   expectedOutput: string,
 ): Promise<{ passed: boolean; actualOutput: string | null; error: string | null; executionTime: number | null; memory: number | null }> {
-  const langId = LANGUAGE_IDS[language]
+  const langId = LANGUAGE_MAP[language]
   if (!langId) {
     return { passed: false, actualOutput: null, error: `Unsupported language: ${language}`, executionTime: null, memory: null }
   }
 
   try {
-    const submissionBody = {
-      source_code: code,
-      language_id: langId,
-      stdin: input,
+    const body: Record<string, any> = {
+      language: langId,
+      code,
+      stdin: input || '',
       expected_output: expectedOutput,
-      cpu_time_limit: 5,
-      memory_limit: 256000,
-      redirect_stderr_to_stdout: true,
+      timeout: 5,
     }
 
-    const submitRes = await fetch(`${JUDGE0_URL}/submissions?wait=true`, {
+    const submitRes = await fetch(`${SANDBOXAPI_URL}/v1/execute`, {
       method: 'POST',
       headers: buildHeaders(),
-      body: JSON.stringify(submissionBody),
-      signal: AbortSignal.timeout(JUDGE0_TIMEOUT),
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(SANDBOXAPI_TIMEOUT),
     })
 
     if (!submitRes.ok) {
       const text = await submitRes.text()
-      return { passed: false, actualOutput: null, error: `Judge0 error: ${submitRes.status} ${text}`, executionTime: null, memory: null }
+      return { passed: false, actualOutput: null, error: `SandboxAPI error: ${submitRes.status} ${text}`, executionTime: null, memory: null }
     }
 
-    const result = (await submitRes.json()) as Judge0Result
-    const statusId = result.status.id
+    const result = (await submitRes.json()) as SandboxAPIResult
 
-    if (statusId === 3) {
+    if (result.status === 'completed') {
       return {
         passed: true,
         actualOutput: result.stdout?.trim() || null,
         error: null,
-        executionTime: result.time ? parseFloat(result.time) * 1000 : null,
-        memory: result.memory,
+        executionTime: result.execution_time_ms || null,
+        memory: result.memory_used_kb || null,
       }
     }
 
-    if (statusId === 4) {
+    if (result.status === 'wrong_answer') {
       return {
         passed: false,
         actualOutput: result.stdout?.trim() || null,
         error: `Expected: ${expectedOutput}, Got: ${result.stdout?.trim() || 'null'}`,
-        executionTime: result.time ? parseFloat(result.time) * 1000 : null,
-        memory: result.memory,
+        executionTime: result.execution_time_ms || null,
+        memory: result.memory_used_kb || null,
       }
     }
 
-    const errorMsg = result.stderr || result.compile_output || result.status.description
+    const errorMsg = result.compile_output || result.stderr || result.status
     return {
       passed: false,
       actualOutput: null,
-      error: errorMsg || `Status: ${result.status.description}`,
-      executionTime: result.time ? parseFloat(result.time) * 1000 : null,
-      memory: result.memory,
+      error: errorMsg || `Status: ${result.status}`,
+      executionTime: result.execution_time_ms || null,
+      memory: result.memory_used_kb || null,
     }
   } catch (err: any) {
     if (err.name === 'TimeoutError' || err.name === 'AbortError') {
@@ -153,9 +149,9 @@ export async function executeTestCases(
 }
 
 export function getSupportedLanguages() {
-  return Object.entries(LANGUAGE_IDS).map(([id, judge0Id]) => ({
+  return Object.entries(LANGUAGE_MAP).map(([id, sandboxId]) => ({
     id,
     name: LANGUAGE_NAMES[id] || id,
-    judge0Id,
+    sandboxId,
   }))
 }

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Editor, { type OnMount } from '@monaco-editor/react'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { getProblemsApi, getProblemApi, submitProblemApi, getSubmissionsApi, getProblemTopicsApi, type CodingProblemData, type CodingSubmissionData } from '@/services/api'
+import { getProblemsApi, getProblemApi, submitProblemApi, getSubmissionsApi, getProblemTopicsApi, startCodingSessionApi, endCodingSessionApi, chatWithAiApi, type CodingProblemData, type CodingSubmissionData } from '@/services/api'
 import { cn } from '@/lib/utils'
 import {
   Play, CheckCircle2, XCircle, Lightbulb, Bot, ChevronLeft, ChevronRight,
@@ -128,9 +128,10 @@ export default function CodingInterview() {
   const [feedback, setFeedback] = useState<CodingSubmissionData['aiFeedback'] | null>(null)
   const [submissionResult, setSubmissionResult] = useState<any>(null)
   const [activeTab, setActiveTab] = useState<TabType>('problem')
-  const [session] = useState<any>(null)
-  const [sessionTimer] = useState(0)
+  const [session, setSession] = useState<any>(null)
+  const [sessionTimer, setSessionTimer] = useState(0)
   const [showCompanyRounds, setShowCompanyRounds] = useState(false)
+  const [aiChatLoading, setAiChatLoading] = useState(false)
   const [topics, setTopics] = useState<string[]>([])
   const [passedCount, setPassedCount] = useState(0)
   const [totalTests, setTotalTests] = useState(0)
@@ -221,6 +222,10 @@ export default function CodingInterview() {
       setExecutionTime(result.data.executionTime)
       setShowResults(true)
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100)
+      if (session && session.type === 'TIMED' && result.data?.status === 'ACCEPTED' && problems.filter(p => p.difficulty === difficultyFilter || difficultyFilter === 'All').length > 1) {
+        const nextProblem = problems.find(p => p.id !== problem.id && (difficultyFilter === 'All' || p.difficulty === difficultyFilter))
+        if (nextProblem) setTimeout(() => loadProblem(nextProblem.id), 1500)
+      }
     } else {
       setSubmissionStatus('ERROR')
       setShowResults(true)
@@ -228,6 +233,28 @@ export default function CodingInterview() {
   }
 
   const handleRun = handleSubmit
+
+  async function handleStartSession(type: string, duration?: number) {
+    const res = await startCodingSessionApi({ type, duration: duration || undefined })
+    if (res.data) {
+      setSession(res.data)
+      if (duration) setSessionTimer(duration * 60)
+    }
+  }
+
+  async function handleEndSession() {
+    if (!session) return
+    await endCodingSessionApi(session.id)
+    setSession(null)
+    setSessionTimer(0)
+  }
+
+  function handleTimerExpire() {
+    if (session) {
+      handleSubmit()
+      handleEndSession()
+    }
+  }
 
   function startCompanyRound(company: string) {
     setCompanyFilter(company)
@@ -238,21 +265,19 @@ export default function CodingInterview() {
     if (value !== undefined) setCode(value)
   }
 
-  function handleAiSend() {
-    if (!aiInput.trim() || !problem) return
-    setAiMessages(prev => [...prev, { role: 'user', text: aiInput }])
+  async function handleAiSend() {
+    if (!aiInput.trim() || !problem || aiChatLoading) return
+    const msg = aiInput
     setAiInput('')
-    const responses = [
-      "Let me help you understand this problem. The key insight is to think about what data structure gives you optimal lookup times.",
-      "Consider edge cases like empty input or very large values. Your solution should handle these gracefully.",
-      "Think about the time complexity. Can you avoid nested loops? Often a hash map or sorting can help reduce O(n²) to O(n log n) or O(n).",
-      "Your approach is on the right track. Try to trace through the algorithm with a small example to verify correctness.",
-      "Consider the space-time tradeoff. Sometimes using extra memory can significantly improve runtime.",
-    ]
-    const reply = responses[Math.floor(Math.random() * responses.length)]
-    setTimeout(() => {
-      setAiMessages(prev => [...prev, { role: 'assistant', text: reply }])
-    }, 600)
+    setAiMessages(prev => [...prev, { role: 'user', text: msg }])
+    setAiChatLoading(true)
+    const result = await chatWithAiApi(problem.id, msg)
+    setAiChatLoading(false)
+    if (result.data) {
+      setAiMessages(prev => [...prev, { role: 'assistant', text: result.data!.reply }])
+    } else {
+      setAiMessages(prev => [...prev, { role: 'assistant', text: 'Sorry, I encountered an error. Please try again.' }])
+    }
   }
 
   if (loading) {
@@ -439,7 +464,32 @@ export default function CodingInterview() {
           )}
           <div className="ml-auto flex items-center gap-2">
             {session && (
-              <CountdownTimer seconds={sessionTimer} onExpire={() => handleSubmit()} />
+              <CountdownTimer seconds={sessionTimer} onExpire={handleTimerExpire} />
+            )}
+            {!session ? (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => handleStartSession('TIMED', 30)}
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 border border-amber-500/30 transition-colors"
+                >
+                  <Timer className="h-3.5 w-3.5" />
+                  30m
+                </button>
+                <button
+                  onClick={() => handleStartSession('PRACTICE')}
+                  className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/30 transition-colors"
+                >
+                  <Play className="h-3.5 w-3.5" />
+                  Start
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleEndSession}
+                className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg text-xs font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 border border-rose-500/30 transition-colors"
+              >
+                End Session
+              </button>
             )}
             <button
               onClick={() => setActiveTab(activeTab === 'submissions' ? 'problem' : 'submissions')}
@@ -630,9 +680,10 @@ export default function CodingInterview() {
                      submissionStatus === 'ERROR' ? 'Error during execution' :
                      'Running tests...'}
                   </span>
-                  {executionTime && (
-                    <span className="ml-auto text-gray-500">{executionTime.toFixed(1)}ms</span>
-                  )}
+                  <span className="ml-auto flex items-center gap-3">
+                    {executionTime && <span className="text-gray-500">{executionTime.toFixed(1)}ms</span>}
+                    {submissionResult?.memoryUsage && <span className="text-gray-500">{(submissionResult.memoryUsage / 1024).toFixed(1)}MB</span>}
+                  </span>
                 </div>
               )}
             </div>
@@ -723,12 +774,13 @@ export default function CodingInterview() {
                 <input
                   value={aiInput}
                   onChange={e => setAiInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && handleAiSend()}
+                  onKeyDown={e => e.key === 'Enter' && !aiChatLoading && handleAiSend()}
                   placeholder="Ask a question..."
                   className="flex-1 h-9 rounded-xl border border-[#334155]/50 bg-[#1E293B]/50 px-3 text-sm text-gray-200 outline-none focus:border-indigo-500/50 placeholder-gray-500"
+                  disabled={aiChatLoading}
                 />
-                <button onClick={handleAiSend} className="h-9 w-9 flex-shrink-0 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center hover:bg-indigo-500/30 transition-colors">
-                  <Send className="h-4 w-4 text-indigo-300" />
+                <button onClick={handleAiSend} disabled={aiChatLoading} className="h-9 w-9 flex-shrink-0 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center hover:bg-indigo-500/30 transition-colors disabled:opacity-50">
+                  {aiChatLoading ? <Loader2 className="h-4 w-4 text-indigo-300 animate-spin" /> : <Send className="h-4 w-4 text-indigo-300" />}
                 </button>
               </div>
             </div>
@@ -805,7 +857,7 @@ export default function CodingInterview() {
                 )}
 
                 {/* Complexity & Score */}
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                   <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-3 flex flex-col items-center gap-1.5">
                     <Clock className="h-4 w-4 text-gray-400" />
                     <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Time</span>
@@ -824,6 +876,11 @@ export default function CodingInterview() {
                     <BarChart3 className="h-4 w-4 text-gray-400" />
                     <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Quality</span>
                     <CircularGauge value={feedback?.codeQuality || 0} size={48} strokeWidth={5} />
+                  </div>
+                  <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-3 flex flex-col items-center gap-1.5">
+                    <Cpu className="h-4 w-4 text-gray-400" />
+                    <span className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Memory</span>
+                    <span className="text-sm font-bold text-blue-400">{submissionResult?.memoryUsage ? `${(submissionResult.memoryUsage / 1024).toFixed(1)}MB` : 'N/A'}</span>
                   </div>
                   <div className="rounded-xl bg-[#1E293B]/50 border border-[#334155]/30 p-3 flex flex-col items-center gap-1.5">
                     <Terminal className="h-4 w-4 text-gray-400" />

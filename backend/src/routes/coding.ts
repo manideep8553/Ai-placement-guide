@@ -1,7 +1,8 @@
 import { Router, Response } from 'express'
 import { prisma } from '../index'
-import { executeTestCases } from '../services/judge0'
+import { executeTestCases } from '../services/sandboxApi'
 import { generateCodingFeedback } from '../services/codingFeedback'
+import { generateChatResponse } from '../services/codingChat'
 import { authenticate, AuthRequest } from '../middleware/auth'
 
 const router = Router()
@@ -168,7 +169,7 @@ router.post('/:id/submit', authenticate, async (req: AuthRequest, res: Response)
   }))
 
   try {
-    const { results, passedCount, totalCount, averageTime } = await executeTestCases(code, language, testCaseInputs)
+    const { results, passedCount, totalCount, averageTime, peakMemory } = await executeTestCases(code, language, testCaseInputs)
 
     const status = passedCount === totalCount ? 'ACCEPTED' : 'WRONG_ANSWER'
     const score = totalCount > 0 ? Math.round((passedCount / totalCount) * 100) : 0
@@ -193,6 +194,7 @@ router.post('/:id/submit', authenticate, async (req: AuthRequest, res: Response)
         totalTestCases: totalCount,
         score,
         executionTime: averageTime,
+        memoryUsage: peakMemory,
         status,
         errorMessage: results.find(r => !r.passed && r.error)?.error || null,
         testCaseResults: results.map(r => ({
@@ -219,6 +221,7 @@ router.post('/:id/submit', authenticate, async (req: AuthRequest, res: Response)
       score,
       status,
       executionTime: averageTime,
+      memoryUsage: peakMemory,
       error: subErr,
       testResults: results.map(r => ({
         testCaseId: r.testCaseId,
@@ -427,6 +430,19 @@ router.get('/company-rounds/:company', async (req: AuthRequest, res: Response) =
   ]
 
   res.json({ company, rounds, totalProblems: problems.length })
+})
+
+router.post('/:id/chat', async (req: AuthRequest, res: Response) => {
+  const { message } = req.body
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required', code: 'MISSING_MESSAGE' })
+  }
+
+  const problem = await prisma.problem.findUnique({ where: { id: String(req.params.id) } })
+  if (!problem) return res.status(404).json({ error: 'Problem not found', code: 'NOT_FOUND' })
+
+  const reply = await generateChatResponse(problem.title, problem.description, message)
+  res.json({ reply })
 })
 
 export default router

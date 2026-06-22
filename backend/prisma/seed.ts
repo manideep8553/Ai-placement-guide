@@ -8,19 +8,19 @@ const prisma = new PrismaClient({ adapter })
 const PASSWORD = bcrypt.hashSync('password123', 10)
 
 const starterCode = {
-  python: 'def solution(nums, target):\n    # Write your code here\n    pass\n',
-  java: 'public class Solution {\n    public int[] solution(int[] nums, int target) {\n        // Write your code here\n        return new int[]{};\n    }\n}\n',
-  cpp: '#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> solution(vector<int>& nums, int target) {\n        // Write your code here\n        return {};\n    }\n};\n',
-  javascript: 'function solution(nums, target) {\n    // Write your code here\n    return [];\n}\n',
-  c: '/**\n * Note: The returned array must be malloced, assume caller calls free().\n */\nint* solution(int* nums, int numsSize, int target, int* returnSize) {\n    // Write your code here\n    *returnSize = 0;\n    return NULL;\n}\n',
+  python: 'def solution(input_str: str) -> str:\n    # Parse input_str into parameters\n    # Write your code here\n    return ""\n\nif __name__ == "__main__":\n    import sys\n    print(solution(sys.stdin.read()), end="")\n',
+  java: 'import java.util.*;\n\npublic class Solution {\n    public static String solution(String input) {\n        // Parse input into parameters\n        // Write your code here\n        return "";\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        StringBuilder sb = new StringBuilder();\n        while (sc.hasNextLine()) {\n            sb.append(sc.nextLine());\n            if (sc.hasNext()) sb.append("\\n");\n        }\n        System.out.print(solution(sb.toString()));\n    }\n}\n',
+  cpp: '#include <iostream>\n#include <string>\n#include <sstream>\nusing namespace std;\n\nstring solution(string input) {\n    // Parse input into parameters\n    // Write your code here\n    return "";\n}\n\nint main() {\n    string input, line;\n    while (getline(cin, line)) {\n        input += line + "\\n";\n    }\n    cout << solution(input);\n    return 0;\n}\n',
+  javascript: 'const fs = require("fs");\n\nfunction solution(input) {\n    // Parse input into parameters\n    // Write your code here\n    return "";\n}\n\nconst input = fs.readFileSync(0, "utf-8");\nconsole.log(solution(input));\n',
+  c: '#include <stdio.h>\n#include <stdlib.h>\n#include <string.h>\n\nchar* solution(const char* input) {\n    // Parse input into parameters\n    // Write your code here\n    return "";\n}\n\nint main() {\n    char* buffer = NULL;\n    size_t size = 0;\n    size_t len = 0;\n    int c;\n    while ((c = getchar()) != EOF) {\n        if (len >= size) {\n            size = size ? size * 2 : 1024;\n            buffer = realloc(buffer, size);\n        }\n        buffer[len++] = c;\n    }\n    if (buffer) buffer[len] = \'\\0\';\n    char* result = solution(buffer ? buffer : "");\n    printf("%s", result);\n    free(buffer);\n    return 0;\n}\n',
 }
 
 const funcSignatures = {
-  python: 'def solution(nums: List[int], target: int) -> List[int]',
-  java: 'public int[] solution(int[] nums, int target)',
-  cpp: 'vector<int> solution(vector<int>& nums, int target)',
-  javascript: 'function solution(nums, target)',
-  c: 'int* solution(int* nums, int numsSize, int target, int* returnSize)',
+  python: 'def solution(input_str: str) -> str',
+  java: 'public static String solution(String input)',
+  cpp: 'string solution(string input)',
+  javascript: 'function solution(input)',
+  c: 'char* solution(const char* input)',
 }
 
 interface ProblemDefinition {
