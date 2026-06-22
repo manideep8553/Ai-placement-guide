@@ -211,7 +211,7 @@ export async function getDashboard(userId: string): Promise<DashboardResponse> {
   const streak = await calculateStreak(userId)
 
   const totalSubmissions = codingSubmissions.length
-  const passedSubmissions = codingSubmissions.filter(s => s.passedCases === s.totalCases && s.totalCases > 0).length
+  const passedSubmissions = codingSubmissions.filter(s => (s as any).passedTestCases === (s as any).totalTestCases && (s as any).totalTestCases > 0).length
   const successRate = totalSubmissions > 0 ? Math.round((passedSubmissions / totalSubmissions) * 100) : 0
   const uniqueProblems = new Set(codingSubmissions.map(s => s.problemId)).size
 
@@ -220,15 +220,15 @@ export async function getDashboard(userId: string): Promise<DashboardResponse> {
     const topic = s.problem.topic
     if (!topicMap[topic]) topicMap[topic] = { attempted: 0, passed: 0 }
     topicMap[topic].attempted++
-    if (s.passedCases === s.totalCases && s.totalCases > 0) topicMap[topic].passed++
+    if ((s as any).passedTestCases === (s as any).totalTestCases && (s as any).totalTestCases > 0) topicMap[topic].passed++
   }
 
   const recentSubmissions = codingSubmissions.slice(0, 5).map(s => ({
     id: s.id,
     problemTitle: s.problem.title,
     language: s.language,
-    passedCases: s.passedCases,
-    totalCases: s.totalCases,
+    passedCases: (s as any).passedTestCases,
+    totalCases: (s as any).totalTestCases,
     submittedAt: s.submittedAt.toISOString(),
   }))
 

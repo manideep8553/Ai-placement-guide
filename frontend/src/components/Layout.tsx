@@ -18,6 +18,7 @@ const navItems = [
   { to: '/assessments', icon: ClipboardCheck, label: 'Mock Assessments' },
   { to: '/resume', icon: FileText, label: 'Resume Analyzer' },
   { to: '/coding-interview', icon: Code2, label: 'AI Coding Interview' },
+  { to: '/coding-history', icon: BarChart3, label: 'Coding History' },
   { to: '/mock-interview', icon: Mic, label: 'Voice Mock Interview' },
   { to: '/roadmap', icon: Map, label: 'Dynamic Roadmap' },
   { to: '/placement-twin', icon: Brain, label: 'Placement Twin' },

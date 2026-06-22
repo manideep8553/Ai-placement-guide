@@ -241,16 +241,79 @@ export interface CodingProblemData {
   examples: { input: string; output: string; explanation?: string }[]
   solutionApproach: string
   optimalComplexity: { time: string; space: string }
-  starterCode: { python: string; java: string; cpp: string; javascript: string }
-  testCases: { input: string; expectedOutput: string }[]
+  starterCode: { python: string; java: string; cpp: string; javascript: string; c: string }
+  funcSignature: { python: string; java: string; cpp: string; javascript: string; c: string }
+  visibleTestCases: { id: string; input: string; expectedOutput: string; isHidden: boolean; orderIndex: number; description?: string }[]
+  hiddenTestCaseCount: number
+  totalTestCaseCount: number
+  testCaseCount: number
+  submissionCount: number
 }
 
-export function getProblemsApi(params?: { topic?: string; difficulty?: string; company?: string; page?: string }) {
+export interface CodingSubmissionData {
+  id: string
+  userId: string
+  problemId: string
+  sessionId: string | null
+  code: string
+  language: string
+  passedTestCases: number
+  totalTestCases: number
+  score: number | null
+  executionTime: number | null
+  memoryUsage: number | null
+  status: string
+  errorMessage: string | null
+  testCaseResults: { testCaseId: string; passed: boolean; actualOutput: string | null; executionTime: number | null; index: number }[] | null
+  aiFeedback: {
+    suggestions: string[]
+    optimizedApproach: string
+    styleIssues: string[]
+    edgeCasesMissed: string[]
+    timeComplexity: string
+    spaceComplexity: string
+    codeQuality: number
+  } | null
+  submittedAt: string
+  problem?: { id: string; title: string; difficulty: string; topic: string; companyTags: string[]; description?: string; constraints?: string[]; examples?: any[] }
+}
+
+export interface CodingSessionData {
+  id: string
+  userId: string
+  type: string
+  company: string | null
+  difficulty: string | null
+  title: string | null
+  duration: number | null
+  status: string
+  score: number | null
+  totalScore: number | null
+  problemCount: number | null
+  startedAt: string
+  completedAt: string | null
+  _count?: { submissions: number }
+  submissions?: (CodingSubmissionData & { problem?: { id: string; title: string; difficulty: string; topic: string } })[]
+}
+
+export interface CodingStatsData {
+  totalSubmissions: number
+  acceptedSubmissions: number
+  successRate: number
+  uniqueProblemsSolved: number
+  topicPerformance: Record<string, { attempted: number; passed: number }>
+  difficultyBreakdown: Record<string, { attempted: number; passed: number }>
+  recentSessions: CodingSessionData[]
+}
+
+export function getProblemsApi(params?: { topic?: string; difficulty?: string; company?: string; search?: string; page?: string; limit?: string }) {
   const qs = new URLSearchParams()
   if (params?.topic) qs.set('topic', params.topic)
   if (params?.difficulty) qs.set('difficulty', params.difficulty)
   if (params?.company) qs.set('company', params.company)
+  if (params?.search) qs.set('search', params.search)
   if (params?.page) qs.set('page', params.page)
+  if (params?.limit) qs.set('limit', params.limit)
   const query = qs.toString()
   return request<{ problems: CodingProblemData[]; total: number; page: number; perPage: number }>(
     `/problems${query ? `?${query}` : ''}`
@@ -261,11 +324,75 @@ export function getProblemApi(id: string) {
   return request<CodingProblemData>(`/problems/${id}`)
 }
 
-export function submitProblemApi(id: string, data: { code: string; language: string; user_id?: string }) {
-  return request<any>(`/problems/${id}/submit`, {
+export function getProblemTopicsApi() {
+  return request<string[]>('/problems/topics')
+}
+
+export function getProblemCompaniesApi() {
+  return request<string[]>('/problems/companies')
+}
+
+export function getCodingStatsApi() {
+  return request<CodingStatsData>('/problems/stats')
+}
+
+export function submitProblemApi(id: string, data: { code: string; language: string; sessionId?: string }) {
+  return request<{
+    id: string
+    passed: boolean
+    passedCount: number
+    totalCount: number
+    score: number
+    status: string
+    executionTime: number | null
+    error: string | null
+    testResults: { testCaseId: string; passed: boolean; actualOutput: string | null; error: string | null; executionTime: number | null; index: number; isHidden: boolean }[]
+    feedback: CodingSubmissionData['aiFeedback']
+  }>(`/problems/${id}/submit`, {
     method: 'POST',
     body: JSON.stringify(data),
   })
+}
+
+export function getSubmissionsApi(params?: { page?: string; limit?: string; status?: string; problemId?: string }) {
+  const qs = new URLSearchParams()
+  if (params?.page) qs.set('page', params.page)
+  if (params?.limit) qs.set('limit', params.limit)
+  if (params?.status) qs.set('status', params.status)
+  if (params?.problemId) qs.set('problemId', params.problemId)
+  const query = qs.toString()
+  return request<{ submissions: CodingSubmissionData[]; total: number; page: number; perPage: number }>(
+    `/problems/submissions${query ? `?${query}` : ''}`
+  )
+}
+
+export function getSubmissionApi(id: string) {
+  return request<CodingSubmissionData>(`/problems/submissions/${id}`)
+}
+
+export function startCodingSessionApi(data: { type?: string; company?: string; difficulty?: string; duration?: number }) {
+  return request<CodingSessionData>('/problems/session/start', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export function endCodingSessionApi(id: string) {
+  return request<CodingSessionData>(`/problems/session/${id}/end`, {
+    method: 'POST',
+  })
+}
+
+export function getCodingSessionsApi() {
+  return request<CodingSessionData[]>('/problems/sessions')
+}
+
+export function getCodingSessionApi(id: string) {
+  return request<CodingSessionData>(`/problems/sessions/${id}`)
+}
+
+export function getCompanyRoundsApi(company: string) {
+  return request<{ company: string; rounds: { name: string; description: string; duration: string; difficulty: string; problemCount: number; problems: any[] }[]; totalProblems: number }>(`/problems/company-rounds/${company}`)
 }
 
 export interface RoadmapData {

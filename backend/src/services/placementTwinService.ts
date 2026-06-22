@@ -127,7 +127,7 @@ async function computeDsaScore(userId: string): Promise<SubScore> {
       uniqueProblems.set(s.problemId, {
         difficulty: s.problem.difficulty,
         topic: s.problem.topic,
-        passed: s.passedCases === s.totalCases && s.totalCases > 0,
+        passed: (s as any).passedTestCases === (s as any).totalTestCases && (s as any).totalTestCases > 0,
       })
     }
   }
@@ -143,7 +143,7 @@ async function computeDsaScore(userId: string): Promise<SubScore> {
     hardSolved * DIFFICULTY_WEIGHTS.HARD)
 
   const totalAttempts = submissions.length
-  const passedAttempts = submissions.filter(s => s.passedCases === s.totalCases && s.totalCases > 0).length
+  const passedAttempts = submissions.filter(s => (s as any).passedTestCases === (s as any).totalTestCases && (s as any).totalTestCases > 0).length
   const accuracy = totalAttempts > 0 ? Math.round((passedAttempts / totalAttempts) * 100) : 0
 
   const passedUnique = problems.filter(p => p.passed).length

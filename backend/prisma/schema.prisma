@@ -22,6 +22,7 @@ model User {
   placementScores    PlacementScore[]
   interviewSessions  InterviewSession[]
   codingSubmissions  CodingSubmission[]
+  codingSessions     CodingSession[]
   roadmaps           Roadmap[]
   gapAnalyses        GapAnalysis[]
   resumes            Resume[]
@@ -104,31 +105,77 @@ model Problem {
   companyTags       String[] @default([])
   solutionApproach  String?
   optimalComplexity Json?    // { time: "O(n)", space: "O(n)" }
-  starterCode       Json?    // { python: "...", java: "...", ... }
+  starterCode       Json?    // { python: "...", java: "...", cpp: "...", javascript: "...", c: "..." }
   examples          Json?    // [{ input, output, explanation }]
   constraints       String[] @default([])
-  testCases         Json?    // [{ input, expectedOutput }]
+  funcSignature     Json?    // { python: "def twoSum(nums, target):", java: "public int[] twoSum(int[] nums, int target)", ... }
   createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
+  testCases         TestCase[]
   codingSubmissions CodingSubmission[]
+}
+
+model TestCase {
+  id              String  @id @default(uuid())
+  problemId       String
+  input           String
+  expectedOutput  String
+  isHidden        Boolean @default(false)
+  orderIndex      Int     @default(0)
+  description     String? // what this test case validates
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
+}
+
+model CodingSession {
+  id           String    @id @default(uuid())
+  userId       String
+  type         String    // PRACTICE | COMPANY_ROUND | TIMED
+  company      String?
+  difficulty   String?
+  title        String?
+  duration     Int?      // minutes (for timed sessions)
+  status       String    @default("IN_PROGRESS") // IN_PROGRESS | COMPLETED | TIMEOUT
+  score        Int?
+  totalScore   Int?
+  problemCount Int?
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  submissions CodingSubmission[]
+
+  @@index([userId, status])
+  @@index([userId, startedAt])
 }
 
 model CodingSubmission {
   id              String   @id @default(uuid())
   userId          String
   problemId       String
+  sessionId       String?
   code            String
-  language        String
-  timeComplexity  String?
-  spaceComplexity String?
-  qualityScore    Float?
-  passedCases     Int      @default(0)
-  totalCases      Int      @default(0)
-  aiFeedback      Json?
+  language        String   // python | java | cpp | javascript | c
+  passedTestCases Int      @default(0)
+  totalTestCases  Int      @default(0)
+  score           Float?
+  executionTime   Float?   // average execution time in ms
+  memoryUsage     Float?   // peak memory usage in KB
+  status          String   @default("PENDING") // PENDING | RUNNING | ACCEPTED | WRONG_ANSWER | ERROR | TIMEOUT
+  errorMessage    String?
+  testCaseResults Json?    // [{ testCaseId, passed, actualOutput, executionTime, index }]
+  aiFeedback      Json?    // { suggestions, optimized_approach, style_issues, edge_cases, timeComplexity, spaceComplexity, codeQuality }
   submittedAt     DateTime @default(now())
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem       @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  session CodingSession? @relation(fields: [sessionId], references: [id])
+
+  @@index([userId, submittedAt])
+  @@index([problemId])
 }
 
 model Roadmap {
